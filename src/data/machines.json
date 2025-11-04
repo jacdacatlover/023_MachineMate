@@ -1,0 +1,272 @@
+[
+  {
+    "id": "leg_press",
+    "name": "Seated Leg Press",
+    "category": "Lower Body",
+    "primaryMuscles": ["Quadriceps", "Glutes"],
+    "secondaryMuscles": ["Hamstrings", "Calves"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine with your back flat against the padded support",
+      "Place your feet on the footplate shoulder-width apart, toes pointing slightly outward",
+      "Adjust the seat position so your knees are at about 90 degrees when starting",
+      "Grip the handles on the sides for stability",
+      "Release the safety locks on either side once you're in position"
+    ],
+    "howToSteps": [
+      "Press through your heels to extend your legs, pushing the platform away",
+      "Stop just before your knees fully lock out (keep a slight bend)",
+      "Slowly lower the weight by bending your knees",
+      "Control the descent until your knees return to about 90 degrees",
+      "Repeat for desired reps, then re-engage safety locks before exiting"
+    ],
+    "commonMistakes": [
+      "Locking knees completely at the top of the movement",
+      "Letting knees cave inward instead of tracking over toes",
+      "Rounding the lower back by going too deep",
+      "Using momentum or bouncing at the bottom",
+      "Placing feet too high or too low on the platform"
+    ],
+    "safetyTips": [
+      "Always engage the safety locks before getting on or off the machine",
+      "Never lock your knees at full extension",
+      "Keep your back pressed firmly against the pad throughout",
+      "If you feel sharp pain in your knees or back, stop immediately",
+      "Start with lighter weight to master the form"
+    ],
+    "beginnerTips": [
+      "Focus on controlled movement rather than heavy weight",
+      "Breathe out as you press, breathe in as you lower",
+      "Keep your core engaged to protect your lower back",
+      "Your knees should track in line with your toes throughout the movement",
+      "Start with 3 sets of 10-12 reps with moderate weight"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/leg_press.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Quadricep-animation.gif"
+  },
+  {
+    "id": "lat_pulldown",
+    "name": "Lat Pulldown",
+    "category": "Back",
+    "primaryMuscles": ["Latissimus Dorsi"],
+    "secondaryMuscles": ["Biceps", "Rear Deltoids", "Rhomboids"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the knee pad so it sits comfortably on your thighs to prevent lifting",
+      "Sit down and reach up to grab the wide bar with an overhand grip",
+      "Hands should be wider than shoulder-width apart",
+      "Plant your feet flat on the floor",
+      "Sit upright with a slight lean back (about 10-15 degrees)"
+    ],
+    "howToSteps": [
+      "Pull the bar down toward your upper chest while keeping your torso still",
+      "Focus on driving your elbows down and back",
+      "Squeeze your shoulder blades together at the bottom of the movement",
+      "Slowly return the bar to the starting position with control",
+      "Keep tension in your lats throughout the entire range of motion"
+    ],
+    "commonMistakes": [
+      "Pulling the bar behind the neck (can strain shoulders)",
+      "Using momentum by swinging the torso excessively",
+      "Shrugging shoulders up toward ears",
+      "Not pulling down far enough to engage the lats fully",
+      "Letting the weight pull your arms up too fast"
+    ],
+    "safetyTips": [
+      "Always pull to the front of your chest, not behind your neck",
+      "Don't use weight so heavy that you need to jerk or swing",
+      "Keep your shoulders down and back, away from your ears",
+      "Ensure the knee pad is secure to prevent being lifted off the seat",
+      "Warm up with lighter weight before increasing resistance"
+    ],
+    "beginnerTips": [
+      "Think about pulling with your elbows, not your hands",
+      "Imagine trying to put your elbows in your back pockets",
+      "Exhale as you pull down, inhale as you release",
+      "Start with a weight that allows you to complete 10-12 reps with good form",
+      "Focus on feeling the work in your back muscles, not your arms"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/lat_pulldown.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Latissimus_dorsi_muscle_animation.gif"
+  },
+  {
+    "id": "chest_press",
+    "name": "Chest Press Machine",
+    "category": "Chest",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoids", "Triceps"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so the handles are at mid-chest level",
+      "Sit with your back flat against the pad, feet firmly on the ground",
+      "Grip the handles with palms facing down or slightly inward",
+      "Your elbows should be bent at about 90 degrees in the starting position",
+      "Retract your shoulder blades (pull them back and down)"
+    ],
+    "howToSteps": [
+      "Press the handles forward until your arms are extended but not locked",
+      "Keep your wrists straight and elbows slightly below shoulder level",
+      "Pause briefly at full extension",
+      "Slowly return the handles to the starting position with control",
+      "Feel the stretch in your chest before starting the next rep"
+    ],
+    "commonMistakes": [
+      "Arching the lower back excessively off the pad",
+      "Pressing with elbows flared too high above shoulder level",
+      "Locking out elbows completely at full extension",
+      "Moving too fast without controlling the weight",
+      "Letting shoulders roll forward instead of staying retracted"
+    ],
+    "safetyTips": [
+      "Keep your shoulder blades pinned to the pad throughout",
+      "Don't let the weight stack crash between reps",
+      "Stop if you feel sharp pain in your shoulders or chest",
+      "Avoid using momentum to press the weight",
+      "Make sure the seat height is correct before adding heavy weight"
+    ],
+    "beginnerTips": [
+      "Exhale as you press forward, inhale as you return",
+      "Keep your core tight to stabilize your torso",
+      "Focus on squeezing your chest muscles at the top of the press",
+      "Start with 3 sets of 10-12 reps",
+      "The movement should feel smooth, not jerky or forced"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/chest_press.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Pectoralis_major_animation_2.gif"
+  },
+  {
+    "id": "seated_row",
+    "name": "Seated Cable Row",
+    "category": "Back",
+    "primaryMuscles": ["Middle Back", "Rhomboids"],
+    "secondaryMuscles": ["Latissimus Dorsi", "Biceps", "Rear Deltoids"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine and place your feet on the footrests",
+      "Slightly bend your knees to avoid locking them out",
+      "Reach forward and grab the handles with both hands",
+      "Sit upright with your chest up and shoulders back",
+      "There should be tension on the cable in this starting position"
+    ],
+    "howToSteps": [
+      "Pull the handles toward your torso while keeping your back straight",
+      "Drive your elbows back and squeeze your shoulder blades together",
+      "Pull the handles to your lower ribcage or upper abdomen",
+      "Pause and squeeze at the end of the pull",
+      "Slowly extend your arms back to the starting position with control"
+    ],
+    "commonMistakes": [
+      "Rounding the back or slouching forward",
+      "Using momentum by rocking back and forth",
+      "Pulling too high toward the chest or too low toward the waist",
+      "Not fully squeezing shoulder blades together at the end",
+      "Shrugging shoulders instead of keeping them down"
+    ],
+    "safetyTips": [
+      "Keep your torso upright and stable throughout the movement",
+      "Don't lean too far forward or backward",
+      "Maintain a neutral spine to protect your lower back",
+      "If your lower back feels strained, reduce the weight",
+      "Ensure footrests are secure before pulling heavy weight"
+    ],
+    "beginnerTips": [
+      "Think about pulling your elbows back rather than pulling with your hands",
+      "Keep your chest proud and shoulders down",
+      "Exhale as you pull toward you, inhale as you release",
+      "Start with moderate weight for 3 sets of 10-12 reps",
+      "Imagine squeezing a pencil between your shoulder blades"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/seated_row.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rhomboid_muscles_animation_small.gif"
+  },
+  {
+    "id": "shoulder_press",
+    "name": "Shoulder Press Machine",
+    "category": "Shoulders",
+    "primaryMuscles": ["Deltoids (Anterior and Lateral)"],
+    "secondaryMuscles": ["Triceps", "Upper Trapezius"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Adjust the seat so the handles are at shoulder height when seated",
+      "Sit with your back firmly against the pad",
+      "Plant your feet flat on the floor for stability",
+      "Grip the handles with palms facing forward or neutral (depending on machine)",
+      "Ensure your elbows are bent at about 90 degrees in the starting position"
+    ],
+    "howToSteps": [
+      "Press the handles upward in a controlled motion",
+      "Extend your arms overhead but don't lock out your elbows completely",
+      "Keep your core engaged and back against the pad",
+      "Slowly lower the handles back to shoulder level",
+      "Maintain control as the weight returns to the starting position"
+    ],
+    "commonMistakes": [
+      "Arching the lower back excessively during the press",
+      "Using momentum or bouncing at the bottom",
+      "Locking elbows aggressively at the top",
+      "Letting the head jut forward instead of staying neutral",
+      "Pressing unevenly with one arm doing more work"
+    ],
+    "safetyTips": [
+      "Keep your back pressed against the pad to avoid strain",
+      "Don't use weight that's too heavy to control",
+      "Stop if you feel sharp pain in your shoulders or neck",
+      "Warm up your shoulders with lighter weight or arm circles first",
+      "Avoid shrugging your shoulders toward your ears"
+    ],
+    "beginnerTips": [
+      "Exhale as you press up, inhale as you lower down",
+      "Focus on pressing evenly with both arms",
+      "Keep your wrists straight throughout the movement",
+      "Start with 3 sets of 8-10 reps with moderate weight",
+      "This exercise requires good shoulder mobility—stretch before starting"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/shoulder_press.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Deltoid_muscle_animation.gif"
+  },
+  {
+    "id": "treadmill",
+    "name": "Treadmill",
+    "category": "Cardio",
+    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
+    "secondaryMuscles": ["Core"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Stand on the side rails of the treadmill",
+      "Attach the safety clip to your clothing",
+      "Select your workout or use the quick start option",
+      "Start the treadmill at a slow speed (1-2 mph)",
+      "Step onto the moving belt and begin walking"
+    ],
+    "howToSteps": [
+      "Maintain an upright posture with your head up and shoulders back",
+      "Swing your arms naturally",
+      "Increase the speed and/or incline to your desired intensity",
+      "To stop, press the stop button or gradually decrease the speed",
+      "Wait for the belt to come to a complete stop before stepping off"
+    ],
+    "commonMistakes": [
+      "Holding onto the handrails",
+      "Looking down at your feet",
+      "Taking strides that are too long",
+      "Stopping abruptly without using the stop button",
+      "Jumping off the treadmill while it's still moving"
+    ],
+    "safetyTips": [
+      "Always use the safety clip",
+      "Don't look at your feet",
+      "Don't hold on to the handrails",
+      "Don't stop abruptly",
+      "Don't jump off the treadmill"
+    ],
+    "beginnerTips": [
+      "Start with a walking pace to get comfortable",
+      "Gradually increase the speed and incline over time",
+      "Listen to your body and don't push yourself too hard",
+      "Stay hydrated by drinking water before, during, and after your workout",
+      "Cool down with a slow walk at the end of your workout"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/treadmill.png",
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Treadmill-animation.gif"
+  }
+]
