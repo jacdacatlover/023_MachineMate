@@ -1,17 +1,18 @@
 // Home screen: Main entry point with "Identify Machine" button and recent history
 
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, ScrollView, FlatList } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../types/navigation';
-import { useMachines } from '../../App';
-import { getRecentHistory } from '../logic/historyStorage';
-import { getFavorites } from '../logic/favoritesStorage';
-import { RecentHistoryItem } from '../types/history';
-import PrimaryButton from '../components/PrimaryButton';
-import MachineListItem from '../components/MachineListItem';
+import { HomeStackParamList } from '../../../types/navigation';
+import { useMachines } from '../../../app/providers/MachinesProvider';
+import { getRecentHistory } from '../../../services/storage/historyStorage';
+import { getFavorites } from '../../../services/storage/favoritesStorage';
+import { RecentHistoryItem } from '../../../types/history';
+import PrimaryButton from '../../../shared/components/PrimaryButton';
+import MachineListItem from '../../../shared/components/MachineListItem';
+import { IdentificationResult } from '../../../types/identification';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -40,9 +41,16 @@ export default function HomeScreen() {
   };
 
   const handleMachinePress = (machineId: string) => {
+    const result: IdentificationResult = {
+      kind: 'catalog',
+      machineId,
+      candidates: [machineId],
+      confidence: null,
+      lowConfidence: false,
+      source: 'manual',
+    };
     navigation.navigate('MachineResult', {
-      primaryMachineId: machineId,
-      candidateIds: [],
+      result,
     });
   };
 

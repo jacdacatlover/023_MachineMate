@@ -3,13 +3,14 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../types/navigation';
-import { useMachines } from '../../App';
-import { identifyMachine } from '../logic/identifyMachine';
-import PrimaryButton from '../components/PrimaryButton';
+import { HomeStackParamList } from '../../../types/navigation';
+import { useMachines } from '../../../app/providers/MachinesProvider';
+import { identifyMachine } from '../../../services/recognition/identifyMachine';
+import PrimaryButton from '../../../shared/components/PrimaryButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type CameraScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Camera'>;
@@ -18,10 +19,25 @@ export default function CameraScreen() {
   const navigation = useNavigation<CameraScreenNavigationProp>();
   const machines = useMachines();
   const [permission, requestPermission] = useCameraPermissions();
+  const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
   const [isProcessing, setIsProcessing] = useState(false);
   const [mountKey, setMountKey] = useState(0);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const cameraRef = useRef<CameraView>(null);
+  const isMountedRef = useRef(true);
+  const resetProcessing = React.useCallback(() => {
+    if (isMountedRef.current) {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Force fresh state when screen gains focus to fix stale permission handler
   useFocusEffect(
@@ -60,6 +76,61 @@ export default function CameraScreen() {
         'Please open the system Settings app and enable camera access for MachineMate.'
       );
     });
+  };
+
+  const ensureLibraryPermission = async () => {
+    try {
+      if (!libraryPermission) {
+        const result = await requestLibraryPermission();
+        return result?.granted ?? false;
+      }
+
+      if (libraryPermission.granted) {
+        return true;
+      }
+
+      if (libraryPermission.canAskAgain) {
+        const result = await requestLibraryPermission();
+        return result?.granted ?? false;
+      }
+
+      Alert.alert(
+        'Photo Access Needed',
+        'MachineMate needs access to your photo library to identify existing pictures.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: openSystemSettings },
+        ]
+      );
+      return false;
+    } catch (error) {
+      Alert.alert(
+        'Permission Error',
+        'We could not check photo permissions. Please try again.'
+      );
+      return false;
+    }
+  };
+
+  const processPhoto = async (uri: string) => {
+    try {
+      setIsProcessing(true);
+
+      const result = await identifyMachine(uri, machines);
+
+      navigation.replace('MachineResult', {
+        photoUri: uri,
+        result,
+      });
+    } catch (error) {
+      console.error('Error identifying machine:', error);
+      Alert.alert(
+        'Recognition Failed',
+        'We ran into a problem analyzing that photo. Please try again.'
+      );
+    } finally {
+      resetProcessing();
+    }
   };
 
   if (!permission.granted) {
@@ -107,33 +178,52 @@ export default function CameraScreen() {
     if (!cameraRef.current || isProcessing) return;
 
     try {
-      setIsProcessing(true);
-
-      // Capture the photo
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.7,
       });
 
-      if (!photo) {
-        setIsProcessing(false);
+      if (!photo || !photo.uri) {
         return;
       }
 
-      // Identify the machine (stub logic)
-      const result = await identifyMachine(photo.uri, machines);
-
-      // Navigate to result screen
-      navigation.replace('MachineResult', {
-        photoUri: photo.uri,
-        primaryMachineId: result.primary.id,
-        candidateIds: result.candidates.map(c => c.id),
-        confidence: result.confidence,
-        lowConfidence: result.lowConfidence,
-        source: result.source,
-      });
+      await processPhoto(photo.uri);
     } catch (error) {
       console.error('Error capturing photo:', error);
-      setIsProcessing(false);
+      Alert.alert(
+        'Capture Failed',
+        'We could not capture a photo. Please try again.'
+      );
+      resetProcessing();
+    }
+  };
+
+  const handlePickImage = async () => {
+    if (isProcessing) return;
+
+    const hasPermission = await ensureLibraryPermission();
+    if (!hasPermission) {
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
+        allowsMultipleSelection: false,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      await processPhoto(result.assets[0].uri);
+    } catch (error) {
+      console.error('Error selecting photo:', error);
+      Alert.alert(
+        'Selection Failed',
+        'We could not open that photo. Please try again.'
+      );
+      resetProcessing();
     }
   };
 
@@ -152,10 +242,11 @@ export default function CameraScreen() {
 
         <View style={styles.bottomControls}>
           <TouchableOpacity
-            style={styles.cancelButton}
+            style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
             onPress={() => navigation.goBack()}
+            disabled={isProcessing}
           >
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.textButtonLabel}>Cancel</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -170,7 +261,13 @@ export default function CameraScreen() {
             )}
           </TouchableOpacity>
 
-          <View style={styles.cancelButton} />
+          <TouchableOpacity
+            style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
+            onPress={handlePickImage}
+            disabled={isProcessing}
+          >
+            <Text style={styles.textButtonLabel}>Upload</Text>
+          </TouchableOpacity>
         </View>
       </CameraView>
     </View>
@@ -222,10 +319,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 48,
   },
-  cancelButton: {
+  textButton: {
     width: 80,
+    alignItems: 'center',
   },
-  cancelText: {
+  textButtonDisabled: {
+    opacity: 0.5,
+  },
+  textButtonLabel: {
     color: '#fff',
     fontSize: 16,
   },

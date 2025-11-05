@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { LibraryStackParamList } from '../types/navigation';
+import { LibraryStackParamList } from '../../types/navigation';
 
 // Import screens (will be created next)
-import LibraryScreen from '../screens/LibraryScreen';
-import MachineDetailScreen from '../screens/MachineDetailScreen';
+import LibraryScreen from '../../features/library/screens/LibraryScreen';
+import MachineDetailScreen from '../../features/library/screens/MachineDetailScreen';
 
 const Stack = createNativeStackNavigator<LibraryStackParamList>();
 

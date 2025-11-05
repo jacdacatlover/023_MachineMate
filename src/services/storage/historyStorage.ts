@@ -1,7 +1,7 @@
 // Storage logic for managing recent history using AsyncStorage
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { RecentHistoryItem } from '../types/history';
+import { RecentHistoryItem } from '../../types/history';
 
 const HISTORY_KEY = '@machinemate_history';
 const MAX_HISTORY_ITEMS = 20;

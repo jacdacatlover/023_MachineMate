@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-MachineMate is an Expo-managed React Native app, and all active source lives inside `MachineMate/`. `App.tsx` wires the machine catalog context, MD3 theme, and navigation container. The `src/` subfolders group responsibilities: `components/` for reusable UI (e.g., `MachineListItem.tsx`), `screens/` for feature flows, `navigation/` for stack and tab setup, `logic/` for AsyncStorage helpers and identification stubs, `types/` for shared TypeScript definitions, and `data/` for the `machines.json` seed catalog. Assets for demos or diagrams sit in `MachineMate/assets`. The root-level `src` mirrors this layout for reference; edit the Expo copy first to keep Metro builds in sync.
+MachineMate is an Expo-managed React Native app, and all active source lives inside `MachineMate/`. `App.tsx` loads the machine catalog, applies theming, and mounts navigation while delegating shared data to `MachinesProvider`. The `src/` subfolders group responsibilities: `app/` for providers + navigation, `features/` for screen logic, `services/` for AsyncStorage + recognition helpers, `shared/` for reusable UI, `types/` for domain contracts, and `data/` for the `machines.json` seed catalog. Assets for demos or diagrams sit in `MachineMate/assets`. The root-level `src` mirrors this layout for reference; edit the Expo copy first to keep Metro builds in sync.
 
 ## Build, Test, and Development Commands
 Install dependencies once with `npm install` inside `MachineMate/`. Key scripts:

@@ -3,12 +3,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { RootTabParamList } from '../types/navigation';
+import { RootTabParamList } from '../../types/navigation';
 
 // Import stack navigators and screens
 import HomeStack from './HomeStack';
 import LibraryStack from './LibraryStack';
-import SettingsScreen from '../screens/SettingsScreen';
+import SettingsScreen from '../../features/settings/screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 

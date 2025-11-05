@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, IconButton, Chip } from 'react-native-paper';
-import { MachineDefinition } from '../types/machine';
+import { MachineDefinition } from '../../types/machine';
 
 interface MachineListItemProps {
   machine: MachineDefinition;

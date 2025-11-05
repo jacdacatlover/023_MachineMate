@@ -4,175 +4,80 @@
 
 ### Core Application Files
 
-**App.tsx** - Main entry point with machine context and theme
-- Loads machines.json data
-- Provides MachinesContext for all components
-- Sets up NavigationContainer with React Native Paper theme
-- Error handling for data loading
+**App.tsx** – Loads the machine catalog from JSON, manages loading/error fallbacks, applies the React Native Paper theme, and mounts the navigation container. Wraps the tree in `MachinesProvider` so every feature can call `useMachines()`.
+
+### App Layer (`src/app/`)
+
+- **providers/MachinesProvider.tsx** – Lightweight React context + hook for machine data.
+- **navigation/HomeStack.tsx** – Home → Camera → MachineResult stack with consistent header styling.
+- **navigation/LibraryStack.tsx** – Library → MachineDetail stack.
+- **navigation/RootNavigator.tsx** – Bottom-tab shell that hosts Home, Library, and Settings.
 
 ### Type Definitions (`src/types/`)
 
-**machine.ts** - Core machine data types
-- `MachineCategory` type
-- `MachineDefinition` interface (id, name, category, muscles, difficulty, steps, tips)
-
-**history.ts** - History tracking types
-- `RecentHistoryItem` interface (machineId, viewedAt)
-
-**navigation.ts** - Navigation type safety
-- `RootTabParamList` - Bottom tab params
-- `HomeStackParamList` - Home stack params
-- `LibraryStackParamList` - Library stack params
+- **machine.ts** – `MachineDefinition`, `MachineCategory`, and difficulty enums.
+- **history.ts** – `RecentHistoryItem` for AsyncStorage history entries.
+- **navigation.ts** – Strongly typed param lists for every navigator.
+- **env.d.ts** – Expo env typings (e.g., `EXPO_PUBLIC_HF_TOKEN`).
 
 ### Data (`src/data/`)
 
-**machines.json** - 5 seed machines with realistic content
-- Leg Press (Lower Body, Beginner)
-- Lat Pulldown (Back, Beginner)
-- Chest Press (Chest, Beginner)
-- Seated Row (Back, Beginner)
-- Shoulder Press (Shoulders, Intermediate)
+- **machines.json** – Six realistic machines with setup/how-to/mistakes/safety/beginner copy.
+- **gymMachineLabels.ts** – Zero-shot vocabulary used to label embeddings.
+- **labelSynonyms.ts** – Maps broad labels to catalog machine ids.
+- **referenceMachineEmbeddings.ts** – Generated SigLIP vectors for curated reference photos.
 
-Each machine includes:
-- Setup steps (3-5 detailed steps)
-- How-to steps (4-5 movement instructions)
-- Common mistakes (4-5 errors to avoid)
-- Safety tips (4-5 safety guidelines)
-- Beginner tips (4-5 helpful hints)
+### Services (`src/services/`)
 
-### Business Logic (`src/logic/`)
+- **recognition/identifyMachine.ts** – Hugging Face SigLIP integration, photo pre-processing, domain gating, label + reference fusion scoring, embedding caches, and confidence gating with fallbacks.
+- **storage/favoritesStorage.ts** – AsyncStorage helpers for favorites (`getFavorites`, `toggleFavorite`, `isFavorite`, `clearFavorites`).
+- **storage/historyStorage.ts** – AsyncStorage helpers for recents (`getRecentHistory`, `addToRecentHistory`, `clearHistory`).
 
-**identifyMachine.ts** - Machine identification (stub)
-- `IdentificationResult` interface
-- `identifyMachine()` function
-- Returns primary machine + 2-3 candidates
-- Designed to be easily swappable for real ML
+### Shared UI (`src/shared/components/`)
 
-**favoritesStorage.ts** - Favorites management
-- `getFavorites()` - Load favorite IDs
-- `setFavorites()` - Save favorite IDs
-- `toggleFavorite()` - Toggle and return updated list
-- `isFavorite()` - Check favorite status
-- `clearFavorites()` - Clear all favorites
+- **PrimaryButton.tsx** – Branded CTA button with icons/loading support.
+- **SectionHeader.tsx** – Consistent section headings for detail screens.
+- **MachineListItem.tsx** – Reusable list row with optional favorite toggle.
 
-**historyStorage.ts** - History management
-- `getRecentHistory()` - Load recent items
-- `addToRecentHistory()` - Add machine to history (max 20 items)
-- `clearHistory()` - Clear all history
+### Features (`src/features/`)
 
-### Navigation (`src/navigation/`)
-
-**RootNavigator.tsx** - Bottom tab navigator
-- Home tab (HomeStack)
-- Library tab (LibraryStack)
-- Settings tab (SettingsScreen)
-- Material Community Icons
-
-**HomeStack.tsx** - Home stack navigator
-- Home → Camera → MachineResult flow
-
-**LibraryStack.tsx** - Library stack navigator
-- Library → MachineDetail flow
-
-### Components (`src/components/`)
-
-**MachineListItem.tsx** - Reusable machine list item
-- Shows machine name, category chip
-- Optional favorite toggle
-- Handles press events
-
-**SectionHeader.tsx** - Styled section header
-- Used in machine detail screens
-- Purple accent color
-
-**PrimaryButton.tsx** - Reusable button component
-- Wraps React Native Paper Button
-- Customizable mode, icon, loading state
-
-### Screens (`src/screens/`)
-
-**HomeScreen.tsx** - Main entry screen
-- Hero section with "Identify a Machine" button
-- Recent machines list (last 5)
-- Loads favorites and history on focus
-
-**CameraScreen.tsx** - Camera capture
-- expo-camera integration
-- Permission handling with helpful UI
-- Capture button
-- Navigates to MachineResult with photo
-
-**MachineResultScreen.tsx** - Identification result
-- Shows captured photo thumbnail
-- Machine info (name, category, muscles, difficulty)
-- Alternative candidates (if wrong)
-- Full guide (setup, how-to, mistakes, safety, tips)
-- Favorite toggle
-- Adds to history
-
-**LibraryScreen.tsx** - Browse all machines
-- Search bar (by name or muscle)
-- Category filter chips
-- Machine list
-- Empty state
-
-**MachineDetailScreen.tsx** - Full machine guide
-- Same content as MachineResult but without photo
-- Accessed from Library
-- Favorite toggle
-- Adds to history
-
-**SettingsScreen.tsx** - Settings and info
-- Clear favorites button (with confirmation)
-- Clear history button (with confirmation)
-- App version info
-- Important disclaimer
+- **home/screens/HomeScreen.tsx** – Welcome hero, identify CTA, and recent machines list.
+- **identification/screens/CameraScreen.tsx** – Camera capture, permission UX, and gallery picker.
+- **identification/screens/MachineResultScreen.tsx** – Recognition outcome, confidence display, full machine guide; uses **identification/components/MachinePickerModal.tsx** for manual overrides.
+- **library/screens/LibraryScreen.tsx** – Searchable, filterable machine directory.
+- **library/screens/MachineDetailScreen.tsx** – Detailed guide view launched from the library.
+- **settings/screens/SettingsScreen.tsx** – Data management actions and app disclaimer.
 
 ### Assets
 
-**assets/muscle-diagrams/** - Muscle diagram images (optional)
-- README.md with instructions
-
-**assets/test-photos/** - Test machine photos (optional)
-- README.md with instructions
+- **assets/muscle-diagrams/** – Placeholder diagrams with README.
+- **assets/test-photos/** – Sample images for local testing.
+- **assets/reference-machines/** – Curated photos used to generate reference embeddings (optional).
 
 ### Documentation
 
-**README.md** - Comprehensive project documentation
-- Features, tech stack, structure
-- Installation and running instructions
-- Testing guide
-- Architecture decisions
-- Future enhancements
-
-**QUICKSTART.md** - Quick start guide
-- 3-step setup
-- Feature overview
-- Next steps
-
-**PROJECT_STRUCTURE.md** - This file
-- Complete file listing and descriptions
+- **README.md** – End-to-end overview, setup, testing, and architecture notes.
+- **QUICKSTART.md** – Condensed setup checklist.
+- **PROJECT_STRUCTURE.md** – This document.
 
 ## File Count Summary
 
 - **Core:** 1 (App.tsx)
-- **Types:** 3 (machine, history, navigation)
-- **Data:** 1 (machines.json)
-- **Logic:** 3 (identify, favorites, history)
-- **Navigation:** 3 (root, home stack, library stack)
-- **Components:** 3 (list item, header, button)
-- **Screens:** 6 (home, camera, result, library, detail, settings)
+- **App Layer:** 4 (MachinesProvider + 3 navigators)
+- **Types:** 5 (machine, history, navigation, identification, env)
+- **Data:** 4 (machines, labels, label synonyms, reference embeddings)
+- **Services:** 3 (recognition, favorites storage, history storage)
+- **Shared UI:** 5 (button, header, list item, body highlighter, exercise player)
+- **Features:** 7 (home, camera, machine result, picker modal, library, machine detail, settings)
 - **Docs:** 3 + 2 asset READMEs
 
-**Total:** 23 TypeScript/JSON files + documentation
+**Total:** 32 TypeScript/JSON files + documentation
 
 ## Key Design Decisions
 
-1. **Context over Redux** - Simple read-only catalog doesn't need complex state management
-2. **AsyncStorage** - Lightweight, perfect for favorites/history
-3. **Stub Identification** - Maintains full UX while being easily swappable
-4. **Type Safety** - Full TypeScript coverage with strict navigation types
-5. **Offline First** - No network dependencies, works in airplane mode
-6. **Component Composition** - Reusable components for consistent UI
-
-All files include helpful comments explaining their purpose and usage.
+1. **Context over Redux** – Machines are read-only static data; a simple provider + hook keeps things lean.
+2. **AsyncStorage** – Lightweight persistence for favorites and recents without extra services.
+3. **Modular Identification** – All machine recognition logic is isolated behind one service to enable swaps (e.g., on-device ML) without UI churn.
+4. **Type Safety** – Navigation and domain models are strongly typed for compile-time guarantees.
+5. **Local-First UX** – Catalog, favorites, and history work offline; only recognition depends on Hugging Face.
+6. **Shared UI Primitives** – A small set of reusable components keeps feature screens thin and consistent.

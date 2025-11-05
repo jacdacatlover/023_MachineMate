@@ -4,7 +4,7 @@ A React Native + Expo mobile app that helps gym beginners learn how to use gym m
 
 ## Features
 
-- 📸 **Camera Identification**: Take a photo of a machine to get instant guidance (MVP uses stub/random selection)
+- 📸 **Camera Identification**: Take or upload a photo of a machine to get instant guidance powered by SigLIP embeddings
 - 📚 **Machine Library**: Browse and search 5 seed machines with detailed instructions
 - ⭐ **Favorites**: Mark machines as favorites for quick access
 - 🕒 **Recent History**: View your last 5 viewed machines
@@ -25,6 +25,7 @@ A React Native + Expo mobile app that helps gym beginners learn how to use gym m
 - **React Native Paper** - Material Design UI components
 - **AsyncStorage** - Local data persistence
 - **expo-camera** - Camera functionality
+- **expo-image-picker** - Importing photos from the device library
 
 ## Project Structure
 
@@ -32,30 +33,43 @@ A React Native + Expo mobile app that helps gym beginners learn how to use gym m
 MachineMate/
 ├── App.tsx                 # Main app with context & theme
 ├── src/
-│   ├── components/         # Reusable UI components
-│   │   ├── MachineListItem.tsx
-│   │   ├── PrimaryButton.tsx
-│   │   └── SectionHeader.tsx
-│   ├── data/              # Static data
-│   │   └── machines.json  # 5 seed machines
-│   ├── logic/             # Business logic
-│   │   ├── favoritesStorage.ts
-│   │   ├── historyStorage.ts
-│   │   └── identifyMachine.ts
-│   ├── navigation/        # Navigation setup
-│   │   ├── RootNavigator.tsx
-│   │   ├── HomeStack.tsx
-│   │   └── LibraryStack.tsx
-│   ├── screens/           # All app screens
-│   │   ├── HomeScreen.tsx
-│   │   ├── CameraScreen.tsx
-│   │   ├── MachineResultScreen.tsx
-│   │   ├── LibraryScreen.tsx
-│   │   ├── MachineDetailScreen.tsx
-│   │   └── SettingsScreen.tsx
-│   └── types/             # TypeScript types
-│       ├── machine.ts
+│   ├── app/                # Global app wiring (navigation, providers)
+│   │   ├── navigation/
+│   │   │   ├── HomeStack.tsx
+│   │   │   ├── LibraryStack.tsx
+│   │   │   └── RootNavigator.tsx
+│   │   └── providers/
+│   │       └── MachinesProvider.tsx
+│   ├── data/               # Static datasets
+│   │   └── machines.json
+│   ├── features/           # Feature-oriented modules
+│   │   ├── home/
+│   │   │   └── screens/HomeScreen.tsx
+│   │   ├── identification/
+│   │   │   ├── components/MachinePickerModal.tsx
+│   │   │   └── screens/
+│   │   │       ├── CameraScreen.tsx
+│   │   │       └── MachineResultScreen.tsx
+│   │   ├── library/
+│   │   │   └── screens/
+│   │   │       ├── LibraryScreen.tsx
+│   │   │       └── MachineDetailScreen.tsx
+│   │   └── settings/
+│   │       └── screens/SettingsScreen.tsx
+│   ├── services/           # Cross-cutting business logic
+│   │   ├── recognition/identifyMachine.ts
+│   │   └── storage/
+│   │       ├── favoritesStorage.ts
+│   │       └── historyStorage.ts
+│   ├── shared/             # Shared UI primitives
+│   │   └── components/
+│   │       ├── MachineListItem.tsx
+│   │       ├── PrimaryButton.tsx
+│   │       └── SectionHeader.tsx
+│   └── types/              # TypeScript contracts
+│       ├── env.d.ts
 │       ├── history.ts
+│       ├── machine.ts
 │       └── navigation.ts
 └── assets/
     ├── muscle-diagrams/   # Muscle diagram images (see README)
@@ -77,12 +91,17 @@ MachineMate/
    npm install
    ```
 
-2. **Start the development server:**
+2. **Sync Expo native modules (run after pulling dependencies updates):**
+   ```bash
+   npx expo install expo-image-picker expo-image-manipulator expo-file-system
+   ```
+
+3. **Start the development server:**
    ```bash
    npx expo start
    ```
 
-3. **Run on your device:**
+4. **Run on your device:**
    - **iOS Simulator** (Mac only): Press `i`
    - **Android Emulator**: Press `a`
    - **Physical Device**: Scan the QR code with Expo Go app
@@ -108,40 +127,33 @@ npx expo start
 
 ## Seed Data
 
-The app includes 5 pre-loaded machines:
+The app includes 6 pre-loaded machines:
 
 1. **Leg Press** (Lower Body, Beginner)
 2. **Lat Pulldown** (Back, Beginner)
 3. **Chest Press** (Chest, Beginner)
 4. **Seated Row** (Back, Beginner)
 5. **Shoulder Press** (Shoulders, Intermediate)
+6. **Treadmill** (Cardio, Beginner)
 
 Each machine has complete, realistic guidance including setup steps, how-to instructions, common mistakes, safety tips, and beginner tips.
 
 ## Key Features Explained
 
-### 1. Machine Identification (Stub)
+### 1. Machine Identification Service
 
-The camera flow works end-to-end, but currently uses **random selection** as a placeholder for real ML/AI. The identification logic is in `src/logic/identifyMachine.ts` and is designed to be easily swappable:
+All recognition logic lives in `src/services/recognition/identifyMachine.ts`. The helper now:
+- Pre-processes images (resize + center crop) before upload and generates a SigLIP embedding once per photo.
+- Runs a **domain gate** to reject non-gym scenes, returning a `kind: 'not_gym'` result when confidence falls below the 0.35 threshold.
+- Scores the entire vocabulary in `src/data/gymMachineLabels.ts` by combining text prompts with any reference-photo embeddings (60% text / 40% image weighting).
+- Maps the top label to a catalog guide when possible (using `src/data/labelSynonyms.ts` or reference metadata) and otherwise returns a generic label suggestion that triggers the manual picker.
+- Caches label, domain, and machine embeddings independently in AsyncStorage and falls back to a deterministic recommendation if remote inference fails.
 
-```typescript
-export async function identifyMachine(
-  photoUri: string,
-  allMachines: MachineDefinition[]
-): Promise<IdentificationResult>
-```
+### 2. Local-First Catalog
 
-**To add real ML later:**
-- Replace the function body with your ML model
-- The UI is completely decoupled and won't need changes
-- Could use TensorFlow, CLIP, or an API call
-
-### 2. Offline-First Architecture
-
-- No network calls in the entire app
-- All data stored locally (AsyncStorage)
-- Machine catalog bundled with the app
-- Works perfectly in airplane mode
+- Machine definitions, guides, and UI chrome ship in-app.
+- AsyncStorage backs favorites and recent history.
+- Recognition is the only network dependency; the rest of the UX works offline.
 
 ### 3. Type-Safe Navigation
 
@@ -149,9 +161,15 @@ All navigation uses TypeScript for compile-time safety:
 
 ```typescript
 navigation.navigate('MachineResult', {
-  photoUri: string,
-  primaryMachineId: string,
-  candidateIds: string[]
+  photoUri,
+  result: {
+    kind: 'catalog',
+    machineId,
+    candidates: [machineId],
+    confidence: null,
+    lowConfidence: false,
+    source: 'manual',
+  },
 });
 ```
 
@@ -161,7 +179,7 @@ navigation.navigate('MachineResult', {
 
 1. From Home screen, tap "Identify a Machine"
 2. Grant camera permission when prompted
-3. Take a photo of anything (stub will randomly select a machine)
+3. Take a photo of anything (low-confidence or unrecognized images will open the manual picker)
 4. View the machine guide with all details
 
 ### Test Library
@@ -187,6 +205,16 @@ See `assets/muscle-diagrams/README.md` for instructions on adding muscle diagram
 
 See `assets/test-photos/README.md` for instructions on adding sample machine photos for testing.
 
+### Reference Photos
+
+Drop curated reference shots into `assets/reference-machines/<labelId>/` (matching the ids in `src/data/gymMachineLabels.ts`) and run:
+
+```bash
+EXPO_PUBLIC_HF_TOKEN=your_token_here npm run embed:references
+```
+
+The script refreshes the precomputed embeddings stored in `src/data/referenceMachineEmbeddings.ts`, which the app uses to weight image matches. Fresh embeddings are cached under the `machinemate_label_embedding_v1_` and `machinemate_domain_embedding_v1_` keys on first launch.
+
 ## Acceptance Criteria ✅
 
 All MVP acceptance criteria are met:
@@ -195,13 +223,13 @@ All MVP acceptance criteria are met:
 - ✅ Library browsing with search and filters
 - ✅ Recent machines displayed on Home screen
 - ✅ Favorites persist across app restarts
-- ✅ Fully functional offline
+- ✅ Catalog, favorites, and history work offline (recognition requires connectivity)
 
 ## Future Enhancements
 
 The codebase is architected to support these future features:
 
-- 🤖 **Real ML identification** - Replace stub in `identifyMachine.ts`
+- 🤖 **On-device / custom ML** - Extend `src/services/recognition/identifyMachine.ts` with additional models
 - 🖼️ **Muscle diagrams** - Add images to visualize muscles worked
 - 📹 **Video demonstrations** - Add video guides for each machine
 - 🏋️ **Workout tracking** - Log sets, reps, and weight
@@ -235,7 +263,7 @@ Should show no errors. If you see errors, ensure all dependencies are installed.
 
 1. **Context for State**: Machine data shared via React Context (simple and sufficient for read-only catalog)
 2. **AsyncStorage**: Lightweight and perfect for favorites/history (no complex state management needed)
-3. **Stub Identification**: Random selection maintains the full UX flow while being easily swappable later
+3. **Pluggable Identification**: Recognition lives in one service with a stable interface, making it easy to swap Hugging Face for another provider or local model later.
 4. **No Backend**: Keeps MVP simple and focuses on mobile UX
 
 ### Code Quality

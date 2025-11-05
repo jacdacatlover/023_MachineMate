@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Alert } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
-import { clearFavorites } from '../logic/favoritesStorage';
-import { clearHistory } from '../logic/historyStorage';
-import PrimaryButton from '../components/PrimaryButton';
+import { clearFavorites } from '../../../services/storage/favoritesStorage';
+import { clearHistory } from '../../../services/storage/historyStorage';
+import PrimaryButton from '../../../shared/components/PrimaryButton';
 
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);

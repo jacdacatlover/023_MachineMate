@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Modal, Portal, Searchbar, List, Divider, Text } from 'react-native-paper';
-import { MachineDefinition } from '../types/machine';
-import PrimaryButton from './PrimaryButton';
+import { MachineDefinition } from '../../../types/machine';
+import PrimaryButton from '../../../shared/components/PrimaryButton';
 
 interface MachinePickerModalProps {
   visible: boolean;
   machines: MachineDefinition[];
-  selectedMachineId: string;
+  selectedMachineId: string | null;
   onSelect: (machineId: string) => void;
   onDismiss: () => void;
 }

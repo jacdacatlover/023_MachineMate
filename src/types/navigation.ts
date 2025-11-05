@@ -1,6 +1,7 @@
 // Type definitions for React Navigation
 
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { IdentificationResult } from './identification';
 
 // Root tab navigator params
 export type RootTabParamList = {
@@ -15,11 +16,7 @@ export type HomeStackParamList = {
   Camera: undefined;
   MachineResult: {
     photoUri?: string;
-    primaryMachineId: string;
-    candidateIds: string[];
-    confidence?: number | null;
-    lowConfidence?: boolean;
-    source?: 'huggingface' | 'fallback';
+    result: IdentificationResult;
   };
 };
 

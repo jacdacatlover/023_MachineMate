@@ -44,10 +44,10 @@ Then press:
 
 ✅ 6 screens fully implemented
 ✅ 5 seed machines with realistic content
-✅ Camera identification flow (stub logic)
+✅ Camera identification flow (Hugging Face SigLIP + confidence gating)
 ✅ Search & filter in Library
 ✅ Favorites & recent history (persisted)
-✅ Offline-first architecture
+✅ Local-first catalog (favorites/history offline; recognition uses Hugging Face)
 ✅ TypeScript + React Native Paper UI
 ✅ Type-safe navigation
 
@@ -62,6 +62,6 @@ Then press:
    - Change theme colors in `App.tsx`
 
 3. **Future Enhancement**:
-   - Replace stub in `src/logic/identifyMachine.ts` with real ML
+   - Extend `src/services/recognition/identifyMachine.ts` with on-device or custom ML
 
 Enjoy building with MachineMate! 🏋️

@@ -1,23 +1,16 @@
 // Main App component with machine data context and navigation
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { PaperProvider, MD3LightTheme, Text } from 'react-native-paper';
 import { MachineDefinition } from './src/types/machine';
-import RootNavigator from './src/navigation/RootNavigator';
+import RootNavigator from './src/app/navigation/RootNavigator';
+import { MachinesProvider } from './src/app/providers/MachinesProvider';
 
 // Import machine data
 import machinesData from './src/data/machines.json';
-
-// Create context for sharing machine data across the app
-const MachinesContext = createContext<MachineDefinition[]>([]);
-
-// Hook to access machines from any component
-export function useMachines(): MachineDefinition[] {
-  return useContext(MachinesContext);
-}
 
 // Custom theme based on React Native Paper
 const theme = {
@@ -79,14 +72,14 @@ export default function App() {
   }
 
   return (
-    <MachinesContext.Provider value={machines}>
+    <MachinesProvider machines={machines}>
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <RootNavigator />
           <StatusBar style="auto" />
         </NavigationContainer>
       </PaperProvider>
-    </MachinesContext.Provider>
+    </MachinesProvider>
   );
 }
 
