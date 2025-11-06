@@ -15,8 +15,6 @@ import {
 import { addToRecentHistory } from '../../../services/storage/historyStorage';
 import { validateMachineId } from '../../../services/storage/validation';
 import SectionHeader from '../../../shared/components/SectionHeader';
-import PrimaryButton from '../../../shared/components/PrimaryButton';
-import MachinePickerModal from '../components/MachinePickerModal';
 import { AnimatedBodyHighlighter } from '../../../shared/components/AnimatedBodyHighlighter';
 import { colors } from '../../../shared/theme';
 
@@ -35,21 +33,14 @@ export default function MachineResultScreen() {
     catalogResult ? catalogResult.machineId : null
   );
   const [isFavorite, setIsFavorite] = useState(false);
-  const autoOpenPicker = useMemo(() => shouldAutoOpenPicker(catalogResult), [catalogResult]);
-  const [isPickerVisible, setIsPickerVisible] = useState(autoOpenPicker);
 
   const currentMachine = useMemo(
     () => machines.find(machine => machine.id === currentMachineId),
     [currentMachineId, machines]
   );
-  const candidates = useMemo(
-    () => buildCandidateList(machines, catalogResult),
-    [machines, catalogResult]
-  );
-  const manualPrompt = useMemo(() => deriveManualPrompt(currentMachine, genericResult), [currentMachine, genericResult]);
-  const candidatePromptText = useMemo(
-    () => deriveCandidatePrompt(catalogResult, genericResult),
-    [catalogResult, genericResult]
+  const manualPrompt = useMemo(
+    () => deriveManualPrompt(currentMachine, catalogResult, genericResult),
+    [currentMachine, catalogResult, genericResult]
   );
   const confidenceCaption = useMemo(
     () => deriveConfidenceCaption(catalogResult, genericResult),
@@ -77,20 +68,10 @@ export default function MachineResultScreen() {
     run();
   }, [currentMachineId]);
 
-  useEffect(() => {
-    if (autoOpenPicker) {
-      setIsPickerVisible(true);
-    }
-  }, [autoOpenPicker]);
-
   const handleToggleFavorite = async () => {
     if (!currentMachineId) return;
     await toggleFavorite(currentMachineId);
     setIsFavorite(prev => !prev);
-  };
-
-  const handleCandidatePress = (machineId: string) => {
-    setCurrentMachineId(machineId);
   };
 
   return (
@@ -108,17 +89,6 @@ export default function MachineResultScreen() {
           <Text variant="bodyMedium" style={styles.unmatchedBody}>
             {manualPrompt.body}
           </Text>
-          {manualPrompt.chips.map(chip => (
-            <Chip key={chip.id} mode="outlined" style={styles.genericChip}>
-              {chip.label}
-            </Chip>
-          ))}
-          <PrimaryButton
-            label="Choose a Machine"
-            icon="magnify"
-            mode="outlined"
-            onPress={() => setIsPickerVisible(true)}
-          />
         </View>
       )}
 
@@ -180,37 +150,13 @@ export default function MachineResultScreen() {
           <Divider />
         </>
       )}
-
-      {/* Candidates */}
-      <View style={styles.candidatesContainer}>
-        <Text variant="bodyMedium" style={styles.candidatesLabel}>
-          {candidatePromptText}
-        </Text>
-        {confidenceCaption && (
+      {confidenceCaption && (
+        <View style={styles.confidenceContainer}>
           <Text variant="bodySmall" style={styles.confidenceText}>
             {confidenceCaption}
           </Text>
-        )}
-        <View style={styles.candidatesChips}>
-          {candidates.map(candidate => (
-            <Chip
-              key={candidate.id}
-              mode="outlined"
-              selected={candidate.id === currentMachineId}
-              onPress={() => handleCandidatePress(candidate.id)}
-              style={styles.candidateChip}
-            >
-              {candidate.name}
-            </Chip>
-          ))}
         </View>
-        <PrimaryButton
-          label="Pick from full list"
-          mode="outlined"
-          icon="magnify"
-          onPress={() => setIsPickerVisible(true)}
-        />
-      </View>
+      )}
 
       <Divider />
 
@@ -285,17 +231,6 @@ export default function MachineResultScreen() {
         </>
       )}
 
-      <MachinePickerModal
-        visible={isPickerVisible}
-        machines={machines}
-        selectedMachineId={currentMachineId}
-        onSelect={machineId => {
-          setCurrentMachineId(machineId);
-          setIsPickerVisible(false);
-        }}
-        onDismiss={() => setIsPickerVisible(false)}
-      />
-
       <View style={styles.bottomPadding} />
     </ScrollView>
   );
@@ -305,78 +240,34 @@ type ManualPrompt = {
   shouldShow: boolean;
   title: string;
   body: string;
-  chips: Array<{ id: string; label: string }>;
 };
-
-function shouldAutoOpenPicker(result: CatalogIdentificationResult | null): boolean {
-  if (!result) {
-    return true;
-  }
-  if (result.source === 'fallback') {
-    return false;
-  }
-  return result.lowConfidence;
-}
-
-function buildCandidateList(
-  machines: MachineDefinition[],
-  catalogResult: CatalogIdentificationResult | null
-): MachineDefinition[] {
-  if (!catalogResult) {
-    return [...machines].sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  const seen = new Set<string>();
-  const resolved: MachineDefinition[] = [];
-
-  catalogResult.candidates.forEach(id => {
-    const match = machines.find(machine => machine.id === id);
-    if (match && !seen.has(match.id)) {
-      seen.add(match.id);
-      resolved.push(match);
-    }
-  });
-
-  [...machines]
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .forEach(machine => {
-      if (!seen.has(machine.id)) {
-        seen.add(machine.id);
-        resolved.push(machine);
-      }
-    });
-
-  return resolved;
-}
 
 function deriveManualPrompt(
   currentMachine: MachineDefinition | undefined,
+  catalogResult: CatalogIdentificationResult | null,
   genericResult: GenericLabelResult | null
 ): ManualPrompt {
   if (!currentMachine || genericResult) {
-    const chips: ManualPrompt['chips'] = [];
-
-    if (genericResult) {
-      chips.push({
-        id: 'generic_suggestion',
-        label: `Suggested: ${genericResult.labelName}`,
-      });
-    }
-
     if (genericResult) {
       return {
         shouldShow: true,
         title: 'Identified machine not in catalog',
-        body: `We think this might be a ${genericResult.labelName}, but it is not in our guides yet. Pick the closest match from the list so we can show helpful instructions.`,
-        chips,
+        body: `We think this might be a ${genericResult.labelName}, but it is not in our guides yet. Try another photo once that machine is available.`,
       };
     }
 
     return {
       shouldShow: true,
       title: "We couldn't identify this machine automatically.",
-      body: 'Please pick the correct machine from the list so we can show the right guide.',
-      chips,
+      body: 'Retake the photo so the equipment is centered and well lit.',
+    };
+  }
+
+  if (catalogResult?.lowConfidence) {
+    return {
+      shouldShow: true,
+      title: "We're not sure about this match.",
+      body: 'Try taking another photo so we can confirm the machine automatically.',
     };
   }
 
@@ -384,25 +275,7 @@ function deriveManualPrompt(
     shouldShow: false,
     title: '',
     body: '',
-    chips: [],
   };
-}
-
-function deriveCandidatePrompt(
-  catalogResult: CatalogIdentificationResult | null,
-  genericResult: GenericLabelResult | null
-): string {
-  if (catalogResult) {
-    return catalogResult.lowConfidence
-      ? 'We were not confident in this match. Please confirm or choose the correct machine:'
-      : 'Not correct? Choose another machine:';
-  }
-
-  if (genericResult) {
-    return 'Pick the closest match from our catalog:';
-  }
-
-  return 'Select the correct gym machine from our catalog:';
 }
 
 function deriveConfidenceCaption(
@@ -514,27 +387,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.text,
   },
-  candidatesContainer: {
-    padding: 16,
-    backgroundColor: colors.surface,
-  },
-  candidatesLabel: {
-    marginBottom: 12,
-    fontWeight: '600',
-    color: colors.text,
+  confidenceContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   confidenceText: {
-    marginBottom: 12,
+    textAlign: 'center',
     color: colors.textTertiary,
-  },
-  candidatesChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  candidateChip: {
-    marginRight: 8,
-    marginBottom: 8,
   },
   section: {
     padding: 16,

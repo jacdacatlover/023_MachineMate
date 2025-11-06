@@ -23,7 +23,27 @@ const CATEGORIES: (MachineCategory | 'All')[] = [
   'Shoulders',
   'Arms',
   'Core',
+  'Cardio',
+  'Full Body',
 ];
+
+const UPPER_BODY_GROUP: readonly MachineCategory[] = ['Back', 'Chest', 'Shoulders', 'Arms'];
+
+function matchesCategorySelection(machineCategory: MachineCategory, selected: MachineCategory | 'All'): boolean {
+  if (selected === 'All') {
+    return true;
+  }
+
+  if (selected === 'Upper Body') {
+    return UPPER_BODY_GROUP.includes(machineCategory);
+  }
+
+  if (selected === 'Lower Body') {
+    return machineCategory === 'Lower Body';
+  }
+
+  return machineCategory === selected;
+}
 
 // Memoized category chip component for better performance
 const CategoryChip = React.memo(
@@ -73,7 +93,7 @@ export default function LibraryScreen() {
   const filteredMachines = useMemo(() => {
     return machines.filter(machine => {
       // Category filter
-      if (selectedCategory !== 'All' && machine.category !== selectedCategory) {
+      if (!matchesCategorySelection(machine.category, selectedCategory)) {
         return false;
       }
 
