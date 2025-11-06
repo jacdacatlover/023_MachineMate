@@ -3,8 +3,14 @@
     "id": "leg_press",
     "name": "Seated Leg Press",
     "category": "Lower Body",
-    "primaryMuscles": ["Quadriceps", "Glutes"],
-    "secondaryMuscles": ["Hamstrings", "Calves"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Glutes"
+    ],
+    "secondaryMuscles": [
+      "Hamstrings",
+      "Calves"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Sit on the machine with your back flat against the padded support",
@@ -42,14 +48,30 @@
       "Start with 3 sets of 10-12 reps with moderate weight"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/leg_press.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Quadricep-animation.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Quadricep-animation.gif",
+    "recognition": {
+      "visualPrompts": [
+        "seated leg press sled machine",
+        "large angled footplate with lower body pushing position",
+        "weight stack leg press in fitness center"
+      ],
+      "labelId": "leg_press_sled",
+      "synonyms": ["leg press", "sled press", "seated leg press"],
+      "keywords": ["footplate", "sled", "lower body"]
+    }
   },
   {
     "id": "lat_pulldown",
     "name": "Lat Pulldown",
     "category": "Back",
-    "primaryMuscles": ["Latissimus Dorsi"],
-    "secondaryMuscles": ["Biceps", "Rear Deltoids", "Rhomboids"],
+    "primaryMuscles": [
+      "Latissimus Dorsi"
+    ],
+    "secondaryMuscles": [
+      "Biceps",
+      "Rear Deltoids",
+      "Rhomboids"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Adjust the knee pad so it sits comfortably on your thighs to prevent lifting",
@@ -87,14 +109,30 @@
       "Focus on feeling the work in your back muscles, not your arms"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/lat_pulldown.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Latissimus_dorsi_muscle_animation.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Latissimus_dorsi_muscle_animation.gif",
+    "recognition": {
+      "visualPrompts": [
+        "lat pulldown machine",
+        "cable station with wide grip bar overhead",
+        "seated high pulley exercise with thigh pads and vertical weight stack",
+        "front pulldown to chest in commercial gym"
+      ],
+      "labelId": "lat_pulldown_station",
+      "synonyms": ["lat pulldown", "wide grip pulldown", "cable pulldown"],
+      "keywords": ["cable station", "wide bar", "thigh pad", "pull-down"]
+    }
   },
   {
     "id": "chest_press",
     "name": "Chest Press Machine",
     "category": "Chest",
-    "primaryMuscles": ["Pectoralis Major"],
-    "secondaryMuscles": ["Anterior Deltoids", "Triceps"],
+    "primaryMuscles": [
+      "Pectoralis Major"
+    ],
+    "secondaryMuscles": [
+      "Anterior Deltoids",
+      "Triceps"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Adjust the seat height so the handles are at mid-chest level",
@@ -132,14 +170,31 @@
       "The movement should feel smooth, not jerky or forced"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/chest_press.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Pectoralis_major_animation_2.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Pectoralis_major_animation_2.gif",
+    "recognition": {
+      "visualPrompts": [
+        "seated chest press machine with dual handles",
+        "horizontal pushing movement from chest level",
+        "weight stack chest press station"
+      ],
+      "labelId": "chest_press_machine",
+      "synonyms": ["chest press", "machine press", "seated press"],
+      "keywords": ["horizontal handles", "padded seat", "push"]
+    }
   },
   {
     "id": "seated_row",
     "name": "Seated Cable Row",
     "category": "Back",
-    "primaryMuscles": ["Middle Back", "Rhomboids"],
-    "secondaryMuscles": ["Latissimus Dorsi", "Biceps", "Rear Deltoids"],
+    "primaryMuscles": [
+      "Middle Back",
+      "Rhomboids"
+    ],
+    "secondaryMuscles": [
+      "Latissimus Dorsi",
+      "Biceps",
+      "Rear Deltoids"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Sit on the machine and place your feet on the footrests",
@@ -177,14 +232,29 @@
       "Imagine squeezing a pencil between your shoulder blades"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/seated_row.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rhomboid_muscles_animation_small.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rhomboid_muscles_animation_small.gif",
+    "recognition": {
+      "visualPrompts": [
+        "seated cable row machine with chest pad",
+        "low pulley row handle pulled toward torso",
+        "horizontal pulling machine with weight stack"
+      ],
+      "labelId": "seated_row_machine",
+      "synonyms": ["seated row", "machine row", "cable row"],
+      "keywords": ["chest pad", "low pulley", "rowing handle"]
+    }
   },
   {
     "id": "shoulder_press",
     "name": "Shoulder Press Machine",
     "category": "Shoulders",
-    "primaryMuscles": ["Deltoids (Anterior and Lateral)"],
-    "secondaryMuscles": ["Triceps", "Upper Trapezius"],
+    "primaryMuscles": [
+      "Deltoids (Anterior and Lateral)"
+    ],
+    "secondaryMuscles": [
+      "Triceps",
+      "Upper Trapezius"
+    ],
     "difficulty": "Intermediate",
     "setupSteps": [
       "Adjust the seat so the handles are at shoulder height when seated",
@@ -222,14 +292,31 @@
       "This exercise requires good shoulder mobility—stretch before starting"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/shoulder_press.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Deltoid_muscle_animation.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Deltoid_muscle_animation.gif",
+    "recognition": {
+      "visualPrompts": [
+        "shoulder press machine with overhead handles",
+        "seated overhead press with back pad and weight stack",
+        "vertical pushing movement for deltoids"
+      ],
+      "labelId": "shoulder_press_machine",
+      "synonyms": ["shoulder press", "overhead press machine", "military press machine"],
+      "keywords": ["overhead handles", "vertical press", "weight stack"]
+    }
   },
   {
     "id": "treadmill",
     "name": "Treadmill",
     "category": "Cardio",
-    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
-    "secondaryMuscles": ["Core"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Hamstrings",
+      "Glutes",
+      "Calves"
+    ],
+    "secondaryMuscles": [
+      "Core"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Stand on the side rails of the treadmill",
@@ -267,14 +354,37 @@
       "Cool down with a slow walk at the end of your workout"
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/treadmill.png",
-    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Treadmill-animation.gif"
+    "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Treadmill-animation.gif",
+    "recognition": {
+      "visualPrompts": [
+        "cardio treadmill with running belt and console screen",
+        "indoor running machine with handrails",
+        "fitness club treadmill equipment"
+      ],
+      "labelId": "treadmill_cardio",
+      "synonyms": ["treadmill", "running machine", "cardio treadmill"],
+      "keywords": ["running belt", "console", "handrails"]
+    }
   },
   {
     "id": "rowing_machine",
     "name": "Rowing Machine",
     "category": "Cardio",
-    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Latissimus Dorsi", "Rhomboids", "Core"],
-    "secondaryMuscles": ["Biceps", "Triceps", "Deltoids", "Trapezius", "Calves"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Hamstrings",
+      "Glutes",
+      "Latissimus Dorsi",
+      "Rhomboids",
+      "Core"
+    ],
+    "secondaryMuscles": [
+      "Biceps",
+      "Triceps",
+      "Deltoids",
+      "Trapezius",
+      "Calves"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Sit on the seat and secure your feet in the footrests.",
@@ -307,14 +417,38 @@
       "Aim for a stroke rate of 20-25 strokes per minute to start."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/rowing_machine.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "rowing machine with sliding seat and handle",
+        "indoor rowing ergometer with flywheel and foot straps",
+        "cardio rower with chain pull and rail track"
+      ],
+      "labelId": "rowing_erg_machine",
+      "synonyms": ["rower", "rowing machine", "erg"],
+      "keywords": ["sliding seat", "flywheel", "rowing handle"]
+    }
   },
   {
     "id": "elliptical_machine",
     "name": "Elliptical Machine",
     "category": "Cardio",
-    "primaryMuscles": ["Glutes", "Hamstrings", "Quadriceps", "Calves", "Core"],
-    "secondaryMuscles": ["Biceps", "Triceps", "Pectorals", "Deltoids", "Latissimus Dorsi", "Rhomboids", "Trapezius"],
+    "primaryMuscles": [
+      "Glutes",
+      "Hamstrings",
+      "Quadriceps",
+      "Calves",
+      "Core"
+    ],
+    "secondaryMuscles": [
+      "Biceps",
+      "Triceps",
+      "Pectorals",
+      "Deltoids",
+      "Latissimus Dorsi",
+      "Rhomboids",
+      "Trapezius"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Step onto the machine, one foot on each pedal.",
@@ -347,14 +481,34 @@
       "Aim for 20-30 minutes of continuous exercise."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/elliptical_machine.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "elliptical cross trainer with moving handles",
+        "cardio elliptical with foot pedals and vertical motion",
+        "low impact elliptical exercise machine with handlebars"
+      ],
+      "labelId": "elliptical_trainer",
+      "synonyms": ["elliptical", "cross trainer", "orbitrek"],
+      "keywords": ["moving handles", "pedals", "elliptical"]
+    }
   },
   {
     "id": "exercise_bike",
     "name": "Exercise Bike",
     "category": "Cardio",
-    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
-    "secondaryMuscles": ["Core", "Hip Flexors", "Adductors", "Tibialis Anterior"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Hamstrings",
+      "Glutes",
+      "Calves"
+    ],
+    "secondaryMuscles": [
+      "Core",
+      "Hip Flexors",
+      "Adductors",
+      "Tibialis Anterior"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Adjust the seat height so that your knee is slightly bent at the bottom of the pedal stroke.",
@@ -387,14 +541,32 @@
       "Stay hydrated by drinking water before, during, and after your workout."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/exercise_bike.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "stationary exercise bike with seat and pedals",
+        "indoor cycling bike with console and handlebars",
+        "upright or recumbent gym bike for cardio"
+      ],
+      "labelId": "exercise_bike",
+      "synonyms": ["exercise bike", "stationary bike", "spin bike", "cycling machine"],
+      "keywords": ["seat", "pedals", "handlebars", "cycling"]
+    }
   },
   {
     "id": "stair_climber",
     "name": "Stair Climber",
     "category": "Cardio",
-    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
-    "secondaryMuscles": ["Core", "Abs"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Hamstrings",
+      "Glutes",
+      "Calves"
+    ],
+    "secondaryMuscles": [
+      "Core",
+      "Abs"
+    ],
     "difficulty": "Intermediate",
     "setupSteps": [
       "Step onto the machine and select your workout program.",
@@ -426,14 +598,31 @@
       "Listen to your body and rest when you need to."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/stair_climber.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "stair climber machine with rotating steps",
+        "step mill cardio equipment with moving stairs",
+        "vertical climbing machine with handrails and stairs"
+      ],
+      "labelId": "stair_climber",
+      "synonyms": ["stair climber", "step mill", "stair stepper", "stairmaster"],
+      "keywords": ["rotating steps", "stairs", "handrails", "climbing"]
+    }
   },
   {
     "id": "smith_machine_squat",
     "name": "Smith Machine Squat",
     "category": "Lower Body",
-    "primaryMuscles": ["Quadriceps", "Glutes"],
-    "secondaryMuscles": ["Hamstrings", "Adductors", "Calves"],
+    "primaryMuscles": [
+      "Quadriceps",
+      "Glutes"
+    ],
+    "secondaryMuscles": [
+      "Hamstrings",
+      "Adductors",
+      "Calves"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Set the barbell on the Smith machine to a height that is slightly below your shoulders.",
@@ -466,14 +655,36 @@
       "Ask a trainer or experienced gym-goer to check your form."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/smith_machine_squat.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "smith machine with guided barbell on vertical rails",
+        "barbell squat rack with fixed vertical bar path and safety hooks",
+        "smith machine squat station with linear bearing track"
+      ],
+      "labelId": "smith_machine",
+      "synonyms": ["smith machine", "guided barbell", "smith rack"],
+      "keywords": ["guided barbell", "rails", "rack", "vertical track"]
+    }
   },
   {
     "id": "cable_crossover",
     "name": "Cable Crossover",
     "category": "Chest",
-    "primaryMuscles": ["Pectoralis Major", "Pectoralis Minor", "Anterior Deltoids"],
-    "secondaryMuscles": ["Serratus Anterior", "Rhomboids", "Levator Scapulae", "Latissimus Dorsi", "Biceps Brachii", "Triceps Brachii", "Core"],
+    "primaryMuscles": [
+      "Pectoralis Major",
+      "Pectoralis Minor",
+      "Anterior Deltoids"
+    ],
+    "secondaryMuscles": [
+      "Serratus Anterior",
+      "Rhomboids",
+      "Levator Scapulae",
+      "Latissimus Dorsi",
+      "Biceps Brachii",
+      "Triceps Brachii",
+      "Core"
+    ],
     "difficulty": "Intermediate",
     "setupSteps": [
       "Set the pulleys on a cable machine to the desired height (high, middle, or low).",
@@ -506,14 +717,29 @@
       "Exhale as you pull the handles together and inhale as you return to the start."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/cable_crossover.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "cable crossover machine with dual adjustable pulleys",
+        "functional trainer with two tall cable columns",
+        "dual pulley cable station with adjustable height settings"
+      ],
+      "labelId": "cable_crossover",
+      "synonyms": ["cable crossover", "dual adjustable pulley", "functional trainer"],
+      "keywords": ["dual columns", "adjustable pulleys", "cables"]
+    }
   },
   {
     "id": "preacher_curl_machine",
     "name": "Preacher Curl Machine",
     "category": "Arms",
-    "primaryMuscles": ["Biceps Brachii"],
-    "secondaryMuscles": ["Brachialis", "Brachioradialis"],
+    "primaryMuscles": [
+      "Biceps Brachii"
+    ],
+    "secondaryMuscles": [
+      "Brachialis",
+      "Brachioradialis"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Adjust the seat height so that your armpits are just over the top of the arm pad.",
@@ -545,14 +771,32 @@
       "Exhale as you curl the weight up and inhale as you lower it."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/preacher_curl_machine.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "preacher curl machine with angled arm pad",
+        "bicep curl station with padded armrest and handles",
+        "seated preacher bench with weight stack for arm curls"
+      ],
+      "labelId": "preacher_curl",
+      "synonyms": ["preacher curl", "bicep curl machine", "arm curl station"],
+      "keywords": ["arm pad", "angled pad", "bicep curl", "armrest"]
+    }
   },
   {
     "id": "tricep_extension_machine",
     "name": "Tricep Extension Machine",
     "category": "Arms",
-    "primaryMuscles": ["Triceps Brachii"],
-    "secondaryMuscles": ["Anconeus", "Deltoids", "Rhomboids", "Trapezius", "Brachioradialis"],
+    "primaryMuscles": [
+      "Triceps Brachii"
+    ],
+    "secondaryMuscles": [
+      "Anconeus",
+      "Deltoids",
+      "Rhomboids",
+      "Trapezius",
+      "Brachioradialis"
+    ],
     "difficulty": "Beginner",
     "setupSteps": [
       "Adjust the seat height so that your elbows are in line with the machine's pivot point.",
@@ -583,13 +827,25 @@
       "Exhale as you extend your arms and inhale as you return to the start."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/tricep_extension_machine.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "tricep extension machine with overhead arm pads",
+        "seated tricep press with padded arm support",
+        "tricep pushdown station with weight stack"
+      ],
+      "labelId": "tricep_extension",
+      "synonyms": ["tricep extension", "tricep press", "arm extension machine"],
+      "keywords": ["arm pads", "overhead pads", "tricep", "extension"]
+    }
   },
   {
     "id": "leg_extension_machine",
     "name": "Leg Extension Machine",
     "category": "Lower Body",
-    "primaryMuscles": ["Quadriceps"],
+    "primaryMuscles": [
+      "Quadriceps"
+    ],
     "secondaryMuscles": [],
     "difficulty": "Beginner",
     "setupSteps": [
@@ -621,6 +877,1336 @@
       "Exhale as you extend your legs and inhale as you lower them."
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/leg_extension_machine.png",
-    "muscleAnimationVideo": ""
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "leg extension machine with padded ankle roller",
+        "seated quadriceps extension with adjustable leg pad",
+        "knee extension machine with weight stack and back support"
+      ],
+      "labelId": "leg_extension",
+      "synonyms": ["leg extension", "quad extension", "knee extension machine"],
+      "keywords": ["ankle pad", "leg roller", "quadriceps", "knee extension"]
+    }
+  },
+  {
+    "id": "leg_curl_machine",
+    "name": "Leg Curl Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Hamstrings"],
+    "secondaryMuscles": ["Calves", "Glutes"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the leg pad so it rests just above your ankles when lying face down",
+      "Lie face down on the machine with your knees just off the edge of the bench",
+      "Align your knees with the machine's pivot point",
+      "Grip the handles for stability",
+      "Ensure your hips stay pressed against the bench"
+    ],
+    "howToSteps": [
+      "Curl your legs up towards your glutes by bending at the knees",
+      "Squeeze your hamstrings at the top of the movement",
+      "Slowly lower the weight back to the starting position with control",
+      "Keep your hips pressed against the bench throughout",
+      "Avoid letting the weight slam down between reps"
+    ],
+    "commonMistakes": [
+      "Lifting hips off the bench during the curl",
+      "Using momentum to swing the weight up",
+      "Not controlling the descent",
+      "Hyperextending the knees at the bottom",
+      "Curling too fast without proper muscle engagement"
+    ],
+    "safetyTips": [
+      "Keep your hips firmly pressed against the bench",
+      "Don't hyperextend your knees at the bottom position",
+      "Use a weight that allows controlled movement",
+      "Stop if you feel sharp pain in your knees",
+      "Avoid jerking or using momentum"
+    ],
+    "beginnerTips": [
+      "Start with lighter weight to master the form",
+      "Focus on squeezing your hamstrings at the top",
+      "Control both the lifting and lowering phases",
+      "Exhale as you curl up, inhale as you lower down",
+      "Perform 3 sets of 10-12 reps"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/leg_curl_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "leg curl machine with lying face down position",
+        "hamstring curl with padded leg roller and prone bench",
+        "lying leg curl station with weight stack"
+      ],
+      "labelId": "leg_curl",
+      "synonyms": ["leg curl", "hamstring curl", "prone leg curl"],
+      "keywords": ["leg pad", "hamstring", "prone position", "leg roller"]
+    }
+  },
+  {
+    "id": "calf_raise_machine",
+    "name": "Seated Calf Raise Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Calves", "Soleus"],
+    "secondaryMuscles": [],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine and place the balls of your feet on the footplate",
+      "Position your knees under the padded lever",
+      "Adjust the lever so it rests comfortably on your thighs",
+      "Release the safety lever once in position",
+      "Keep your back straight and core engaged"
+    ],
+    "howToSteps": [
+      "Lower your heels as far as possible below the footplate for a full stretch",
+      "Push through the balls of your feet to raise your heels as high as possible",
+      "Squeeze your calves at the top of the movement",
+      "Slowly lower back to the starting position with control",
+      "Maintain constant tension throughout the movement"
+    ],
+    "commonMistakes": [
+      "Bouncing at the bottom instead of controlled movement",
+      "Not achieving full range of motion",
+      "Using momentum rather than muscle contraction",
+      "Lifting too fast without proper calf engagement",
+      "Letting the weight drop quickly"
+    ],
+    "safetyTips": [
+      "Always use the safety lever when getting on or off",
+      "Don't bounce at the bottom of the movement",
+      "Use a full range of motion for maximum benefit",
+      "Stop if you feel sharp pain in your Achilles tendon",
+      "Start with lighter weight to avoid calf strain"
+    ],
+    "beginnerTips": [
+      "Focus on slow, controlled movements",
+      "Hold the top position for 1-2 seconds",
+      "Stretch your calves fully at the bottom",
+      "Perform 3-4 sets of 15-20 reps",
+      "Calves respond well to higher rep ranges"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/calf_raise_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "seated calf raise machine with knee pad lever",
+        "calf exercise station with footplate and thigh pad",
+        "seated calf machine with weight stack and adjustable knee pad"
+      ],
+      "labelId": "calf_raise",
+      "synonyms": ["seated calf raise", "calf press", "soleus machine"],
+      "keywords": ["footplate", "knee pad", "calf", "seated position"]
+    }
+  },
+  {
+    "id": "pec_deck_machine",
+    "name": "Pec Deck Fly Machine",
+    "category": "Chest",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoids"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so handles are at chest level",
+      "Sit with your back flat against the pad",
+      "Place your forearms against the padded handles",
+      "Grip the handles lightly",
+      "Start with arms open wide, feeling a stretch in your chest"
+    ],
+    "howToSteps": [
+      "Bring the handles together in front of your chest in a hugging motion",
+      "Squeeze your chest muscles as the handles meet",
+      "Hold for a brief moment at peak contraction",
+      "Slowly return to the starting position with control",
+      "Stop when you feel a comfortable stretch, don't overextend"
+    ],
+    "commonMistakes": [
+      "Going too far back and overextending the shoulders",
+      "Using momentum to swing the weight",
+      "Not bringing the handles all the way together",
+      "Arching the back off the pad",
+      "Moving too quickly without muscle engagement"
+    ],
+    "safetyTips": [
+      "Don't overstretch at the starting position",
+      "Keep your back firmly against the pad",
+      "Stop if you feel shoulder discomfort",
+      "Use a weight you can control through full range of motion",
+      "Avoid jerking or using momentum"
+    ],
+    "beginnerTips": [
+      "Focus on squeezing your chest, not pushing with arms",
+      "Think of giving a big hug",
+      "Exhale as you bring handles together, inhale as you open",
+      "Start with 3 sets of 10-12 reps",
+      "Control is more important than weight"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/pec_deck_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "pec deck fly machine with dual arm pads",
+        "chest fly station with curved handles and back pad",
+        "butterfly machine with padded arm levers"
+      ],
+      "labelId": "pec_deck_machine",
+      "synonyms": ["pec deck", "chest fly machine", "butterfly machine", "pec fly"],
+      "keywords": ["dual arms", "elbow pads", "fly motion", "chest isolation"]
+    }
+  },
+  {
+    "id": "hip_abductor_machine",
+    "name": "Hip Abductor Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Gluteus Medius", "Gluteus Minimus"],
+    "secondaryMuscles": ["Tensor Fasciae Latae"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine with your back against the pad",
+      "Place the outside of your thighs against the padded levers",
+      "Adjust the starting position so your legs start together",
+      "Grip the handles on the sides",
+      "Keep your back straight and core engaged"
+    ],
+    "howToSteps": [
+      "Push your legs outward against the pads",
+      "Open your legs as wide as comfortably possible",
+      "Squeeze your outer glutes at the full extension",
+      "Slowly bring your legs back together with control",
+      "Maintain tension throughout the movement"
+    ],
+    "commonMistakes": [
+      "Using momentum instead of controlled movement",
+      "Leaning forward or backward",
+      "Opening legs too wide causing hip discomfort",
+      "Moving too fast",
+      "Not engaging the glutes properly"
+    ],
+    "safetyTips": [
+      "Don't force your legs wider than comfortable",
+      "Keep your back against the pad throughout",
+      "Stop if you feel hip or groin pain",
+      "Use a moderate weight to maintain control",
+      "Avoid jerking movements"
+    ],
+    "beginnerTips": [
+      "Focus on feeling the work in your outer glutes",
+      "Move slowly and with control",
+      "Exhale as you push out, inhale as you return",
+      "Perform 3 sets of 15-20 reps",
+      "This exercise helps with hip stability"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/hip_abductor_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "hip abductor machine with outward leg movement",
+        "seated leg spreader with padded thigh pads",
+        "outer thigh machine with weight stack"
+      ],
+      "labelId": "hip_abductor",
+      "synonyms": ["hip abductor", "outer thigh machine", "thigh abductor"],
+      "keywords": ["thigh pads", "outward movement", "hip", "glutes"]
+    }
+  },
+  {
+    "id": "hip_adductor_machine",
+    "name": "Hip Adductor Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Adductors", "Inner Thigh"],
+    "secondaryMuscles": ["Gracilis"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine with your back against the pad",
+      "Place the inside of your thighs against the padded levers",
+      "Adjust the starting position so your legs start wide apart",
+      "Grip the handles on the sides",
+      "Keep your back straight and core engaged"
+    ],
+    "howToSteps": [
+      "Squeeze your legs together against the pads",
+      "Bring your knees as close together as possible",
+      "Hold the contraction at the end for a moment",
+      "Slowly allow your legs to return to the starting position",
+      "Keep constant tension on your inner thighs"
+    ],
+    "commonMistakes": [
+      "Using momentum to slam legs together",
+      "Leaning forward or rounding the back",
+      "Moving too fast without muscle engagement",
+      "Not returning to full starting position",
+      "Using excessive weight"
+    ],
+    "safetyTips": [
+      "Don't start with legs too wide if it's uncomfortable",
+      "Keep your back firmly against the pad",
+      "Stop if you feel groin pain",
+      "Use controlled movements, not momentum",
+      "Avoid excessive weight that compromises form"
+    ],
+    "beginnerTips": [
+      "Focus on squeezing your inner thighs",
+      "Move slowly and deliberately",
+      "Exhale as you squeeze in, inhale as you open",
+      "Perform 3 sets of 15-20 reps",
+      "This helps strengthen inner thighs and improve hip stability"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/hip_adductor_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "hip adductor machine with inward leg movement",
+        "seated leg squeeze machine with inner thigh pads",
+        "inner thigh machine with weight stack"
+      ],
+      "labelId": "hip_adductor",
+      "synonyms": ["hip adductor", "inner thigh machine", "thigh adductor"],
+      "keywords": ["thigh pads", "inward movement", "inner thigh", "squeeze"]
+    }
+  },
+  {
+    "id": "assisted_pullup_dip",
+    "name": "Assisted Pull-up/Dip Machine",
+    "category": "Back",
+    "primaryMuscles": ["Latissimus Dorsi", "Triceps"],
+    "secondaryMuscles": ["Biceps", "Deltoids", "Chest"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Set the desired weight (counterweight - more weight makes it easier)",
+      "Step onto the platform and grip the pull-up bar overhead or dip handles",
+      "Place your knees or feet on the assistance pad",
+      "Engage your core and get into starting position",
+      "Ensure the machine is set to either pull-up or dip mode"
+    ],
+    "howToSteps": [
+      "For pull-ups: Pull yourself up until chin clears the bar",
+      "For dips: Lower yourself until elbows are at 90 degrees, then push back up",
+      "Use the counterweight assistance to complete the movement",
+      "Control both the upward and downward phases",
+      "Repeat for desired reps"
+    ],
+    "commonMistakes": [
+      "Using too much assistance weight (counterweight)",
+      "Not achieving full range of motion",
+      "Swinging or using momentum",
+      "Shrugging shoulders instead of engaging back",
+      "Flaring elbows too wide on dips"
+    ],
+    "safetyTips": [
+      "Start with more assistance and gradually decrease",
+      "Keep your core engaged throughout",
+      "Don't let the weight stack slam down",
+      "Stop if you feel shoulder pain",
+      "Use a spotter when first learning the movement"
+    ],
+    "beginnerTips": [
+      "More counterweight makes the exercise easier",
+      "Focus on controlled movement over reps",
+      "Pull-ups: Think about pulling elbows down, not hands up",
+      "Dips: Keep elbows tucked close to body",
+      "Gradually reduce assistance as you get stronger"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/assisted_pullup_dip.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "assisted pull-up dip machine with knee pad platform",
+        "counterweight assisted chin-up station with dual function",
+        "vertical exercise station with assistance platform"
+      ],
+      "labelId": "assisted_pullup",
+      "synonyms": ["assisted pull-up", "assisted dip", "assisted chin-up", "gravitron"],
+      "keywords": ["counterweight", "knee pad", "pull-up bar", "dip handles"]
+    }
+  },
+  {
+    "id": "back_extension_machine",
+    "name": "Back Extension Machine",
+    "category": "Back",
+    "primaryMuscles": ["Erector Spinae", "Lower Back"],
+    "secondaryMuscles": ["Glutes", "Hamstrings"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the pad so it sits just below your hip bones",
+      "Position yourself face down with your hips on the pad",
+      "Hook your feet under the footpads",
+      "Cross your arms over your chest or behind your head",
+      "Start with your torso hanging downward"
+    ],
+    "howToSteps": [
+      "Raise your torso up until your body forms a straight line",
+      "Squeeze your lower back and glutes at the top",
+      "Hold briefly at the top position",
+      "Slowly lower back down with control",
+      "Don't hyperextend your back beyond neutral"
+    ],
+    "commonMistakes": [
+      "Hyperextending the back too far",
+      "Using momentum to swing up",
+      "Not engaging the glutes",
+      "Rising too high above neutral spine",
+      "Moving too quickly"
+    ],
+    "safetyTips": [
+      "Never hyperextend beyond a straight line",
+      "Keep movements slow and controlled",
+      "Stop if you feel sharp lower back pain",
+      "Don't use additional weight until you master bodyweight",
+      "Engage your core throughout"
+    ],
+    "beginnerTips": [
+      "Start with bodyweight only",
+      "Focus on quality over quantity",
+      "Think about lengthening your spine, not just bending up",
+      "Perform 3 sets of 10-15 reps",
+      "This strengthens your lower back and helps prevent injury"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/back_extension_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "back extension bench with hip pad and foot anchors",
+        "roman chair hyperextension station",
+        "lower back exercise machine with angled bench"
+      ],
+      "labelId": "back_extension",
+      "synonyms": ["back extension", "hyperextension", "roman chair", "lower back extension"],
+      "keywords": ["hip pad", "foot anchors", "lower back", "prone position"]
+    }
+  },
+  {
+    "id": "incline_chest_press",
+    "name": "Incline Chest Press Machine",
+    "category": "Chest",
+    "primaryMuscles": ["Upper Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoids", "Triceps"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat so handles are at upper chest/shoulder level",
+      "Sit with your back against the inclined pad",
+      "Plant your feet firmly on the floor",
+      "Grip the handles with palms facing down",
+      "Retract your shoulder blades"
+    ],
+    "howToSteps": [
+      "Press the handles upward and forward at an incline angle",
+      "Extend arms fully but don't lock elbows",
+      "Squeeze your upper chest at the top",
+      "Slowly return handles to starting position",
+      "Feel the stretch in your upper chest"
+    ],
+    "commonMistakes": [
+      "Arching lower back off the pad",
+      "Pressing too vertically like a shoulder press",
+      "Not retracting shoulder blades",
+      "Using momentum instead of controlled movement",
+      "Incomplete range of motion"
+    ],
+    "safetyTips": [
+      "Keep your back firmly on the inclined pad",
+      "Don't lock out elbows completely",
+      "Stop if you feel shoulder discomfort",
+      "Control the weight throughout the movement",
+      "Use a weight you can handle with proper form"
+    ],
+    "beginnerTips": [
+      "Focus on feeling it in your upper chest",
+      "Exhale as you press, inhale as you return",
+      "Keep a slight bend in elbows at full extension",
+      "Start with 3 sets of 10-12 reps",
+      "Targets upper chest more than flat press"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/incline_chest_press.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "incline chest press machine with angled back pad",
+        "upper chest press station with inclined seat",
+        "incline pressing machine with dual handles"
+      ],
+      "labelId": "incline_press",
+      "synonyms": ["incline press", "incline chest press", "upper chest machine"],
+      "keywords": ["inclined pad", "upper chest", "angled press", "handles"]
+    }
+  },
+  {
+    "id": "hack_squat_machine",
+    "name": "Hack Squat Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": ["Glutes", "Hamstrings", "Calves"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Step onto the platform and position your back against the pad",
+      "Place your feet shoulder-width apart on the platform",
+      "Position your shoulders under the padded supports",
+      "Grip the handles on the side",
+      "Release the safety locks"
+    ],
+    "howToSteps": [
+      "Lower yourself by bending your knees",
+      "Descend until thighs are parallel to the platform",
+      "Keep your back flat against the pad throughout",
+      "Push through your heels to return to starting position",
+      "Don't lock knees at the top"
+    ],
+    "commonMistakes": [
+      "Letting knees cave inward",
+      "Rounding the lower back",
+      "Not going deep enough",
+      "Locking knees at the top",
+      "Lifting heels off the platform"
+    ],
+    "safetyTips": [
+      "Always engage safety locks when getting on/off",
+      "Keep your entire back against the pad",
+      "Never lock your knees at full extension",
+      "Stop if you feel knee or back pain",
+      "Start with lighter weight to master form"
+    ],
+    "beginnerTips": [
+      "Focus on controlled descent and ascent",
+      "Keep knees tracking over toes",
+      "Exhale as you push up, inhale as you lower",
+      "Start with 3 sets of 8-12 reps",
+      "Great alternative to barbell squats"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/hack_squat_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "hack squat machine with angled sled and back pad",
+        "45-degree leg press alternative with shoulder pads",
+        "vertical squat machine with platform and back support"
+      ],
+      "labelId": "hack_squat_machine",
+      "synonyms": ["hack squat", "sled squat", "machine squat"],
+      "keywords": ["sled", "shoulder pads", "foot platform", "angled"]
+    }
+  },
+  {
+    "id": "ab_crunch_machine",
+    "name": "Ab Crunch Machine",
+    "category": "Core",
+    "primaryMuscles": ["Rectus Abdominis", "Abs"],
+    "secondaryMuscles": ["Obliques"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the machine and adjust the seat height",
+      "Place your feet under the footpads",
+      "Grip the handles above your head or at chest level",
+      "Sit up straight initially",
+      "Engage your core before starting"
+    ],
+    "howToSteps": [
+      "Crunch forward by contracting your abs",
+      "Bring your chest toward your knees",
+      "Squeeze your abs at full contraction",
+      "Slowly return to the starting position with control",
+      "Keep constant tension on your abs"
+    ],
+    "commonMistakes": [
+      "Using arms to pull instead of abs to crunch",
+      "Moving too fast with momentum",
+      "Not achieving full contraction",
+      "Arching the back on return",
+      "Using excessive weight"
+    ],
+    "safetyTips": [
+      "Don't use your arms to pull, let abs do the work",
+      "Keep movements slow and controlled",
+      "Stop if you feel lower back pain",
+      "Focus on abs, not neck or hip flexors",
+      "Start with lighter weight"
+    ],
+    "beginnerTips": [
+      "Think about bringing ribs to hips",
+      "Exhale as you crunch, inhale as you return",
+      "Focus on feeling your abs contract",
+      "Perform 3 sets of 15-20 reps",
+      "Quality of contraction matters more than weight"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/ab_crunch_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "ab crunch machine with overhead handles and foot pads",
+        "seated abdominal machine with weight stack",
+        "core exercise station with torso crunch movement"
+      ],
+      "labelId": "ab_crunch",
+      "synonyms": ["ab crunch", "abdominal machine", "crunch machine", "ab machine"],
+      "keywords": ["handles", "foot pads", "crunch", "abs", "core"]
+    }
+  },
+  {
+    "id": "torso_rotation_machine",
+    "name": "Torso Rotation Machine",
+    "category": "Core",
+    "primaryMuscles": ["Obliques"],
+    "secondaryMuscles": ["Abs", "Lower Back"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so the pivot is at chest level",
+      "Sit with your back against the pad",
+      "Place your arms against the padded arm supports",
+      "Secure your thighs under the thigh pad",
+      "Set the machine to rotate in your desired direction"
+    ],
+    "howToSteps": [
+      "Rotate your torso to one side using your obliques",
+      "Twist as far as comfortably possible",
+      "Hold briefly at the end range",
+      "Return to center with control",
+      "Repeat for desired reps, then switch sides"
+    ],
+    "commonMistakes": [
+      "Using momentum to swing the weight",
+      "Rotating too quickly",
+      "Not engaging the core muscles",
+      "Using excessive weight",
+      "Twisting beyond comfortable range"
+    ],
+    "safetyTips": [
+      "Never use excessive weight on this machine",
+      "Move slowly and with control",
+      "Stop if you feel lower back pain",
+      "Don't twist beyond your natural range of motion",
+      "Keep your hips stable throughout"
+    ],
+    "beginnerTips": [
+      "Start with very light weight",
+      "Focus on controlled rotation, not speed",
+      "Exhale as you rotate, inhale as you return",
+      "Perform equal reps on both sides",
+      "This targets your obliques for a defined waist"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/torso_rotation_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "torso rotation machine with arm pads and rotating seat",
+        "oblique twist machine with thigh restraint",
+        "core rotation station with adjustable resistance"
+      ],
+      "labelId": "torso_rotation",
+      "synonyms": ["torso rotation", "oblique machine", "twist machine", "rotary torso"],
+      "keywords": ["rotation", "twist", "obliques", "arm pads"]
+    }
+  },
+  {
+    "id": "t_bar_row_machine",
+    "name": "T-Bar Row Machine",
+    "category": "Back",
+    "primaryMuscles": ["Latissimus Dorsi", "Middle Back"],
+    "secondaryMuscles": ["Rhomboids", "Biceps", "Rear Deltoids"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Straddle the machine with feet on the platform",
+      "Bend at the hips and grip the handles",
+      "Position your chest against the pad if available",
+      "Keep your back straight and core engaged",
+      "Start with arms extended"
+    ],
+    "howToSteps": [
+      "Pull the handles toward your chest",
+      "Drive your elbows back and squeeze shoulder blades together",
+      "Pull to your lower chest or upper abdomen",
+      "Hold the contraction briefly",
+      "Lower with control back to starting position"
+    ],
+    "commonMistakes": [
+      "Rounding the back during the pull",
+      "Using momentum to jerk the weight",
+      "Not pulling all the way to the chest",
+      "Shrugging shoulders instead of retracting",
+      "Moving too fast"
+    ],
+    "safetyTips": [
+      "Keep your back straight throughout the movement",
+      "Don't round your lower back",
+      "Use the chest pad for support if available",
+      "Control the weight, don't let it drop",
+      "Stop if you feel lower back strain"
+    ],
+    "beginnerTips": [
+      "Focus on pulling with your back, not your arms",
+      "Think about driving elbows back",
+      "Exhale as you pull, inhale as you lower",
+      "Start with 3 sets of 8-12 reps",
+      "Great for building back thickness"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/t_bar_row_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "t-bar row machine with angled bar and platform",
+        "chest-supported row with T-shaped handle",
+        "lever row machine with foot platform"
+      ],
+      "labelId": "t_bar_row",
+      "synonyms": ["t-bar row", "lever row", "landmine row"],
+      "keywords": ["T-bar", "chest pad", "platform", "row"]
+    }
+  },
+  {
+    "id": "decline_bench_press",
+    "name": "Decline Bench Press Machine",
+    "category": "Chest",
+    "primaryMuscles": ["Lower Pectoralis Major"],
+    "secondaryMuscles": ["Triceps", "Anterior Deltoids"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat so handles are at lower chest level",
+      "Sit with your back against the declined pad",
+      "Secure your legs under the leg restraints",
+      "Grip the handles with palms facing forward",
+      "Retract your shoulder blades"
+    ],
+    "howToSteps": [
+      "Press the handles forward and slightly downward",
+      "Extend arms fully without locking elbows",
+      "Squeeze your lower chest at full extension",
+      "Slowly return to starting position",
+      "Feel the stretch in your lower chest"
+    ],
+    "commonMistakes": [
+      "Not securing legs properly",
+      "Pressing straight instead of downward angle",
+      "Using momentum",
+      "Incomplete range of motion",
+      "Arching back excessively"
+    ],
+    "safetyTips": [
+      "Always secure your legs before starting",
+      "Keep your back on the declined pad",
+      "Don't lock elbows at full extension",
+      "Control the weight throughout",
+      "Stop if you feel shoulder discomfort"
+    ],
+    "beginnerTips": [
+      "Focus on feeling it in your lower chest",
+      "Exhale as you press, inhale as you return",
+      "Keep shoulders retracted",
+      "Start with 3 sets of 10-12 reps",
+      "Targets lower chest specifically"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/decline_bench_press.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "decline chest press machine with downward angled seat",
+        "lower chest press with leg restraints",
+        "decline pressing station with negative angle"
+      ],
+      "labelId": "decline_press",
+      "synonyms": ["decline press", "decline chest press", "lower chest machine"],
+      "keywords": ["declined pad", "leg restraints", "lower chest", "downward angle"]
+    }
+  },
+  {
+    "id": "reverse_fly_machine",
+    "name": "Reverse Fly Machine",
+    "category": "Back",
+    "primaryMuscles": ["Rear Deltoids"],
+    "secondaryMuscles": ["Rhomboids", "Middle Trapezius"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat so handles are at shoulder height",
+      "Sit facing the machine with chest against the pad",
+      "Grip the handles with palms facing each other",
+      "Start with arms together in front",
+      "Keep a slight bend in your elbows"
+    ],
+    "howToSteps": [
+      "Pull the handles apart and backward in an arc motion",
+      "Squeeze your rear deltoids and upper back",
+      "Pull until arms are in line with your body",
+      "Hold briefly at full extension",
+      "Slowly return to starting position with control"
+    ],
+    "commonMistakes": [
+      "Using momentum to swing the weight",
+      "Not squeezing shoulder blades together",
+      "Pulling with arms instead of rear delts",
+      "Going too fast",
+      "Using excessive weight"
+    ],
+    "safetyTips": [
+      "Keep chest firmly against the pad",
+      "Don't use momentum",
+      "Stop if you feel shoulder pain",
+      "Use controlled movements",
+      "Start with lighter weight to master form"
+    ],
+    "beginnerTips": [
+      "Focus on squeezing your rear delts and upper back",
+      "Think about pulling elbows back, not hands",
+      "Exhale as you pull apart, inhale as you return",
+      "Perform 3 sets of 12-15 reps",
+      "Great for posture and shoulder health"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/reverse_fly_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "reverse fly machine with chest pad and dual handles",
+        "rear delt fly station with forward-facing position",
+        "pec deck machine in reverse position"
+      ],
+      "labelId": "reverse_fly",
+      "synonyms": ["reverse fly", "rear delt fly", "reverse pec deck"],
+      "keywords": ["chest pad", "rear delts", "fly motion", "backward pull"]
+    }
+  },
+  {
+    "id": "standing_calf_raise",
+    "name": "Standing Calf Raise Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Gastrocnemius", "Calves"],
+    "secondaryMuscles": ["Soleus"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Position yourself under the shoulder pads",
+      "Place the balls of your feet on the edge of the platform",
+      "Let your heels hang off the edge",
+      "Stand up straight with shoulders under the pads",
+      "Keep your legs straight but not locked"
+    ],
+    "howToSteps": [
+      "Lower your heels as far as possible for a full stretch",
+      "Push up onto your toes as high as possible",
+      "Squeeze your calves at the top",
+      "Hold briefly at full extension",
+      "Lower back down with control"
+    ],
+    "commonMistakes": [
+      "Bouncing at the bottom",
+      "Not achieving full range of motion",
+      "Bending knees during the movement",
+      "Using momentum",
+      "Not pausing at the top"
+    ],
+    "safetyTips": [
+      "Keep legs straight but not locked",
+      "Don't bounce at the bottom",
+      "Control the movement throughout",
+      "Stop if you feel Achilles tendon pain",
+      "Use full range of motion"
+    ],
+    "beginnerTips": [
+      "Focus on slow, controlled raises",
+      "Pause at the top for 1-2 seconds",
+      "Get a full stretch at the bottom",
+      "Perform 3-4 sets of 15-20 reps",
+      "Higher reps work well for calves"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/standing_calf_raise.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "standing calf raise machine with shoulder pads",
+        "vertical calf press with platform and weight stack",
+        "standing calf machine with elevated footplate"
+      ],
+      "labelId": "standing_calf_raise",
+      "synonyms": ["standing calf raise", "calf raise", "standing calf press"],
+      "keywords": ["shoulder pads", "footplate", "standing", "calves"]
+    }
+  },
+  {
+    "id": "glute_kickback_machine",
+    "name": "Glute Kickback Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Glutes"],
+    "secondaryMuscles": ["Hamstrings"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the pad height to hip level",
+      "Stand facing the machine with chest against the pad",
+      "Place one leg on the lever platform behind you",
+      "Hold the handles for stability",
+      "Keep your planted foot flat on the floor"
+    ],
+    "howToSteps": [
+      "Push your leg backward and upward by contracting your glutes",
+      "Extend until your glute is fully contracted",
+      "Squeeze your glutes at the top",
+      "Lower back to starting position with control",
+      "Complete all reps, then switch legs"
+    ],
+    "commonMistakes": [
+      "Arching the lower back excessively",
+      "Using momentum to swing the leg",
+      "Not fully contracting the glutes",
+      "Leaning too far forward",
+      "Moving too fast"
+    ],
+    "safetyTips": [
+      "Keep your core engaged to protect lower back",
+      "Don't hyperextend your back",
+      "Control the movement, don't swing",
+      "Stop if you feel lower back pain",
+      "Focus on glute contraction, not range of motion"
+    ],
+    "beginnerTips": [
+      "Squeeze your glutes at the top of each rep",
+      "Keep movements slow and controlled",
+      "Exhale as you kick back, inhale as you lower",
+      "Perform 3 sets of 12-15 reps per leg",
+      "Great for isolating and building glutes"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/glute_kickback_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "glute kickback machine with chest pad and leg lever",
+        "standing hip extension machine with forward-facing position",
+        "glute press with unilateral leg movement"
+      ],
+      "labelId": "glute_kickback",
+      "synonyms": ["glute kickback", "hip extension machine", "donkey kick machine"],
+      "keywords": ["chest pad", "leg lever", "glutes", "kickback"]
+    }
+  },
+  {
+    "id": "bicep_curl_machine",
+    "name": "Bicep Curl Machine",
+    "category": "Arms",
+    "primaryMuscles": ["Biceps Brachii"],
+    "secondaryMuscles": ["Brachialis", "Forearms"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat so your elbows align with the machine's pivot",
+      "Sit with your back against the pad",
+      "Rest your upper arms on the arm pad",
+      "Grip the handles with an underhand grip",
+      "Keep your shoulders relaxed"
+    ],
+    "howToSteps": [
+      "Curl the handles up toward your shoulders",
+      "Squeeze your biceps at the top of the movement",
+      "Hold briefly at peak contraction",
+      "Slowly lower back to starting position",
+      "Keep your upper arms stationary on the pad"
+    ],
+    "commonMistakes": [
+      "Lifting elbows off the pad",
+      "Using momentum to swing the weight",
+      "Not achieving full range of motion",
+      "Moving too quickly",
+      "Excessive weight that compromises form"
+    ],
+    "safetyTips": [
+      "Keep upper arms firmly on the pad",
+      "Don't hyperextend at the bottom",
+      "Control both concentric and eccentric phases",
+      "Stop if you feel elbow pain",
+      "Start with moderate weight"
+    ],
+    "beginnerTips": [
+      "Focus on squeezing your biceps at the top",
+      "Move slowly and with control",
+      "Exhale as you curl up, inhale as you lower",
+      "Perform 3 sets of 10-12 reps",
+      "Isolates biceps better than free weights"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/bicep_curl_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "bicep curl machine with arm pad and handles",
+        "seated curl station with padded armrest",
+        "isolated bicep machine with weight stack"
+      ],
+      "labelId": "bicep_curl",
+      "synonyms": ["bicep curl", "arm curl machine", "bicep machine"],
+      "keywords": ["arm pad", "curl", "biceps", "handles"]
+    }
+  },
+  {
+    "id": "vertical_chest_press",
+    "name": "Vertical Chest Press",
+    "category": "Chest",
+    "primaryMuscles": ["Pectoralis Major"],
+    "secondaryMuscles": ["Anterior Deltoids", "Triceps"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Adjust the seat so handles are at mid-chest height",
+      "Sit with back flat against vertical pad",
+      "Grip handles with palms facing down or inward",
+      "Plant feet firmly on the floor",
+      "Retract shoulder blades before starting"
+    ],
+    "howToSteps": [
+      "Press handles straight forward from chest",
+      "Extend arms fully without locking elbows",
+      "Squeeze chest at full extension",
+      "Slowly return to starting position",
+      "Maintain tension throughout the movement"
+    ],
+    "commonMistakes": [
+      "Not keeping back against pad",
+      "Locking elbows at extension",
+      "Using momentum",
+      "Partial range of motion",
+      "Shoulders rolling forward"
+    ],
+    "safetyTips": [
+      "Keep back pressed firmly against pad",
+      "Maintain shoulder blade retraction",
+      "Don't lock elbows completely",
+      "Control the weight throughout",
+      "Stop if you feel shoulder pain"
+    ],
+    "beginnerTips": [
+      "Focus on chest contraction",
+      "Exhale on press, inhale on return",
+      "Keep core engaged for stability",
+      "Start with 3 sets of 10-12 reps",
+      "Similar to bench press but more stable"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/vertical_chest_press.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "vertical chest press with straight-up seating position",
+        "upright chest machine with forward handles",
+        "vertical pressing station with back support"
+      ],
+      "labelId": "vertical_chest_press",
+      "synonyms": ["vertical chest press", "upright chest press"],
+      "keywords": ["vertical", "upright", "chest", "forward press"]
+    }
+  },
+  {
+    "id": "lat_pulldown_close_grip",
+    "name": "Close Grip Lat Pulldown",
+    "category": "Back",
+    "primaryMuscles": ["Latissimus Dorsi", "Lower Lats"],
+    "secondaryMuscles": ["Biceps", "Rhomboids", "Middle Back"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Attach close-grip handle to lat pulldown cable",
+      "Adjust knee pad to secure your thighs",
+      "Sit down and grip the handle with palms facing each other",
+      "Keep your feet flat on the floor",
+      "Sit upright with slight lean back"
+    ],
+    "howToSteps": [
+      "Pull the handle down toward your upper chest",
+      "Drive your elbows down and back",
+      "Squeeze your shoulder blades together at bottom",
+      "Hold briefly at full contraction",
+      "Slowly return to starting position with control"
+    ],
+    "commonMistakes": [
+      "Pulling to waist instead of chest",
+      "Using momentum by swinging torso",
+      "Not pulling down far enough",
+      "Shrugging shoulders",
+      "Letting weight pull arms up too fast"
+    ],
+    "safetyTips": [
+      "Pull to upper chest, not behind neck",
+      "Keep torso relatively stable",
+      "Don't use excessive weight",
+      "Maintain shoulder blade retraction",
+      "Warm up with lighter weight first"
+    ],
+    "beginnerTips": [
+      "Think about pulling elbows to your sides",
+      "Focus on lat engagement, not arm strength",
+      "Exhale as you pull down, inhale as you release",
+      "Start with 3 sets of 10-12 reps",
+      "Close grip emphasizes lower lats more"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/lat_pulldown_close_grip.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "lat pulldown with V-bar or close-grip handle",
+        "narrow grip cable pulldown station",
+        "close-grip lat machine with parallel handles"
+      ],
+      "labelId": "lat_pulldown_close",
+      "synonyms": ["close grip pulldown", "narrow grip lat pulldown", "V-bar pulldown"],
+      "keywords": ["close grip", "V-bar", "narrow grip", "lat pulldown"]
+    }
+  },
+  {
+    "id": "chest_supported_row",
+    "name": "Chest Supported Row Machine",
+    "category": "Back",
+    "primaryMuscles": ["Middle Back", "Rhomboids"],
+    "secondaryMuscles": ["Latissimus Dorsi", "Biceps", "Rear Deltoids"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the chest pad height to mid-chest level",
+      "Lie face down with chest against the pad",
+      "Plant your feet firmly on the footrests",
+      "Grip the handles with both hands",
+      "Keep your chest pressed against pad throughout"
+    ],
+    "howToSteps": [
+      "Pull the handles toward your torso",
+      "Drive elbows back and squeeze shoulder blades together",
+      "Pull until handles reach your sides",
+      "Hold the contraction briefly",
+      "Slowly extend arms back to starting position"
+    ],
+    "commonMistakes": [
+      "Lifting chest off the pad",
+      "Using momentum to jerk the weight",
+      "Not squeezing shoulder blades together",
+      "Pulling with arms instead of back",
+      "Incomplete range of motion"
+    ],
+    "safetyTips": [
+      "Keep chest firmly against the pad",
+      "Don't round your shoulders forward",
+      "Control the weight throughout",
+      "Stop if you feel shoulder discomfort",
+      "Use proper weight that allows full range"
+    ],
+    "beginnerTips": [
+      "Think about pulling elbows back, not hands",
+      "Squeeze shoulder blades like crushing a pencil",
+      "Exhale as you pull, inhale as you extend",
+      "Perform 3 sets of 10-12 reps",
+      "Chest support removes lower back strain"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/chest_supported_row.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "chest supported row with angled pad and dual handles",
+        "prone row machine with chest support",
+        "face-down rowing station with weight stack"
+      ],
+      "labelId": "chest_supported_row",
+      "synonyms": ["chest supported row", "prone row", "seal row machine"],
+      "keywords": ["chest pad", "prone position", "row", "supported"]
+    }
+  },
+  {
+    "id": "shoulder_shrug_machine",
+    "name": "Shoulder Shrug Machine",
+    "category": "Back",
+    "primaryMuscles": ["Trapezius", "Upper Traps"],
+    "secondaryMuscles": ["Levator Scapulae"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Stand with feet shoulder-width apart on the platform",
+      "Position shoulders under the padded levers",
+      "Grip the handles with arms hanging straight",
+      "Keep your torso upright and core engaged",
+      "Start with shoulders in a relaxed, lowered position"
+    ],
+    "howToSteps": [
+      "Shrug your shoulders straight up toward your ears",
+      "Lift as high as possible, squeezing your traps",
+      "Hold briefly at the top",
+      "Slowly lower shoulders back to starting position",
+      "Keep arms straight throughout the movement"
+    ],
+    "commonMistakes": [
+      "Rolling shoulders instead of straight up motion",
+      "Using momentum to bounce the weight",
+      "Bending arms during the shrug",
+      "Not achieving full range of motion",
+      "Moving too quickly"
+    ],
+    "safetyTips": [
+      "Shrug straight up, don't roll shoulders",
+      "Keep arms fully extended",
+      "Don't use excessive weight",
+      "Control both the up and down phases",
+      "Stop if you feel neck pain"
+    ],
+    "beginnerTips": [
+      "Think about touching shoulders to ears",
+      "Keep movement vertical, not circular",
+      "Exhale as you shrug up, inhale as you lower",
+      "Perform 3 sets of 12-15 reps",
+      "Builds trap strength and neck stability"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/shoulder_shrug_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "shoulder shrug machine with overhead pads and standing position",
+        "trap shrug station with weight stack and shoulder levers",
+        "standing shrug machine with vertical movement"
+      ],
+      "labelId": "shoulder_shrug",
+      "synonyms": ["shoulder shrug", "trap machine", "shrug machine"],
+      "keywords": ["shoulder pads", "shrug", "trapezius", "standing"]
+    }
+  },
+  {
+    "id": "seated_leg_curl",
+    "name": "Seated Leg Curl Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Hamstrings"],
+    "secondaryMuscles": ["Calves"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the back pad so it supports your lower back",
+      "Sit with your back against the pad",
+      "Position the leg pad just above your ankles",
+      "Adjust the thigh pad to secure your legs",
+      "Grip the handles on the sides"
+    ],
+    "howToSteps": [
+      "Curl your legs down and back by bending at the knees",
+      "Pull until your knees are bent at about 90 degrees",
+      "Squeeze your hamstrings at full contraction",
+      "Slowly return to starting position with control",
+      "Keep your back and hips pressed against the pads"
+    ],
+    "commonMistakes": [
+      "Lifting hips off the seat",
+      "Using momentum to swing the weight",
+      "Not achieving full range of motion",
+      "Curling too fast",
+      "Hyperextending knees at the top"
+    ],
+    "safetyTips": [
+      "Keep hips and back firmly seated",
+      "Don't hyperextend knees at starting position",
+      "Control both phases of movement",
+      "Stop if you feel knee pain",
+      "Start with moderate weight"
+    ],
+    "beginnerTips": [
+      "Focus on hamstring contraction",
+      "Move slowly and deliberately",
+      "Exhale as you curl down, inhale as you extend",
+      "Perform 3 sets of 10-12 reps",
+      "Seated version is easier on lower back than lying"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/seated_leg_curl.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "seated leg curl machine with back pad and leg lever",
+        "hamstring curl in upright seated position",
+        "seated leg curl with adjustable pads and weight stack"
+      ],
+      "labelId": "seated_leg_curl",
+      "synonyms": ["seated leg curl", "seated hamstring curl"],
+      "keywords": ["seated", "leg curl", "hamstring", "back pad"]
+    }
+  },
+  {
+    "id": "dual_adjustable_pulley",
+    "name": "Dual Adjustable Pulley",
+    "category": "Full Body",
+    "primaryMuscles": ["Variable based on exercise"],
+    "secondaryMuscles": ["Core"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Adjust both pulleys to desired height",
+      "Select appropriate weight on each stack",
+      "Attach desired handles or attachments",
+      "Stand in center between the two columns",
+      "Grip handles and position yourself for chosen exercise"
+    ],
+    "howToSteps": [
+      "Perform chosen exercise with proper form",
+      "Cable crossover: Bring handles together in front",
+      "Cable rows: Pull handles to sides",
+      "Various exercises possible with different positions",
+      "Maintain tension throughout the movement"
+    ],
+    "commonMistakes": [
+      "Using momentum instead of controlled movement",
+      "Not maintaining proper posture",
+      "Incorrect pulley height for exercise",
+      "Excessive weight that compromises form",
+      "Standing too close or too far from machine"
+    ],
+    "safetyTips": [
+      "Ensure both cables are properly attached",
+      "Don't let weights slam down",
+      "Maintain stable stance throughout",
+      "Use appropriate weight for the exercise",
+      "Be aware of cable path during movement"
+    ],
+    "beginnerTips": [
+      "Start with lighter weights to learn movement",
+      "Focus on proper form over weight",
+      "Experiment with different heights and angles",
+      "Great for isolation and functional exercises",
+      "Versatile machine for many muscle groups"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/dual_adjustable_pulley.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "dual adjustable cable machine with two tall columns",
+        "functional trainer with adjustable pulley heights",
+        "two-sided cable station with independent weight stacks"
+      ],
+      "labelId": "dual_pulley",
+      "synonyms": ["dual pulley", "functional trainer", "adjustable cable machine", "dual cable"],
+      "keywords": ["dual columns", "adjustable pulleys", "cables", "functional trainer"]
+    }
+  },
+  {
+    "id": "lateral_raise_machine",
+    "name": "Lateral Raise Machine",
+    "category": "Shoulders",
+    "primaryMuscles": ["Lateral Deltoids", "Side Delts"],
+    "secondaryMuscles": ["Trapezius"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat so your shoulders align with the pivot point",
+      "Sit with your back against the pad",
+      "Position your upper arms against the padded levers",
+      "Grip the handles lightly",
+      "Start with arms at your sides"
+    ],
+    "howToSteps": [
+      "Raise the levers up and out to the sides",
+      "Lift until your arms are parallel to the floor",
+      "Squeeze your side deltoids at the top",
+      "Hold briefly at the peak",
+      "Slowly lower back to starting position with control"
+    ],
+    "commonMistakes": [
+      "Using momentum to swing the weight",
+      "Raising arms too high above parallel",
+      "Shrugging shoulders during the lift",
+      "Moving too quickly",
+      "Using excessive weight"
+    ],
+    "safetyTips": [
+      "Don't raise arms above shoulder height",
+      "Keep back against the pad",
+      "Avoid shrugging or using momentum",
+      "Stop if you feel shoulder pain",
+      "Start with light weight to master form"
+    ],
+    "beginnerTips": [
+      "Focus on lifting with your side delts",
+      "Think about leading with your elbows",
+      "Exhale as you raise, inhale as you lower",
+      "Perform 3 sets of 12-15 reps",
+      "Builds shoulder width and definition"
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/lateral_raise_machine.png",
+    "muscleAnimationVideo": "",
+    "recognition": {
+      "visualPrompts": [
+        "lateral raise machine with arm pads and outward movement",
+        "side delt machine with padded arm levers",
+        "shoulder abduction machine with weight stack"
+      ],
+      "labelId": "lateral_raise",
+      "synonyms": ["lateral raise", "side raise machine", "shoulder abduction machine"],
+      "keywords": ["arm pads", "lateral raise", "side delts", "outward"]
+    }
   }
 ]

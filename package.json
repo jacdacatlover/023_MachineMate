@@ -7,7 +7,6 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "embed:references": "node scripts/embedReferences.js",
     "lint": "eslint src App.tsx --ext .ts,.tsx",
     "lint:fix": "eslint src App.tsx --ext .ts,.tsx --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}' 'App.tsx'",

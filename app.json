@@ -25,9 +25,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "huggingFaceToken": "${EXPO_PUBLIC_HF_TOKEN}"
     }
   }
 }

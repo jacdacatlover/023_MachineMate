@@ -1,7 +1,7 @@
 // Home screen: Main entry point with "Identify Machine" button and recent history
 
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -75,6 +75,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.heroSection}>
+        <Image source={require('../../../../assets/icon.png')} style={styles.logo} />
         <Text variant="headlineSmall" style={styles.title}>
           Welcome to MachineMate
         </Text>
@@ -128,6 +129,11 @@ const styles = StyleSheet.create({
   heroSection: {
     padding: 24,
     alignItems: 'center',
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 16,
   },
   title: {
     fontWeight: 'bold',

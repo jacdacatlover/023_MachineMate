@@ -4,7 +4,7 @@ A React Native + Expo mobile app that helps gym beginners learn how to use gym m
 
 ## Features
 
-- 📸 **Camera Identification**: Take or upload a photo of a machine to get instant guidance via the backend VLM API (with SigLIP fallback)
+- 📸 **Camera Identification**: Take or upload a photo of a machine to get instant guidance via the backend `/identify` API
 - 📚 **Machine Library**: Browse and search 5 seed machines with detailed instructions
 - ⭐ **Favorites**: Mark machines as favorites for quick access
 - 🕒 **Recent History**: View your last 5 viewed machines
@@ -172,16 +172,9 @@ Each machine has complete, realistic guidance including setup steps, how-to inst
 
 ### 1. Machine Identification Service
 
-All recognition logic lives in `src/services/recognition/identifyMachine.ts`. The helper now:
-- Uploads the captured photo to the backend `/identify` endpoint whenever `EXPO_PUBLIC_API_BASE_URL` is set, trusting the `{ machine, confidence }` payload (≥0.7 auto-navigates to the guide, otherwise the manual picker opens) and tagging the result with `source: 'backend_api'`.
-- Falls back to the legacy on-device pipeline when the API is unavailable or returns an error so testing can continue offline.
-
-The fallback SigLIP pipeline still:
-- Pre-processes images (resize + center crop) before upload and generates a SigLIP embedding once per photo.
-- Runs a **domain gate** to reject non-gym scenes, returning a `kind: 'not_gym'` result when confidence falls below the 0.35 threshold.
-- Scores the entire vocabulary in `src/data/gymMachineLabels.ts` by combining text prompts with any reference-photo embeddings (60% text / 40% image weighting).
-- Maps the top label to a catalog guide when possible (using `src/data/labelSynonyms.ts` or reference metadata) and otherwise returns a generic label suggestion that triggers the manual picker.
-- Caches label, domain, and machine embeddings independently in AsyncStorage and falls back to a deterministic recommendation if remote inference fails.
+All recognition logic lives in `src/services/recognition/identifyMachine.ts`. The client:
+- Uploads the captured photo to the backend `/identify` endpoint whenever `EXPO_PUBLIC_API_BASE_URL` is set. A `{ machine, confidence }` response ≥0.7 auto-navigates to the guide; lower confidence opens the manual picker with candidates tagged as `source: 'backend_api'`.
+- Falls back to a deterministic catalog suggestion (hash-based so QA is repeatable) when the API is unavailable or returns an error. This keeps the flow usable offline while making it clear that results are low-confidence (`source: 'fallback'`).
 
 ### 2. Local-First Catalog
 
@@ -238,16 +231,6 @@ See `assets/muscle-diagrams/README.md` for instructions on adding muscle diagram
 ### Test Photos
 
 See `assets/test-photos/README.md` for instructions on adding sample machine photos for testing.
-
-### Reference Photos
-
-Drop curated reference shots into `assets/reference-machines/<labelId>/` (matching the ids in `src/data/gymMachineLabels.ts`) and run:
-
-```bash
-EXPO_PUBLIC_HF_TOKEN=your_token_here npm run embed:references
-```
-
-The script refreshes the precomputed embeddings stored in `src/data/referenceMachineEmbeddings.ts`, which the app uses to weight image matches. Fresh embeddings are cached under the `machinemate_label_embedding_v1_` and `machinemate_domain_embedding_v1_` keys on first launch.
 
 ## Acceptance Criteria ✅
 

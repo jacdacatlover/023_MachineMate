@@ -1,11 +1,9 @@
 // Shared identification result types for machine recognition flows.
 
 export type IdentificationSource =
-  | 'huggingface'
+  | 'backend_api'
   | 'fallback'
-  | 'label_fusion'
-  | 'manual'
-  | 'backend_api';
+  | 'manual';
 
 export interface CatalogIdentificationResult {
   kind: 'catalog';
@@ -26,13 +24,7 @@ export interface GenericLabelResult {
   photoUri?: string;
 }
 
-export interface NotGymResult {
-  kind: 'not_gym';
-  confidence: number;
-  photoUri?: string;
-}
-
-export type IdentificationResult = CatalogIdentificationResult | GenericLabelResult | NotGymResult;
+export type IdentificationResult = CatalogIdentificationResult | GenericLabelResult;
 
 export function isCatalogResult(result: IdentificationResult): result is CatalogIdentificationResult {
   return result.kind === 'catalog';
@@ -40,8 +32,4 @@ export function isCatalogResult(result: IdentificationResult): result is Catalog
 
 export function isGenericLabelResult(result: IdentificationResult): result is GenericLabelResult {
   return result.kind === 'generic';
-}
-
-export function isNotGymResult(result: IdentificationResult): result is NotGymResult {
-  return result.kind === 'not_gym';
 }

@@ -7,14 +7,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import { HomeStackParamList } from '../../../types/navigation';
 import { useMachines } from '../../../app/providers/MachinesProvider';
 import { MachineDefinition } from '../../../types/machine';
-import {
-  CatalogIdentificationResult,
-  GenericLabelResult,
-  NotGymResult,
-  isCatalogResult,
-  isGenericLabelResult,
-  isNotGymResult,
-} from '../../../types/identification';
+import { CatalogIdentificationResult, GenericLabelResult, isCatalogResult, isGenericLabelResult } from '../../../types/identification';
 import {
   toggleFavorite,
   isFavorite as checkIsFavorite,
@@ -36,7 +29,6 @@ export default function MachineResultScreen() {
 
   const catalogResult = isCatalogResult(result) ? result : null;
   const genericResult = isGenericLabelResult(result) ? result : null;
-  const notGymResult = isNotGymResult(result) ? result : null;
   const photoUri = result.photoUri ?? routePhotoUri;
 
   const [currentMachineId, setCurrentMachineId] = useState<string | null>(
@@ -54,17 +46,14 @@ export default function MachineResultScreen() {
     () => buildCandidateList(machines, catalogResult),
     [machines, catalogResult]
   );
-  const manualPrompt = useMemo(
-    () => deriveManualPrompt(currentMachine, genericResult, notGymResult),
-    [currentMachine, genericResult, notGymResult]
-  );
+  const manualPrompt = useMemo(() => deriveManualPrompt(currentMachine, genericResult), [currentMachine, genericResult]);
   const candidatePromptText = useMemo(
     () => deriveCandidatePrompt(catalogResult, genericResult),
     [catalogResult, genericResult]
   );
   const confidenceCaption = useMemo(
-    () => deriveConfidenceCaption(catalogResult, genericResult, notGymResult),
-    [catalogResult, genericResult, notGymResult]
+    () => deriveConfidenceCaption(catalogResult, genericResult),
+    [catalogResult, genericResult]
   );
 
   useEffect(() => {
@@ -362,10 +351,9 @@ function buildCandidateList(
 
 function deriveManualPrompt(
   currentMachine: MachineDefinition | undefined,
-  genericResult: GenericLabelResult | null,
-  notGymResult: NotGymResult | null
+  genericResult: GenericLabelResult | null
 ): ManualPrompt {
-  if (!currentMachine || genericResult || notGymResult) {
+  if (!currentMachine || genericResult) {
     const chips: ManualPrompt['chips'] = [];
 
     if (genericResult) {
@@ -373,22 +361,6 @@ function deriveManualPrompt(
         id: 'generic_suggestion',
         label: `Suggested: ${genericResult.labelName}`,
       });
-    }
-
-    if (notGymResult) {
-      chips.push({
-        id: 'not_gym_confidence',
-        label: `Confidence it is not a gym machine: ${formatPercent(notGymResult.confidence)}`,
-      });
-    }
-
-    if (notGymResult) {
-      return {
-        shouldShow: true,
-        title: "Doesn't look like a gym machine",
-        body: 'Try retaking the photo with the full machine in view, or choose the correct machine from the list.',
-        chips,
-      };
     }
 
     if (genericResult) {
@@ -435,8 +407,7 @@ function deriveCandidatePrompt(
 
 function deriveConfidenceCaption(
   catalogResult: CatalogIdentificationResult | null,
-  genericResult: GenericLabelResult | null,
-  notGymResult: NotGymResult | null
+  genericResult: GenericLabelResult | null
 ): string | null {
   if (catalogResult && typeof catalogResult.confidence === 'number') {
     const suffix = catalogResult.source === 'fallback' ? ' (fallback)' : '';
@@ -445,10 +416,6 @@ function deriveConfidenceCaption(
 
   if (genericResult) {
     return `Confidence: ${formatPercent(genericResult.confidence)}`;
-  }
-
-  if (notGymResult) {
-    return `Confidence it is not a gym machine: ${formatPercent(notGymResult.confidence)}`;
   }
 
   return null;

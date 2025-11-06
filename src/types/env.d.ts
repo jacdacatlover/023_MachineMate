@@ -1,6 +1,6 @@
 declare const process: {
   env: {
-    EXPO_PUBLIC_HF_TOKEN?: string;
+    EXPO_PUBLIC_API_BASE_URL?: string;
     [key: string]: string | undefined;
   };
 };

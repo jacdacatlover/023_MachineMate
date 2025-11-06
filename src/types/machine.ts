@@ -7,7 +7,19 @@ export type MachineCategory =
   | 'Chest'
   | 'Shoulders'
   | 'Arms'
-  | 'Core';
+  | 'Core'
+  | 'Cardio'
+  | 'Full Body';
+
+/**
+ * Recognition configuration for machine identification
+ */
+export interface MachineRecognition {
+  visualPrompts: string[];
+  labelId?: string;
+  synonyms?: string[];
+  keywords?: string[];
+}
 
 export interface MachineDefinition {
   id: string; // e.g., 'leg_press'
@@ -23,4 +35,5 @@ export interface MachineDefinition {
   beginnerTips: string[];
   muscleDiagramImage?: string; // Optional path to muscle diagram asset
   muscleAnimationVideo?: string; // Optional path to muscle animation video
+  recognition?: MachineRecognition; // Optional recognition configuration
 }

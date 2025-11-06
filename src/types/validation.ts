@@ -33,39 +33,6 @@ export const BackendIdentifyResponseSchema = z.object({
 }).strict();
 
 /**
- * Schema for validating Hugging Face embedding response
- * Supports multiple response formats from the API
- */
-export const HuggingFaceEmbeddingSchema = z.union([
-  // Format 1: Direct array of numbers
-  z.array(z.number()),
-
-  // Format 2: Nested array [[...]]
-  z.array(z.array(z.number())),
-
-  // Format 3: Object with array property
-  z.object({
-    embedding: z.array(z.number()),
-  }).strict(),
-
-  // Format 4: Object with nested array
-  z.object({
-    embedding: z.array(z.array(z.number())),
-  }).strict(),
-]);
-
-/**
- * Schema for cached embedding in AsyncStorage
- * Includes versioning and timestamp for cache invalidation
- */
-export const CachedEmbeddingSchema = z.object({
-  embedding: z.array(z.number()),
-  timestamp: z.number(),
-  version: z.number(),
-}).strict();
-
-/**
  * Type helpers extracted from schemas
  */
 export type BackendIdentifyResponse = z.infer<typeof BackendIdentifyResponseSchema>;
-export type CachedEmbedding = z.infer<typeof CachedEmbeddingSchema>;

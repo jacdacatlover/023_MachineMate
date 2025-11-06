@@ -6,6 +6,7 @@ import { Text, ActivityIndicator } from 'react-native-paper';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import type { MediaType } from 'expo-image-picker';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../../types/navigation';
 import { useMachines } from '../../../app/providers/MachinesProvider';
@@ -207,8 +208,11 @@ export default function CameraScreen() {
     }
 
     try {
+      const resolvedImageMediaType: MediaType =
+        // Expo SDK 51+ exposes MediaType enums; fall back to string literal for older runtimes.
+        (ImagePicker as unknown as { MediaType?: { Images: MediaType } }).MediaType?.Images ?? 'images';
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: [resolvedImageMediaType],
         quality: 0.7,
         allowsMultipleSelection: false,
       });
