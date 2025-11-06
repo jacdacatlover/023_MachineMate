@@ -1,62 +1,89 @@
 // Main App component with machine data context and navigation
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
-import { PaperProvider, MD3LightTheme, Text } from 'react-native-paper';
+import { PaperProvider, Text } from 'react-native-paper';
 import { MachineDefinition } from './src/types/machine';
 import RootNavigator from './src/app/navigation/RootNavigator';
 import { MachinesProvider } from './src/app/providers/MachinesProvider';
+import PrimaryButton from './src/shared/components/PrimaryButton';
+import { theme, navigationTheme, colors } from './src/shared/theme';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
+import {
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
 
 // Import machine data
 import machinesData from './src/data/machines.json';
-
-// Custom theme based on React Native Paper
-const theme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    primary: '#6200ee',
-    secondary: '#03dac6',
-  },
-};
 
 export default function App() {
   const [machines, setMachines] = useState<MachineDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load custom fonts
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
+  });
+
   useEffect(() => {
     loadMachines();
   }, []);
 
-  const loadMachines = async () => {
-    try {
-      // In a real app, this could be an async fetch
-      // For now, we're using the imported JSON directly
-      // Simulate a small delay to show loading state
-      await new Promise(resolve => setTimeout(resolve, 500));
+  const loadMachines = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
+    try {
       // Validate and load machines
       if (!machinesData || !Array.isArray(machinesData)) {
         throw new Error('Invalid machines data format');
       }
 
-      setMachines(machinesData as MachineDefinition[]);
-      setIsLoading(false);
+      if (machinesData.length === 0) {
+        throw new Error('No machines found in catalog');
+      }
+
+      // Validate that each machine has required fields
+      const validated = machinesData.map((machine: any) => ({
+        ...machine,
+        primaryMuscles: machine.primaryMuscles ?? [],
+        setupSteps: machine.setupSteps ?? [],
+      }));
+
+      setMachines(validated);
     } catch (err) {
-      console.error('Error loading machines:', err);
-      setError('Failed to load machine data. Please restart the app.');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('Error loading machines:', errorMessage);
+      setError(`Failed to load machine data: ${errorMessage}`);
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state (fonts or data)
+  if (!fontsLoaded || isLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading MachineMate...</Text>
       </View>
     );
@@ -67,6 +94,12 @@ export default function App() {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>⚠️ {error}</Text>
+        <PrimaryButton
+          label="Try Again"
+          icon="refresh"
+          onPress={loadMachines}
+          mode="contained"
+        />
       </View>
     );
   }
@@ -74,9 +107,9 @@ export default function App() {
   return (
     <MachinesProvider machines={machines}>
       <PaperProvider theme={theme}>
-        <NavigationContainer>
+        <NavigationContainer theme={navigationTheme}>
           <RootNavigator />
-          <StatusBar style="auto" />
+          <StatusBar style="light" />
         </NavigationContainer>
       </PaperProvider>
     </MachinesProvider>
@@ -88,17 +121,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     padding: 24,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
   },
   errorText: {
     fontSize: 16,
-    color: '#d32f2f',
+    color: colors.error,
     textAlign: 'center',
+    marginBottom: 24,
   },
 });

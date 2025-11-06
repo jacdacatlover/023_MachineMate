@@ -3,6 +3,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { colors } from '../theme';
 
 interface SectionHeaderProps {
   title: string;
@@ -24,10 +25,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
     paddingHorizontal: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface,
   },
   title: {
     fontWeight: 'bold',
-    color: '#6200ee',
+    color: colors.primary,
   },
 });

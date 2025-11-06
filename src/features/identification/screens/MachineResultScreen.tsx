@@ -20,10 +20,12 @@ import {
   isFavorite as checkIsFavorite,
 } from '../../../services/storage/favoritesStorage';
 import { addToRecentHistory } from '../../../services/storage/historyStorage';
+import { validateMachineId } from '../../../services/storage/validation';
 import SectionHeader from '../../../shared/components/SectionHeader';
 import PrimaryButton from '../../../shared/components/PrimaryButton';
 import MachinePickerModal from '../components/MachinePickerModal';
 import { AnimatedBodyHighlighter } from '../../../shared/components/AnimatedBodyHighlighter';
+import { colors } from '../../../shared/theme';
 
 type MachineResultScreenRouteProp = RouteProp<HomeStackParamList, 'MachineResult'>;
 
@@ -72,9 +74,15 @@ export default function MachineResultScreen() {
     }
 
     const run = async () => {
-      const favStatus = await checkIsFavorite(currentMachineId);
-      setIsFavorite(favStatus);
-      await addToRecentHistory(currentMachineId);
+      try {
+        // Validate machine ID before adding to history
+        validateMachineId(currentMachineId, machines);
+        const favStatus = await checkIsFavorite(currentMachineId);
+        setIsFavorite(favStatus);
+        await addToRecentHistory(currentMachineId);
+      } catch (error) {
+        console.error('Error loading machine data:', error);
+      }
     };
 
     run();
@@ -135,7 +143,7 @@ export default function MachineResultScreen() {
               </Text>
               <IconButton
                 icon={isFavorite ? 'star' : 'star-outline'}
-                iconColor={isFavorite ? '#FFD700' : '#666'}
+                iconColor={isFavorite ? colors.warning : colors.textSecondary}
                 size={28}
                 onPress={handleToggleFavorite}
               />
@@ -457,24 +465,25 @@ function formatPercent(value: number | null | undefined): string {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   photo: {
     width: '100%',
     height: 200,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.surface,
   },
   unmatchedContainer: {
     padding: 24,
-    backgroundColor: '#fff8e1',
+    backgroundColor: colors.surfaceVariant,
   },
   unmatchedTitle: {
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
+    color: colors.text,
   },
   unmatchedBody: {
-    color: '#555',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -496,6 +505,7 @@ const styles = StyleSheet.create({
   machineName: {
     flex: 1,
     fontWeight: 'bold',
+    color: colors.text,
   },
   categoryChip: {
     alignSelf: 'flex-start',
@@ -506,9 +516,10 @@ const styles = StyleSheet.create({
   },
   muscleLabel: {
     fontWeight: '600',
+    color: colors.text,
   },
   muscleText: {
-    color: '#666',
+    color: colors.textSecondary,
   },
   difficultyChip: {
     alignSelf: 'flex-start',
@@ -517,35 +528,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   beginnerChip: {
-    backgroundColor: '#e8f5e9',
+    backgroundColor: colors.success + '30',
   },
   intermediateChip: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: colors.warning + '30',
   },
   animationSection: {
     padding: 16,
-    backgroundColor: '#fafafa',
+    backgroundColor: colors.surface,
   },
   diagramSection: {
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface,
   },
   sectionTitle: {
     fontWeight: 'bold',
     marginBottom: 12,
     textAlign: 'center',
+    color: colors.text,
   },
   candidatesContainer: {
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.surface,
   },
   candidatesLabel: {
     marginBottom: 12,
     fontWeight: '600',
+    color: colors.text,
   },
   confidenceText: {
     marginBottom: 12,
-    color: '#777',
+    color: colors.textTertiary,
   },
   candidatesChips: {
     flexDirection: 'row',
@@ -567,9 +580,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 8,
     minWidth: 24,
+    color: colors.primary,
   },
   stepText: {
     flex: 1,
+    color: colors.text,
   },
   bulletRow: {
     flexDirection: 'row',
@@ -581,6 +596,7 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
+    color: colors.text,
   },
   bottomPadding: {
     height: 32,

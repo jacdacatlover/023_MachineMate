@@ -6,6 +6,7 @@ import { Text, Divider } from 'react-native-paper';
 import { clearFavorites } from '../../../services/storage/favoritesStorage';
 import { clearHistory } from '../../../services/storage/historyStorage';
 import PrimaryButton from '../../../shared/components/PrimaryButton';
+import { colors } from '../../../shared/theme';
 
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);
@@ -126,7 +127,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   section: {
     padding: 16,
@@ -134,9 +135,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontWeight: 'bold',
     marginBottom: 8,
+    color: colors.text,
   },
   sectionDescription: {
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 16,
   },
   divider: {
@@ -144,18 +146,18 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     marginBottom: 12,
-    color: '#444',
+    color: colors.text,
   },
   disclaimerBox: {
-    backgroundColor: '#fff9e6',
+    backgroundColor: colors.surfaceVariant,
     borderLeftWidth: 4,
-    borderLeftColor: '#ff9800',
+    borderLeftColor: colors.warning,
     padding: 16,
     borderRadius: 4,
   },
   disclaimerText: {
     marginBottom: 12,
-    color: '#444',
+    color: colors.text,
     lineHeight: 20,
   },
   bottomPadding: {

@@ -4,6 +4,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, IconButton, Chip } from 'react-native-paper';
 import { MachineDefinition } from '../../types/machine';
+import { colors } from '../theme';
 
 interface MachineListItemProps {
   machine: MachineDefinition;
@@ -37,7 +38,7 @@ export default function MachineListItem({
         {onFavoriteToggle && (
           <IconButton
             icon={isFavorite ? 'star' : 'star-outline'}
-            iconColor={isFavorite ? '#FFD700' : '#666'}
+            iconColor={isFavorite ? colors.warning : colors.textSecondary}
             size={24}
             onPress={onFavoriteToggle}
           />
@@ -49,9 +50,9 @@ export default function MachineListItem({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.border,
   },
   content: {
     flexDirection: 'row',

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Body from 'react-native-body-highlighter';
+import { colors } from '../theme';
 
 type BodyPartName =
   | 'trapezius'
@@ -197,7 +198,7 @@ export const AnimatedBodyHighlighter: React.FC<AnimatedBodyHighlighterProps> = (
           gender={gender}
           side={bodyView}
           scale={1.2}
-          colors={['#FF6B6B', '#4ECDC4']} // Red for primary, teal for secondary
+          colors={[colors.primary, colors.accent]} // Hot pink for primary, electric cyan for secondary
         />
       </View>
 
@@ -249,20 +250,20 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   primaryColor: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: colors.primary,
   },
   secondaryColor: {
-    backgroundColor: '#4ECDC4',
+    backgroundColor: colors.accent,
   },
   legendText: {
     fontSize: 14,
-    color: '#333',
+    color: colors.text,
     flex: 1,
   },
   viewLabel: {
     marginTop: 8,
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
     fontStyle: 'italic',
   },
 });

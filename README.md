@@ -4,7 +4,7 @@ A React Native + Expo mobile app that helps gym beginners learn how to use gym m
 
 ## Features
 
-- 📸 **Camera Identification**: Take or upload a photo of a machine to get instant guidance powered by SigLIP embeddings
+- 📸 **Camera Identification**: Take or upload a photo of a machine to get instant guidance via the backend VLM API (with SigLIP fallback)
 - 📚 **Machine Library**: Browse and search 5 seed machines with detailed instructions
 - ⭐ **Favorites**: Mark machines as favorites for quick access
 - 🕒 **Recent History**: View your last 5 viewed machines
@@ -106,6 +106,36 @@ MachineMate/
    - **Android Emulator**: Press `a`
    - **Physical Device**: Scan the QR code with Expo Go app
 
+### Optional: Backend mock API
+
+The mobile client now checks for `EXPO_PUBLIC_API_BASE_URL`. When present, it
+uploads photos to the FastAPI prototype before falling back to the legacy
+on-device pipeline.
+
+1. Install backend dependencies:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r backend/requirements.txt
+   ```
+2. Start the server:
+   ```bash
+   uvicorn backend.app.main:app --reload
+   ```
+   Configure the backend via environment variables, for example:
+   ```bash
+   export MACHINEMATE_VLM_API_BASE_URL=https://your-vlm-host
+   export MACHINEMATE_VLM_API_KEY=your_token   # optional
+   ```
+3. Point the Expo app at the API:
+   ```bash
+   export EXPO_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+   npx expo start
+   ```
+
+The `/identify` endpoint currently returns mocked predictions so you can test
+the end-to-end flow while the detector + VLM stack is developed.
+
 ## Running the App
 
 ### On iOS Simulator (Mac)
@@ -143,6 +173,10 @@ Each machine has complete, realistic guidance including setup steps, how-to inst
 ### 1. Machine Identification Service
 
 All recognition logic lives in `src/services/recognition/identifyMachine.ts`. The helper now:
+- Uploads the captured photo to the backend `/identify` endpoint whenever `EXPO_PUBLIC_API_BASE_URL` is set, trusting the `{ machine, confidence }` payload (≥0.7 auto-navigates to the guide, otherwise the manual picker opens) and tagging the result with `source: 'backend_api'`.
+- Falls back to the legacy on-device pipeline when the API is unavailable or returns an error so testing can continue offline.
+
+The fallback SigLIP pipeline still:
 - Pre-processes images (resize + center crop) before upload and generates a SigLIP embedding once per photo.
 - Runs a **domain gate** to reject non-gym scenes, returning a `kind: 'not_gym'` result when confidence falls below the 0.35 threshold.
 - Scores the entire vocabulary in `src/data/gymMachineLabels.ts` by combining text prompts with any reference-photo embeddings (60% text / 40% image weighting).

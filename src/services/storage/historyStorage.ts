@@ -2,19 +2,27 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RecentHistoryItem } from '../../types/history';
+import { RecentHistorySchema } from '../../types/validation';
 
 const HISTORY_KEY = '@machinemate_history';
 const MAX_HISTORY_ITEMS = 20;
 
 /**
  * Get the recent history of viewed machines
+ * Validates data from AsyncStorage and returns empty array if corrupted
  */
 export async function getRecentHistory(): Promise<RecentHistoryItem[]> {
   try {
     const value = await AsyncStorage.getItem(HISTORY_KEY);
-    return value ? JSON.parse(value) : [];
+    if (!value) return [];
+
+    const parsed = JSON.parse(value);
+    const validated = RecentHistorySchema.parse(parsed);
+    return validated;
   } catch (error) {
-    console.error('Error reading history:', error);
+    console.error('Error reading/validating history, clearing corrupted data:', error);
+    // Clear corrupted data
+    await AsyncStorage.removeItem(HISTORY_KEY).catch(() => {});
     return [];
   }
 }
@@ -44,8 +52,10 @@ export async function addToRecentHistory(machineId: string): Promise<RecentHisto
       history = history.slice(0, MAX_HISTORY_ITEMS);
     }
 
-    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    return history;
+    // Validate before saving
+    const validated = RecentHistorySchema.parse(history);
+    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(validated));
+    return validated;
   } catch (error) {
     console.error('Error adding to history:', error);
     return await getRecentHistory();

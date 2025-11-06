@@ -4,6 +4,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootTabParamList } from '../../types/navigation';
+import { colors } from '../../shared/theme';
 
 // Import stack navigators and screens
 import HomeStack from './HomeStack';
@@ -16,8 +17,12 @@ export default function RootNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#6200ee',
-        tabBarInactiveTintColor: '#666',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
         headerShown: false, // We use stack headers instead
       }}
     >
@@ -50,8 +55,8 @@ export default function RootNavigator() {
             <MaterialCommunityIcons name="cog" size={size} color={color} />
           ),
           headerShown: true,
-          headerStyle: { backgroundColor: '#6200ee' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />

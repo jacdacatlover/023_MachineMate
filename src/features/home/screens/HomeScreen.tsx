@@ -7,12 +7,15 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../../types/navigation';
 import { useMachines } from '../../../app/providers/MachinesProvider';
+import { MachineDefinition } from '../../../types/machine';
 import { getRecentHistory } from '../../../services/storage/historyStorage';
-import { getFavorites } from '../../../services/storage/favoritesStorage';
+import { getFavorites, setFavorites as saveFavorites } from '../../../services/storage/favoritesStorage';
+import { filterValidMachineIds } from '../../../services/storage/validation';
 import { RecentHistoryItem } from '../../../types/history';
 import PrimaryButton from '../../../shared/components/PrimaryButton';
 import MachineListItem from '../../../shared/components/MachineListItem';
 import { IdentificationResult } from '../../../types/identification';
+import { colors } from '../../../shared/theme';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -22,19 +25,29 @@ export default function HomeScreen() {
   const [recentHistory, setRecentHistory] = useState<RecentHistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
+  const loadData = useCallback(async () => {
+    const history = await getRecentHistory();
+    const favs = await getFavorites();
+
+    // Validate and clean up invalid machine IDs
+    const validFavs = filterValidMachineIds(favs, machines);
+    if (validFavs.length !== favs.length) {
+      // Save cleaned favorites back to storage
+      await saveFavorites(validFavs).catch(err =>
+        console.error('Failed to save cleaned favorites:', err)
+      );
+    }
+
+    setRecentHistory(history.slice(0, 5)); // Show only last 5
+    setFavorites(validFavs);
+  }, [machines]);
+
   // Load recent history and favorites when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, [loadData])
   );
-
-  const loadData = async () => {
-    const history = await getRecentHistory();
-    const favs = await getFavorites();
-    setRecentHistory(history.slice(0, 5)); // Show only last 5
-    setFavorites(favs);
-  };
 
   const handleIdentifyMachine = () => {
     navigation.navigate('Camera');
@@ -57,7 +70,7 @@ export default function HomeScreen() {
   // Get machine objects from IDs in recent history
   const recentMachines = recentHistory
     .map(item => machines.find((m) => m.id === item.machineId))
-    .filter(Boolean);
+    .filter((machine): machine is MachineDefinition => machine !== undefined);
 
   return (
     <ScrollView style={styles.container}>
@@ -84,10 +97,10 @@ export default function HomeScreen() {
           </Text>
           {recentMachines.map((machine) => (
             <MachineListItem
-              key={machine!.id}
-              machine={machine!}
-              isFavorite={favorites.includes(machine!.id)}
-              onPress={() => handleMachinePress(machine!.id)}
+              key={machine.id}
+              machine={machine}
+              isFavorite={favorites.includes(machine.id)}
+              onPress={() => handleMachinePress(machine.id)}
             />
           ))}
         </View>
@@ -110,7 +123,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   heroSection: {
     padding: 24,
@@ -120,10 +133,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 12,
+    color: colors.text,
   },
   subtitle: {
     textAlign: 'center',
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 24,
   },
   recentSection: {
@@ -133,17 +147,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontWeight: 'bold',
+    color: colors.text,
   },
   emptyState: {
     padding: 48,
     alignItems: 'center',
   },
   emptyText: {
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   emptySubtext: {
-    color: '#999',
+    color: colors.textTertiary,
     textAlign: 'center',
   },
 });

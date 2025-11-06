@@ -12,34 +12,16 @@ import {
   REFERENCE_MACHINE_EMBEDDINGS,
   ReferenceMachineEmbedding,
 } from '../../data/referenceMachineEmbeddings';
-import * as FileSystem from 'expo-file-system';
+import { BackendIdentifyResponseSchema } from '../../types/validation';
+import { RECOGNITION_CONFIG } from './config';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const HF_MODEL_ID = 'google/siglip-so400m-patch14-384';
-const HF_EMBEDDINGS_URL = `https://api-inference.huggingface.co/embeddings/${HF_MODEL_ID}`;
-const HF_CONFIDENCE_THRESHOLD = 0.6;
-const HF_CONFIDENCE_GAP = 0.07;
-const HF_HIGH_CONFIDENCE_THRESHOLD = 0.75;
-const MACHINE_EMBEDDING_STORAGE_PREFIX = 'machinemate_embedding_v3_';
-const LABEL_EMBEDDING_STORAGE_PREFIX = 'machinemate_label_embedding_v2_';
-const DOMAIN_EMBEDDING_STORAGE_PREFIX = 'machinemate_domain_embedding_v2_';
-const DOMAIN_CONFIDENCE_THRESHOLD = 0.35;
-const DOMAIN_CONFIDENCE_MARGIN = 0.05;
-const LABEL_CONFIDENCE_THRESHOLD = 0.45;
-const LABEL_CONFIDENCE_GAP = 0.08;
-const LABEL_HIGH_CONFIDENCE_THRESHOLD = 0.65;
-const MAX_LABEL_CANDIDATES = 5;
-const TEXT_CONFIDENCE_WEIGHT = 0.6;
-const REFERENCE_CONFIDENCE_WEIGHT = 0.4;
-const LEGACY_CACHE_CLEARED_KEY = 'machinemate_cache_migrated_v2';
-const LEGACY_STORAGE_PREFIXES = [
-  'machinemate_embedding_v1_',
-  'machinemate_embedding_v2_',
-  'machinemate_label_embedding_v1_',
-  'machinemate_domain_embedding_v1_',
-];
+const API_BASE_URL =
+  (Constants?.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
+  process.env.EXPO_PUBLIC_API_BASE_URL;
 
 // Additional visual keywords per machine to steer SigLIP toward unique features.
 const MACHINE_PROMPT_OVERRIDES: Record<string, string[]> = {
@@ -147,6 +129,17 @@ export async function identifyMachine(
 
   await ensureLegacyCacheCleared();
 
+  if (API_BASE_URL) {
+    const apiResult = await identifyWithBackendApi(photoUri, allMachines).catch(error => {
+      console.warn('Backend API identification failed.', error);
+      return null;
+    });
+
+    if (apiResult) {
+      return { ...apiResult, photoUri };
+    }
+  }
+
   if (HF_TOKEN) {
     const remoteResult = await runRemotePipeline(photoUri, allMachines);
 
@@ -162,6 +155,103 @@ export async function identifyMachine(
 
   const fallbackResult = fallbackManualRecommendation(photoUri, allMachines);
   return { ...fallbackResult, photoUri };
+}
+
+async function identifyWithBackendApi(
+  photoUri: string,
+  allMachines: MachineDefinition[]
+): Promise<CatalogIdentificationResult | GenericLabelResult | null> {
+  if (!API_BASE_URL) {
+    return null;
+  }
+
+  const endpoint = `${API_BASE_URL.replace(/\/$/, '')}/identify`;
+  const uploadUri = await ensureUploadablePhoto(photoUri);
+  const formData = new FormData();
+  const fileName = getFileNameFromUri(uploadUri);
+  const mimeType = inferMimeTypeFromUri(fileName);
+
+  formData.append(
+    'image',
+    {
+      uri: uploadUri,
+      name: fileName,
+      type: mimeType,
+    } as any
+  );
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), RECOGNITION_CONFIG.api.timeoutMs);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Accept: 'application/json',
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorPayload = await response.text();
+      console.warn('Backend API identification error:', errorPayload);
+      return null;
+    }
+
+    const rawPayload = await response.json();
+
+    // Validate API response with Zod
+    const validationResult = BackendIdentifyResponseSchema.safeParse(rawPayload);
+    if (!validationResult.success) {
+      console.warn('Backend API returned invalid payload:', validationResult.error);
+      return null;
+    }
+
+    const payload = validationResult.data;
+
+    // Log trace_id for debugging
+    if (payload.trace_id) {
+      console.log('🔍 Backend Trace ID:', payload.trace_id);
+      console.log(`   Machine: ${payload.machine}, Confidence: ${payload.confidence}`);
+      console.log(`   Debug: ${API_BASE_URL}/traces/${payload.trace_id}`);
+    }
+
+    const normalizedMachineName = payload.machine.trim();
+    const confidence = clampConfidence(payload.confidence);
+    const lowConfidence = confidence < RECOGNITION_CONFIG.api.confidenceThreshold;
+
+    const matchingMachine = allMachines.find(
+      machine => machine.name.toLowerCase() === normalizedMachineName.toLowerCase()
+    );
+
+    if (matchingMachine) {
+      return {
+        kind: 'catalog',
+        machineId: matchingMachine.id,
+        candidates: buildBackendCandidateIds(matchingMachine.id, allMachines),
+        confidence,
+        lowConfidence,
+        source: 'backend_api',
+      };
+    }
+
+    return {
+      kind: 'generic',
+      labelId: normalizedMachineName,
+      labelName: normalizedMachineName,
+      candidates: [],
+      confidence,
+    };
+  } catch (error) {
+    if ((error as Error)?.name === 'AbortError') {
+      console.warn('Backend API request aborted due to timeout.');
+      return null;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function identifyWithHuggingFace(
@@ -213,8 +303,9 @@ async function identifyWithHuggingFace(
   const runnerUpConfidence = rest.length ? rest[0].confidence : 0;
   const confidenceGap = primaryConfidence - runnerUpConfidence;
   const lowConfidence =
-    primaryConfidence < HF_CONFIDENCE_THRESHOLD ||
-    (primaryConfidence < HF_HIGH_CONFIDENCE_THRESHOLD && confidenceGap < HF_CONFIDENCE_GAP);
+    primaryConfidence < RECOGNITION_CONFIG.huggingFace.confidenceThreshold ||
+    (primaryConfidence < RECOGNITION_CONFIG.huggingFace.highConfidenceThreshold &&
+      confidenceGap < RECOGNITION_CONFIG.huggingFace.confidenceGap);
 
   const runnerUpIds = rest.map(item => item.machine.id);
   const candidateSet = new Set(runnerUpIds);
@@ -323,8 +414,8 @@ async function classifyGymDomain(imageEmbedding: number[]): Promise<DomainClassi
   const negativeScore = normalizeSimilarity(cosineSimilarity(imageEmbedding, negative.embedding));
 
   const isGym =
-    positiveScore >= DOMAIN_CONFIDENCE_THRESHOLD &&
-    positiveScore >= negativeScore + DOMAIN_CONFIDENCE_MARGIN;
+    positiveScore >= RECOGNITION_CONFIG.domain.confidenceThreshold &&
+    positiveScore >= negativeScore + RECOGNITION_CONFIG.domain.confidenceMargin;
   const confidence = isGym ? positiveScore : Math.max(negativeScore, 1 - positiveScore);
 
   console.log('identifyMachine:domain', {
@@ -372,8 +463,8 @@ async function rankLabelsBySimilarity(imageEmbedding: number[]): Promise<LabelSc
 
       const fusedConfidence =
         bestReferenceConfidence !== null
-          ? TEXT_CONFIDENCE_WEIGHT * textConfidence +
-            REFERENCE_CONFIDENCE_WEIGHT * bestReferenceConfidence
+          ? RECOGNITION_CONFIG.fusion.text * textConfidence +
+            RECOGNITION_CONFIG.fusion.reference * bestReferenceConfidence
           : textConfidence;
 
       const labelScore: LabelScore = {
@@ -404,9 +495,9 @@ function buildOutcomeFromLabelScores(
   const [topScore, ...rest] = labelScores;
   const runnerUpConfidence = rest.length ? rest[0].fusedConfidence : 0;
   const lowConfidence =
-    topScore.fusedConfidence < LABEL_CONFIDENCE_THRESHOLD ||
-    (topScore.fusedConfidence < LABEL_HIGH_CONFIDENCE_THRESHOLD &&
-      topScore.fusedConfidence - runnerUpConfidence < LABEL_CONFIDENCE_GAP);
+    topScore.fusedConfidence < RECOGNITION_CONFIG.label.confidenceThreshold ||
+    (topScore.fusedConfidence < RECOGNITION_CONFIG.label.highConfidenceThreshold &&
+      topScore.fusedConfidence - runnerUpConfidence < RECOGNITION_CONFIG.label.confidenceGap);
 
   console.log('identifyMachine:labels', {
     primary: topScore.label.name,
@@ -421,7 +512,7 @@ function buildOutcomeFromLabelScores(
     lowConfidence,
   });
 
-  const labelCandidates = [topScore, ...rest].slice(0, MAX_LABEL_CANDIDATES);
+  const labelCandidates = [topScore, ...rest].slice(0, RECOGNITION_CONFIG.label.maxCandidates);
   const mappedPrimaryMachineId =
     getCatalogMachineIdForLabel(topScore.label.id) ?? topScore.bestReferenceMachineId;
 
@@ -474,18 +565,66 @@ function buildCandidateMachineIds(
   return Array.from(idSet);
 }
 
+function buildBackendCandidateIds(primaryMachineId: string, allMachines: MachineDefinition[]): string[] {
+  const sorted = allMachines
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(machine => machine.id);
+
+  return [primaryMachineId, ...sorted.filter(id => id !== primaryMachineId)];
+}
+
+function getFileNameFromUri(uri: string): string {
+  const segments = uri.split('/');
+  const lastSegment = segments[segments.length - 1] || 'photo.jpg';
+  return lastSegment.includes('.') ? lastSegment : `${lastSegment}.jpg`;
+}
+
+function inferMimeTypeFromUri(fileName: string): string {
+  const normalized = fileName.toLowerCase();
+  if (normalized.endsWith('.png')) {
+    return 'image/png';
+  }
+  if (normalized.endsWith('.webp')) {
+    return 'image/webp';
+  }
+  if (normalized.endsWith('.heic') || normalized.endsWith('.heif')) {
+    return 'image/heic';
+  }
+  return 'image/jpeg';
+}
+
+function clampConfidence(value: number): number {
+  if (Number.isNaN(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(1, value));
+}
+
+/**
+ * Preprocesses a photo for machine identification
+ *
+ * Two-step process:
+ * 1. Initial downscale to 640px (reduces file size for processing)
+ * 2. Center crop to 90% square + final resize to 384x384 (SigLIP input size)
+ *
+ * Note: Two operations are required because we need dimensions after
+ * resize to calculate the center crop coordinates
+ */
 async function preprocessPhoto(photoUri: string): Promise<string> {
-  // Downscale to reduce payload size, then crop to center square (focus equipment).
+  // Step 1: Initial downscale to reduce payload size
   const resized = await ImageManipulator.manipulateAsync(
     photoUri,
     [{ resize: { width: 640 } }],
     { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
   );
 
+  // Calculate center crop coordinates based on resized dimensions
   const cropSize = Math.floor(Math.min(resized.width, resized.height) * 0.9);
   const originX = Math.max(0, Math.floor((resized.width - cropSize) / 2));
   const originY = Math.max(0, Math.floor((resized.height - cropSize) / 2));
 
+  // Step 2: Crop and final resize in a single operation
   const cropped = await ImageManipulator.manipulateAsync(
     resized.uri,
     [
@@ -499,10 +638,29 @@ async function preprocessPhoto(photoUri: string): Promise<string> {
       },
       { resize: { width: 384, height: 384 } },
     ],
-    { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+    { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
   );
 
   return cropped.uri;
+}
+
+async function ensureUploadablePhoto(photoUri: string): Promise<string> {
+  const lower = photoUri.toLowerCase();
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+    return photoUri;
+  }
+
+  try {
+    const transformed = await ImageManipulator.manipulateAsync(
+      photoUri,
+      [],
+      { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    return transformed.uri ?? photoUri;
+  } catch (error) {
+    console.warn('Failed to normalize photo for upload; using original URI.', error);
+    return photoUri;
+  }
 }
 
 async function embedPhoto(photoUri: string): Promise<EmbeddedPhoto | null> {
@@ -535,7 +693,7 @@ async function embedPhoto(photoUri: string): Promise<EmbeddedPhoto | null> {
 }
 
 async function fetchImageEmbedding(base64Image: string): Promise<number[] | null> {
-  const response = await fetch(HF_EMBEDDINGS_URL, {
+  const response = await fetch(RECOGNITION_CONFIG.huggingFace.embeddingsUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${HF_TOKEN}`,
@@ -573,7 +731,7 @@ async function fetchImageEmbedding(base64Image: string): Promise<number[] | null
 async function getMachineTextEmbedding(machine: MachineDefinition): Promise<number[] | null> {
   return getCachedEmbedding(
     machineEmbeddingCache,
-    MACHINE_EMBEDDING_STORAGE_PREFIX,
+    RECOGNITION_CONFIG.cache.prefixes.machine,
     machine.id,
     async () => {
       const description = buildMachineDescription(machine);
@@ -583,7 +741,7 @@ async function getMachineTextEmbedding(machine: MachineDefinition): Promise<numb
 }
 
 async function fetchTextEmbedding(text: string): Promise<number[] | null> {
-  const response = await fetch(HF_EMBEDDINGS_URL, {
+  const response = await fetch(RECOGNITION_CONFIG.huggingFace.embeddingsUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${HF_TOKEN}`,
@@ -694,7 +852,7 @@ function hashString(value: string): number {
 }
 
 async function getLabelEmbedding(label: GymMachineLabel): Promise<number[] | null> {
-  return getCachedEmbedding(labelEmbeddingCache, LABEL_EMBEDDING_STORAGE_PREFIX, label.id, () =>
+  return getCachedEmbedding(labelEmbeddingCache, RECOGNITION_CONFIG.cache.prefixes.label, label.id, () =>
     fetchTextEmbedding(buildLabelPrompt(label))
   );
 }
@@ -702,7 +860,7 @@ async function getLabelEmbedding(label: GymMachineLabel): Promise<number[] | nul
 async function getDomainPromptEmbedding(prompt: DomainPrompt): Promise<number[] | null> {
   return getCachedEmbedding(
     domainEmbeddingCache,
-    DOMAIN_EMBEDDING_STORAGE_PREFIX,
+    RECOGNITION_CONFIG.cache.prefixes.domain,
     prompt.id,
     () => fetchTextEmbedding(prompt.prompt)
   );
@@ -776,7 +934,7 @@ async function ensureLegacyCacheCleared(): Promise<void> {
   }
 
   try {
-    const migrated = await AsyncStorage.getItem(LEGACY_CACHE_CLEARED_KEY);
+    const migrated = await AsyncStorage.getItem(RECOGNITION_CONFIG.cache.migrationKey);
     if (migrated) {
       legacyCacheCleared = true;
       return;
@@ -784,13 +942,13 @@ async function ensureLegacyCacheCleared(): Promise<void> {
 
     const keys = await AsyncStorage.getAllKeys();
     const legacyKeys = keys.filter(key =>
-      LEGACY_STORAGE_PREFIXES.some(prefix => key.startsWith(prefix))
+      RECOGNITION_CONFIG.cache.legacyPrefixes.some(prefix => key.startsWith(prefix))
     );
     if (legacyKeys.length) {
       await AsyncStorage.multiRemove(legacyKeys);
     }
 
-    await AsyncStorage.setItem(LEGACY_CACHE_CLEARED_KEY, '1');
+    await AsyncStorage.setItem(RECOGNITION_CONFIG.cache.migrationKey, '1');
     legacyCacheCleared = true;
   } catch (error) {
     console.warn('Failed to migrate legacy embedding cache.', error);

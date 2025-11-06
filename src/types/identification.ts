@@ -1,6 +1,11 @@
 // Shared identification result types for machine recognition flows.
 
-export type IdentificationSource = 'huggingface' | 'fallback' | 'label_fusion' | 'manual';
+export type IdentificationSource =
+  | 'huggingface'
+  | 'fallback'
+  | 'label_fusion'
+  | 'manual'
+  | 'backend_api';
 
 export interface CatalogIdentificationResult {
   kind: 'catalog';

@@ -268,5 +268,359 @@
     ],
     "muscleDiagramImage": "assets/muscle-diagrams/treadmill.png",
     "muscleAnimationVideo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Treadmill-animation.gif"
+  },
+  {
+    "id": "rowing_machine",
+    "name": "Rowing Machine",
+    "category": "Cardio",
+    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Latissimus Dorsi", "Rhomboids", "Core"],
+    "secondaryMuscles": ["Biceps", "Triceps", "Deltoids", "Trapezius", "Calves"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Sit on the seat and secure your feet in the footrests.",
+      "Adjust the straps to fit snugly across the balls of your feet.",
+      "Grab the handle with an overhand grip, hands shoulder-width apart.",
+      "Slide forward until your shins are vertical and your arms are straight."
+    ],
+    "howToSteps": [
+      "Begin the 'drive' by pushing powerfully with your legs.",
+      "Once your legs are nearly straight, lean back slightly and pull the handle towards your lower chest.",
+      "Finish the stroke by pulling your elbows back and squeezing your shoulder blades.",
+      "For the 'recovery', extend your arms, then lean your torso forward, and finally bend your knees to return to the starting position."
+    ],
+    "commonMistakes": [
+      "Pulling with the arms first instead of driving with the legs.",
+      "Rounding the back or hunching the shoulders.",
+      "Letting the knees come up too early in the recovery.",
+      "Shooting the hips back too quickly."
+    ],
+    "safetyTips": [
+      "Keep your back straight and core engaged throughout the movement.",
+      "Don't hyper-extend your knees at the end of the drive.",
+      "Control the movement on the recovery; don't just let the machine pull you.",
+      "Start with a lower damper setting to focus on form."
+    ],
+    "beginnerTips": [
+      "Focus on a smooth, continuous motion.",
+      "The rhythm should be 'legs, body, arms' on the drive and 'arms, body, legs' on the recovery.",
+      "Keep a consistent pace and focus on your breathing.",
+      "Aim for a stroke rate of 20-25 strokes per minute to start."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/rowing_machine.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "elliptical_machine",
+    "name": "Elliptical Machine",
+    "category": "Cardio",
+    "primaryMuscles": ["Glutes", "Hamstrings", "Quadriceps", "Calves", "Core"],
+    "secondaryMuscles": ["Biceps", "Triceps", "Pectorals", "Deltoids", "Latissimus Dorsi", "Rhomboids", "Trapezius"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Step onto the machine, one foot on each pedal.",
+      "Grasp the handlebars for stability.",
+      "Begin moving your feet in a striding motion to start the machine.",
+      "Adjust the resistance and incline to your desired level."
+    ],
+    "howToSteps": [
+      "Maintain an upright posture with your chest up and shoulders back.",
+      "Push and pull the handlebars to engage your upper body.",
+      "Keep a smooth, fluid motion in your legs.",
+      "To go in reverse, simply pedal backward."
+    ],
+    "commonMistakes": [
+      "Leaning on the handlebars, which reduces the work your legs do.",
+      "Slouching or rounding your back.",
+      "Not using the handlebars, which neglects the upper body workout.",
+      "Staying at the same resistance and incline level for every workout."
+    ],
+    "safetyTips": [
+      "Keep your feet flat on the pedals.",
+      "Don't lock your knees.",
+      "Maintain a light grip on the handlebars.",
+      "Stop if you feel dizzy or lightheaded."
+    ],
+    "beginnerTips": [
+      "Start with a lower resistance and incline until you get used to the motion.",
+      "Focus on maintaining good posture.",
+      "Try pedaling backward to work different muscles.",
+      "Aim for 20-30 minutes of continuous exercise."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/elliptical_machine.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "exercise_bike",
+    "name": "Exercise Bike",
+    "category": "Cardio",
+    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
+    "secondaryMuscles": ["Core", "Hip Flexors", "Adductors", "Tibialis Anterior"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so that your knee is slightly bent at the bottom of the pedal stroke.",
+      "Adjust the handlebars to a comfortable height.",
+      "If using toe cages, slip your feet in and tighten the straps.",
+      "Select a workout program or set the resistance manually."
+    ],
+    "howToSteps": [
+      "Begin pedaling at a comfortable pace.",
+      "Maintain a consistent speed and resistance.",
+      "Keep your back straight and your core engaged.",
+      "To increase the intensity, increase the resistance or your pedaling speed."
+    ],
+    "commonMistakes": [
+      "Setting the seat too high or too low.",
+      "Hunching over the handlebars.",
+      "Pedaling with only your toes.",
+      "Not using enough resistance."
+    ],
+    "safetyTips": [
+      "Make sure the bike is on a level surface.",
+      "Keep your shoelaces tucked in.",
+      "Don't pedal too fast without any resistance.",
+      "Stop if you feel any pain in your knees or hips."
+    ],
+    "beginnerTips": [
+      "Start with a 5-10 minute warm-up at a low resistance.",
+      "Gradually increase the duration and intensity of your workouts.",
+      "Cool down with 5 minutes of easy pedaling at the end of your workout.",
+      "Stay hydrated by drinking water before, during, and after your workout."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/exercise_bike.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "stair_climber",
+    "name": "Stair Climber",
+    "category": "Cardio",
+    "primaryMuscles": ["Quadriceps", "Hamstrings", "Glutes", "Calves"],
+    "secondaryMuscles": ["Core", "Abs"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Step onto the machine and select your workout program.",
+      "Start at a slow speed to get used to the motion.",
+      "Place your hands lightly on the handrails for balance."
+    ],
+    "howToSteps": [
+      "Maintain an upright posture, with your back straight and core engaged.",
+      "Step up and down in a continuous motion.",
+      "Push through your heels to engage your glutes.",
+      "To increase the intensity, increase the speed or the duration of your workout."
+    ],
+    "commonMistakes": [
+      "Leaning heavily on the handrails.",
+      "Slouching or rounding your back.",
+      "Taking small, quick steps instead of full steps.",
+      "Looking down at your feet."
+    ],
+    "safetyTips": [
+      "Use the handrails for balance, not to support your body weight.",
+      "Keep your core engaged to protect your lower back.",
+      "Stop if you feel dizzy or lightheaded.",
+      "Be careful when getting on and off the machine."
+    ],
+    "beginnerTips": [
+      "Start with shorter workouts and gradually increase the duration.",
+      "Focus on maintaining good form.",
+      "Don't be afraid to start at a slower speed.",
+      "Listen to your body and rest when you need to."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/stair_climber.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "smith_machine_squat",
+    "name": "Smith Machine Squat",
+    "category": "Lower Body",
+    "primaryMuscles": ["Quadriceps", "Glutes"],
+    "secondaryMuscles": ["Hamstrings", "Adductors", "Calves"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Set the barbell on the Smith machine to a height that is slightly below your shoulders.",
+      "Position yourself under the bar with the bar resting on your upper back.",
+      "Grasp the bar with both hands, wider than shoulder-width apart.",
+      "Unrack the bar by lifting it up and rotating it to release the safety hooks."
+    ],
+    "howToSteps": [
+      "Place your feet shoulder-width apart, either directly under the bar or slightly in front.",
+      "Keeping your back straight and chest up, lower your hips as if you are sitting in a chair.",
+      "Descend until your thighs are parallel to the floor, or as low as you can comfortably go.",
+      "Push through your heels to return to the starting position."
+    ],
+    "commonMistakes": [
+      "Letting your knees cave inward.",
+      "Rounding your back.",
+      "Not going low enough.",
+      "Placing the bar on your neck instead of your upper back."
+    ],
+    "safetyTips": [
+      "Set the safety stoppers to a height that will catch the bar if you fail a rep.",
+      "Keep your core engaged throughout the movement.",
+      "Control the weight on the way down; don't let it drop.",
+      "Start with a lighter weight to get used to the movement."
+    ],
+    "beginnerTips": [
+      "Experiment with your foot placement to find what is most comfortable for you.",
+      "Focus on maintaining a controlled, smooth movement.",
+      "Don't be afraid to use the safety features of the machine.",
+      "Ask a trainer or experienced gym-goer to check your form."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/smith_machine_squat.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "cable_crossover",
+    "name": "Cable Crossover",
+    "category": "Chest",
+    "primaryMuscles": ["Pectoralis Major", "Pectoralis Minor", "Anterior Deltoids"],
+    "secondaryMuscles": ["Serratus Anterior", "Rhomboids", "Levator Scapulae", "Latissimus Dorsi", "Biceps Brachii", "Triceps Brachii", "Core"],
+    "difficulty": "Intermediate",
+    "setupSteps": [
+      "Set the pulleys on a cable machine to the desired height (high, middle, or low).",
+      "Select a light to moderate weight on each stack.",
+      "Grasp a handle in each hand.",
+      "Step forward to create tension on the cables, with one foot slightly in front of the other."
+    ],
+    "howToSteps": [
+      "With a slight bend in your elbows, pull the handles forward and together in a wide arc.",
+      "Squeeze your chest muscles at the peak of the contraction.",
+      "Slowly return your arms to the starting position, controlling the weight.",
+      "Keep your core engaged and your back straight throughout the movement."
+    ],
+    "commonMistakes": [
+      "Using too much weight, which can lead to poor form.",
+      "Bending your elbows too much, turning the exercise into a press.",
+      "Rounding your back or shoulders.",
+      "Not controlling the weight on the way back."
+    ],
+    "safetyTips": [
+      "Start with a light weight to master the form.",
+      "Keep a slight bend in your elbows to avoid straining them.",
+      "Don't let the weight stacks touch between reps.",
+      "Stop if you feel any pain in your shoulders or chest."
+    ],
+    "beginnerTips": [
+      "Focus on the mind-muscle connection, really feeling your chest muscles work.",
+      "Experiment with different pulley heights to target different parts of your chest.",
+      "Keep the movement slow and controlled.",
+      "Exhale as you pull the handles together and inhale as you return to the start."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/cable_crossover.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "preacher_curl_machine",
+    "name": "Preacher Curl Machine",
+    "category": "Arms",
+    "primaryMuscles": ["Biceps Brachii"],
+    "secondaryMuscles": ["Brachialis", "Brachioradialis"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so that your armpits are just over the top of the arm pad.",
+      "Rest your upper arms on the pad, with your palms facing up.",
+      "Grasp the handles with an underhand grip."
+    ],
+    "howToSteps": [
+      "Slowly curl the weight up towards your shoulders.",
+      "Squeeze your biceps at the top of the movement.",
+      "Slowly lower the weight back to the starting position.",
+      "Do not fully extend your arms at the bottom to keep tension on the biceps."
+    ],
+    "commonMistakes": [
+      "Using too much weight and using momentum to lift the weight.",
+      "Not fully extending the arms at the bottom of the movement.",
+      "Lifting the elbows off the pad.",
+      "Going too fast and not controlling the weight."
+    ],
+    "safetyTips": [
+      "Do not hyperextend your elbows at the bottom of the movement.",
+      "Keep your wrists straight throughout the exercise.",
+      "Start with a lighter weight to ensure proper form.",
+      "If you feel pain in your elbows, stop the exercise."
+    ],
+    "beginnerTips": [
+      "Focus on a slow and controlled movement.",
+      "Really squeeze your biceps at the top of the curl.",
+      "Don't be afraid to use a lighter weight to get the form right.",
+      "Exhale as you curl the weight up and inhale as you lower it."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/preacher_curl_machine.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "tricep_extension_machine",
+    "name": "Tricep Extension Machine",
+    "category": "Arms",
+    "primaryMuscles": ["Triceps Brachii"],
+    "secondaryMuscles": ["Anconeus", "Deltoids", "Rhomboids", "Trapezius", "Brachioradialis"],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the seat height so that your elbows are in line with the machine's pivot point.",
+      "Place your upper arms flat on the pad.",
+      "Grasp the handles with an overhand grip."
+    ],
+    "howToSteps": [
+      "Extend your arms downward until they are fully extended.",
+      "Squeeze your triceps at the bottom of the movement.",
+      "Slowly return to the starting position."
+    ],
+    "commonMistakes": [
+      "Using too much weight and using momentum.",
+      "Lifting your elbows off the pad.",
+      "Not fully extending your arms.",
+      "Moving too quickly and not controlling the weight."
+    ],
+    "safetyTips": [
+      "Do not lock your elbows at the bottom of the movement.",
+      "Keep your wrists straight.",
+      "Start with a lighter weight to ensure proper form.",
+      "If you feel pain in your elbows, stop the exercise."
+    ],
+    "beginnerTips": [
+      "Focus on a slow and controlled movement.",
+      "Squeeze your triceps at the bottom of the extension.",
+      "Keep your upper arms stationary on the pad.",
+      "Exhale as you extend your arms and inhale as you return to the start."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/tricep_extension_machine.png",
+    "muscleAnimationVideo": ""
+  },
+  {
+    "id": "leg_extension_machine",
+    "name": "Leg Extension Machine",
+    "category": "Lower Body",
+    "primaryMuscles": ["Quadriceps"],
+    "secondaryMuscles": [],
+    "difficulty": "Beginner",
+    "setupSteps": [
+      "Adjust the back pad so that your knees are in line with the machine's pivot point.",
+      "Adjust the ankle pad so that it rests comfortably on your lower shins.",
+      "Select a light to moderate weight."
+    ],
+    "howToSteps": [
+      "Extend your legs until they are straight, but do not lock your knees.",
+      "Squeeze your quadriceps at the top of the movement.",
+      "Slowly lower the weight back to the starting position."
+    ],
+    "commonMistakes": [
+      "Using too much weight and momentum.",
+      "Swinging the weight up and down.",
+      "Locking the knees at the top of the movement.",
+      "Not controlling the weight on the way down."
+    ],
+    "safetyTips": [
+      "Do not lock your knees.",
+      "Keep the movement slow and controlled.",
+      "If you have knee problems, consult with a doctor or physical therapist before using this machine.",
+      "Stop if you feel any pain in your knees."
+    ],
+    "beginnerTips": [
+      "Start with a light weight to focus on form.",
+      "Focus on squeezing your quadriceps at the top of the movement.",
+      "Control the weight throughout the entire range of motion.",
+      "Exhale as you extend your legs and inhale as you lower them."
+    ],
+    "muscleDiagramImage": "assets/muscle-diagrams/leg_extension_machine.png",
+    "muscleAnimationVideo": ""
   }
 ]

@@ -1,15 +1,16 @@
 // Library screen: Browse and search all machines
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Searchbar, Chip, Text } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LibraryStackParamList } from '../../../types/navigation';
 import { useMachines } from '../../../app/providers/MachinesProvider';
-import { MachineCategory } from '../../../types/machine';
+import { MachineCategory, MachineDefinition } from '../../../types/machine';
 import { getFavorites } from '../../../services/storage/favoritesStorage';
 import MachineListItem from '../../../shared/components/MachineListItem';
+import { colors } from '../../../shared/theme';
 
 type LibraryScreenNavigationProp = NativeStackNavigationProp<LibraryStackParamList, 'Library'>;
 
@@ -23,6 +24,31 @@ const CATEGORIES: (MachineCategory | 'All')[] = [
   'Arms',
   'Core',
 ];
+
+// Memoized category chip component for better performance
+const CategoryChip = React.memo(
+  ({
+    category,
+    isSelected,
+    onPress,
+  }: {
+    category: MachineCategory | 'All';
+    isSelected: boolean;
+    onPress: (category: MachineCategory | 'All') => void;
+  }) => (
+    <Chip
+      mode={isSelected ? 'flat' : 'outlined'}
+      selected={isSelected}
+      onPress={() => onPress(category)}
+      style={styles.categoryChip}
+      textStyle={styles.categoryChipText}
+    >
+      {category}
+    </Chip>
+  )
+);
+
+CategoryChip.displayName = 'CategoryChip';
 
 export default function LibraryScreen() {
   const navigation = useNavigation<LibraryScreenNavigationProp>();
@@ -38,34 +64,61 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     const favs = await getFavorites();
     setFavorites(favs);
-  };
+  }, []);
 
-  // Filter machines based on search and category
-  const filteredMachines = machines.filter(machine => {
-    // Category filter
-    if (selectedCategory !== 'All' && machine.category !== selectedCategory) {
-      return false;
-    }
+  // Filter machines based on search and category (memoized for performance)
+  const filteredMachines = useMemo(() => {
+    return machines.filter(machine => {
+      // Category filter
+      if (selectedCategory !== 'All' && machine.category !== selectedCategory) {
+        return false;
+      }
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        machine.name.toLowerCase().includes(query) ||
-        machine.primaryMuscles.some(muscle => muscle.toLowerCase().includes(query)) ||
-        machine.category.toLowerCase().includes(query)
-      );
-    }
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          machine.name.toLowerCase().includes(query) ||
+          machine.primaryMuscles.some(muscle => muscle.toLowerCase().includes(query)) ||
+          machine.category.toLowerCase().includes(query)
+        );
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [machines, selectedCategory, searchQuery]);
 
-  const handleMachinePress = (machineId: string) => {
-    navigation.navigate('MachineDetail', { machineId });
-  };
+  const handleMachinePress = useCallback(
+    (machineId: string) => {
+      navigation.navigate('MachineDetail', { machineId });
+    },
+    [navigation]
+  );
+
+  // Memoized render functions for FlatLists
+  const renderCategoryChip = useCallback(
+    ({ item }: { item: MachineCategory | 'All' }) => (
+      <CategoryChip category={item} isSelected={selectedCategory === item} onPress={setSelectedCategory} />
+    ),
+    [selectedCategory]
+  );
+
+  const renderMachineItem = useCallback(
+    ({ item }: { item: MachineDefinition }) => (
+      <MachineListItem
+        machine={item}
+        isFavorite={favorites.includes(item.id)}
+        onPress={() => handleMachinePress(item.id)}
+      />
+    ),
+    [favorites, handleMachinePress]
+  );
+
+  const keyExtractorMachine = useCallback((item: MachineDefinition) => item.id, []);
+  const keyExtractorCategory = useCallback((item: MachineCategory | 'All') => item, []);
 
   return (
     <View style={styles.container}>
@@ -83,33 +136,24 @@ export default function LibraryScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           data={CATEGORIES}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <Chip
-              mode={selectedCategory === item ? 'flat' : 'outlined'}
-              selected={selectedCategory === item}
-              onPress={() => setSelectedCategory(item)}
-              style={styles.categoryChip}
-              textStyle={styles.categoryChipText}
-            >
-              {item}
-            </Chip>
-          )}
+          keyExtractor={keyExtractorCategory}
+          renderItem={renderCategoryChip}
           contentContainerStyle={styles.filtersContent}
+          maxToRenderPerBatch={8}
+          updateCellsBatchingPeriod={50}
         />
       </View>
 
       {/* Machine list */}
       <FlatList
         data={filteredMachines}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <MachineListItem
-            machine={item}
-            isFavorite={favorites.includes(item.id)}
-            onPress={() => handleMachinePress(item.id)}
-          />
-        )}
+        keyExtractor={keyExtractorMachine}
+        renderItem={renderMachineItem}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        windowSize={10}
+        removeClippedSubviews={true}
+        initialNumToRender={10}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text variant="bodyLarge" style={styles.emptyText}>
@@ -128,11 +172,12 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   searchBar: {
     margin: 16,
     elevation: 2,
+    backgroundColor: colors.surface,
   },
   filtersContainer: {
     marginBottom: 8,
@@ -151,11 +196,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   emptySubtext: {
-    color: '#999',
+    color: colors.textTertiary,
     textAlign: 'center',
   },
 });

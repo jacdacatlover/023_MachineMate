@@ -1,30 +1,41 @@
 // Storage logic for managing favorite machines using AsyncStorage
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FavoritesSchema } from '../../types/validation';
 
 const FAVORITES_KEY = '@machinemate_favorites';
 
 /**
  * Get the list of favorited machine IDs
+ * Validates data from AsyncStorage and returns empty array if corrupted
  */
 export async function getFavorites(): Promise<string[]> {
   try {
     const value = await AsyncStorage.getItem(FAVORITES_KEY);
-    return value ? JSON.parse(value) : [];
+    if (!value) return [];
+
+    const parsed = JSON.parse(value);
+    const validated = FavoritesSchema.parse(parsed);
+    return validated;
   } catch (error) {
-    console.error('Error reading favorites:', error);
+    console.error('Error reading/validating favorites, clearing corrupted data:', error);
+    // Clear corrupted data
+    await AsyncStorage.removeItem(FAVORITES_KEY).catch(() => {});
     return [];
   }
 }
 
 /**
  * Save the list of favorited machine IDs
+ * Validates input before saving
  */
 export async function setFavorites(ids: string[]): Promise<void> {
   try {
-    await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
+    const validated = FavoritesSchema.parse(ids);
+    await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(validated));
   } catch (error) {
-    console.error('Error saving favorites:', error);
+    console.error('Error validating/saving favorites:', error);
+    throw error;
   }
 }
 

@@ -3,6 +3,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../types/navigation';
+import { colors } from '../../shared/theme';
 
 // Import screens (will be created next)
 import HomeScreen from '../../features/home/screens/HomeScreen';
@@ -15,8 +16,8 @@ export default function HomeStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#6200ee' },
-        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '600' },
       }}
     >

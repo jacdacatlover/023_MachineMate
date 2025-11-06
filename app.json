@@ -27,7 +27,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "huggingFaceToken": "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"
+      "huggingFaceToken": "${EXPO_PUBLIC_HF_TOKEN}"
     }
   }
 }

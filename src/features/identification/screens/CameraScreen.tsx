@@ -12,6 +12,7 @@ import { useMachines } from '../../../app/providers/MachinesProvider';
 import { identifyMachine } from '../../../services/recognition/identifyMachine';
 import PrimaryButton from '../../../shared/components/PrimaryButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors } from '../../../shared/theme';
 
 type CameraScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Camera'>;
 
@@ -138,7 +139,7 @@ export default function CameraScreen() {
 
     return (
       <View key={mountKey} style={styles.permissionContainer}>
-        <MaterialCommunityIcons name="camera-off" size={64} color="#666" />
+        <MaterialCommunityIcons name="camera-off" size={64} color={colors.textSecondary} />
         <Text variant="titleLarge" style={styles.permissionTitle}>
           Camera Permission Required
         </Text>
@@ -207,7 +208,7 @@ export default function CameraScreen() {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         quality: 0.7,
         allowsMultipleSelection: false,
       });
@@ -216,7 +217,12 @@ export default function CameraScreen() {
         return;
       }
 
-      await processPhoto(result.assets[0].uri);
+      const asset = result.assets[0];
+      if (!asset?.uri) {
+        throw new Error('Selected image is missing a URI.');
+      }
+
+      await processPhoto(asset.uri);
     } catch (error) {
       console.error('Error selecting photo:', error);
       Alert.alert(
@@ -229,47 +235,43 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing="back"
-      >
-        <View style={styles.overlay}>
-          <Text variant="titleMedium" style={styles.instructionText}>
-            Center the machine in the frame
-          </Text>
-        </View>
+      <CameraView ref={cameraRef} style={styles.camera} facing="back" />
 
-        <View style={styles.bottomControls}>
-          <TouchableOpacity
-            style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
-            onPress={() => navigation.goBack()}
-            disabled={isProcessing}
-          >
-            <Text style={styles.textButtonLabel}>Cancel</Text>
-          </TouchableOpacity>
+      <View pointerEvents="none" style={styles.overlay}>
+        <Text variant="titleMedium" style={styles.instructionText}>
+          Center the machine in the frame
+        </Text>
+      </View>
 
-          <TouchableOpacity
-            style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
-            onPress={handleCapture}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <MaterialCommunityIcons name="camera" size={40} color="#fff" />
-            )}
-          </TouchableOpacity>
+      <View style={styles.bottomControls}>
+        <TouchableOpacity
+          style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
+          onPress={() => navigation.goBack()}
+          disabled={isProcessing}
+        >
+          <Text style={styles.textButtonLabel}>Cancel</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
-            onPress={handlePickImage}
-            disabled={isProcessing}
-          >
-            <Text style={styles.textButtonLabel}>Upload</Text>
-          </TouchableOpacity>
-        </View>
-      </CameraView>
+        <TouchableOpacity
+          style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
+          onPress={handleCapture}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <MaterialCommunityIcons name="camera" size={40} color={colors.white} />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.textButton, isProcessing && styles.textButtonDisabled]}
+          onPress={handlePickImage}
+          disabled={isProcessing}
+        >
+          <Text style={styles.textButtonLabel}>Upload</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -284,40 +286,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   permissionTitle: {
     marginTop: 16,
     marginBottom: 8,
     fontWeight: 'bold',
+    color: colors.text,
   },
   permissionText: {
     textAlign: 'center',
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 24,
   },
   camera: {
     flex: 1,
   },
   overlay: {
-    flex: 1,
-    justifyContent: 'flex-start',
+    position: 'absolute',
+    top: 48,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    paddingTop: 48,
   },
   instructionText: {
-    color: '#fff',
+    color: colors.white,
     backgroundColor: 'rgba(0,0,0,0.6)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
   bottomControls: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 48,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 48,
   },
   textButton: {
     width: 80,
@@ -327,18 +333,18 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   textButtonLabel: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
   },
   captureButton: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#6200ee',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#fff',
+    borderColor: colors.white,
   },
   captureButtonDisabled: {
     opacity: 0.5,

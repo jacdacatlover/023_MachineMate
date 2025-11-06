@@ -4,20 +4,19 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors } from '../theme';
 
 type ButtonMode = 'text' | 'outlined' | 'contained' | 'elevated' | 'contained-tonal';
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 interface PrimaryButtonProps {
   label: string;
   onPress: () => void;
-  icon?: string;
+  icon?: IconName;
   disabled?: boolean;
   loading?: boolean;
   mode?: ButtonMode;
 }
-
-const PRIMARY_COLOR = '#6200ee';
-const TONAL_COLOR = '#ede7f6';
 
 export default function PrimaryButton({
   label,
@@ -43,7 +42,7 @@ export default function PrimaryButton({
     containerStyles.push(styles.buttonDisabled);
   }
 
-  const labelColor = isContained ? '#fff' : PRIMARY_COLOR;
+  const labelColor = isContained ? colors.white : colors.primary;
 
   return (
     <TouchableOpacity
@@ -59,7 +58,7 @@ export default function PrimaryButton({
           <>
             {icon && (
               <MaterialCommunityIcons
-                name={icon as any}
+                name={icon}
                 size={20}
                 color={labelColor}
                 style={styles.icon}
@@ -93,15 +92,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonContained: {
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: colors.primary,
   },
   buttonContainedTonal: {
-    backgroundColor: TONAL_COLOR,
+    backgroundColor: colors.primaryDark,
   },
   buttonOutlined: {
     borderWidth: 2,
-    borderColor: PRIMARY_COLOR,
-    backgroundColor: '#fff',
+    borderColor: colors.primary,
+    backgroundColor: colors.surface,
   },
   buttonDisabled: {
     opacity: 0.5,
