@@ -7,10 +7,13 @@ import { View, FlatList } from 'react-native';
 import { Searchbar, Chip, Text } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
-import { getFavorites } from '@shared/services/favoritesStorage';
+
 import MachineListItem from '@features/library/components/MachineListItem';
-import { MachineCategory, MachineDefinition } from 'src/types/machine';
-import { LibraryStackParamList } from 'src/types/navigation';
+
+import { getFavorites } from '@shared/services/favoritesStorage';
+
+import { MachineCategory, MachineDefinition } from '@typings/machine';
+import { LibraryStackParamList } from '@typings/navigation';
 
 import { styles } from './LibraryScreen.styles';
 
@@ -79,17 +82,17 @@ export default function LibraryScreen() {
   const [selectedCategory, setSelectedCategory] = useState<MachineCategory | 'All'>('All');
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Load favorites when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadFavorites();
-    }, [])
-  );
-
   const loadFavorites = useCallback(async () => {
     const favs = await getFavorites();
     setFavorites(favs);
   }, []);
+
+  // Load favorites when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadFavorites();
+    }, [loadFavorites])
+  );
 
   // Filter machines based on search and category (memoized for performance)
   const filteredMachines = useMemo(() => {

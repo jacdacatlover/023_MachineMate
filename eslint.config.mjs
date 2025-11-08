@@ -46,6 +46,17 @@ export default [
         clearInterval: 'readonly',
         Promise: 'readonly',
         fetch: 'readonly',
+        FormData: 'readonly',
+        AbortController: 'readonly',
+        Blob: 'readonly',
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        beforeAll: 'readonly',
+        afterEach: 'readonly',
+        afterAll: 'readonly',
       },
     },
     plugins: {
@@ -83,23 +94,33 @@ export default [
             'index',
           ],
           pathGroups: [
-            {
-              pattern: '@app/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@features/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@shared/**',
-              group: 'internal',
-              position: 'before',
-            },
+          {
+            pattern: '@app/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@features/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@shared/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@typings/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@data/**',
+            group: 'internal',
+            position: 'after',
+          },
           ],
-          pathGroupsExcludedImportTypes: ['builtin'],
+          pathGroupsExcludedImportTypes: ['builtin', 'internal'],
           'newlines-between': 'always',
           alphabetize: {
             order: 'asc',
@@ -111,6 +132,21 @@ export default [
     settings: {
       react: {
         version: 'detect',
+      },
+    },
+  },
+  {
+    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        describe: 'readonly',
+        expect: 'readonly',
+        it: 'readonly',
+        jest: 'readonly',
       },
     },
   },

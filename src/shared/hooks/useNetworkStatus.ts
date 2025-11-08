@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { useCallback, useEffect, useState } from 'react';
 
 import { createLogger } from '@shared/logger';
 
@@ -55,6 +55,16 @@ export function useNetworkStatus(): NetworkStatus {
     details: null,
   });
 
+  const updateStatus = useCallback((state: NetInfoState) => {
+    setStatus({
+      isConnected: state.isConnected,
+      isInternetReachable: state.isInternetReachable,
+      connectionType: state.type,
+      isConnectionExpensive: state.details?.isConnectionExpensive ?? false,
+      details: state.details,
+    });
+  }, []);
+
   useEffect(() => {
     // Get initial state
     NetInfo.fetch().then(state => {
@@ -71,17 +81,7 @@ export function useNetworkStatus(): NetworkStatus {
     return () => {
       unsubscribe();
     };
-  }, []);
-
-  const updateStatus = (state: NetInfoState) => {
-    setStatus({
-      isConnected: state.isConnected,
-      isInternetReachable: state.isInternetReachable,
-      connectionType: state.type,
-      isConnectionExpensive: state.details?.isConnectionExpensive ?? false,
-      details: state.details,
-    });
-  };
+  }, [updateStatus]);
 
   return status;
 }

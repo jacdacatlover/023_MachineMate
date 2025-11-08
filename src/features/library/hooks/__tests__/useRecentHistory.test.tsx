@@ -1,40 +1,27 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
 
-import { useRecentHistory } from '../useRecentHistory';
 import { MachinesProvider } from '@app/providers/MachinesProvider';
-import { MachineDefinition } from 'src/types/machine';
-import { RecentHistoryItem } from 'src/types/history';
 
-const mockMachines: MachineDefinition[] = [
-  {
-    id: 'machine-1',
-    name: 'Leg Press',
-    category: 'Lower Body',
-    primaryMuscles: ['Quadriceps'],
-    secondaryMuscles: [],
-    difficulty: 'Beginner',
-    setupSteps: [],
-    howToSteps: [],
-    commonMistakes: [],
-    safetyTips: [],
-    beginnerTips: [],
-  },
-  {
-    id: 'machine-2',
-    name: 'Chest Press',
-    category: 'Chest',
-    primaryMuscles: ['Chest'],
-    secondaryMuscles: [],
-    difficulty: 'Beginner',
-    setupSteps: [],
-    howToSteps: [],
-    commonMistakes: [],
-    safetyTips: [],
-    beginnerTips: [],
-  },
-];
+import { RecentHistoryItem } from '@typings/history';
+import { MachineDefinition } from '@typings/machine';
+
+import { useRecentHistory } from '../useRecentHistory';
+
+const mockMachines: MachineDefinition[] = Array.from({ length: 12 }, (_, index) => ({
+  id: `machine-${index + 1}`,
+  name: `Machine ${index + 1}`,
+  category: index % 2 === 0 ? 'Lower Body' : 'Upper Body',
+  primaryMuscles: ['Quadriceps'],
+  secondaryMuscles: ['Hamstrings'],
+  difficulty: 'Beginner',
+  setupSteps: ['Step 1'],
+  howToSteps: ['Step 1'],
+  commonMistakes: ['Mistake'],
+  safetyTips: ['Tip'],
+  beginnerTips: ['Beginner tip'],
+}));
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MachinesProvider machines={mockMachines}>{children}</MachinesProvider>
@@ -79,9 +66,13 @@ describe('useRecentHistory', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await result.current.addToHistory('machine-1');
+    await act(async () => {
+      await result.current.addToHistory('machine-1');
+    });
 
-    expect(result.current.history).toHaveLength(1);
+    await waitFor(() => {
+      expect(result.current.history).toHaveLength(1);
+    });
     expect(result.current.history[0].machineId).toBe('machine-1');
     expect(result.current.history[0].viewedAt).toBeDefined();
   });
@@ -101,9 +92,13 @@ describe('useRecentHistory', () => {
     });
 
     // Add machine-1 again
-    await result.current.addToHistory('machine-1');
+    await act(async () => {
+      await result.current.addToHistory('machine-1');
+    });
 
-    expect(result.current.history).toHaveLength(2);
+    await waitFor(() => {
+      expect(result.current.history).toHaveLength(2);
+    });
     expect(result.current.history[0].machineId).toBe('machine-1');
     expect(result.current.history[1].machineId).toBe('machine-2');
     // Timestamp should be updated
@@ -113,8 +108,8 @@ describe('useRecentHistory', () => {
   it('should limit history to 10 items', async () => {
     // Create history with 10 items
     const storedHistory: RecentHistoryItem[] = Array.from({ length: 10 }, (_, i) => ({
-      machineId: i % 2 === 0 ? 'machine-1' : 'machine-2',
-      viewedAt: `2025-01-0${i + 1}T00:00:00.000Z`,
+      machineId: `machine-${i + 1}`,
+      viewedAt: `2025-01-${String(i + 1).padStart(2, '0')}T00:00:00.000Z`,
     }));
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedHistory));
 
@@ -125,10 +120,14 @@ describe('useRecentHistory', () => {
     });
 
     // Add another machine
-    await result.current.addToHistory('machine-1');
+    await act(async () => {
+      await result.current.addToHistory('machine-1');
+    });
 
     // Should still have 10 items (oldest removed)
-    expect(result.current.history).toHaveLength(10);
+    await waitFor(() => {
+      expect(result.current.history).toHaveLength(10);
+    });
     expect(result.current.history[0].machineId).toBe('machine-1');
   });
 
@@ -147,9 +146,13 @@ describe('useRecentHistory', () => {
 
     expect(result.current.history).toHaveLength(2);
 
-    await result.current.clearHistory();
+    await act(async () => {
+      await result.current.clearHistory();
+    });
 
-    expect(result.current.history).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.history).toEqual([]);
+    });
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@machinemate_history');
   });
 
@@ -189,7 +192,9 @@ describe('useRecentHistory', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await result.current.addToHistory('machine-1');
+    await act(async () => {
+      await result.current.addToHistory('machine-1');
+    });
 
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       '@machinemate_history',

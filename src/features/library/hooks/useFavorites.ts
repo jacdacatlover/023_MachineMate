@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
 import { useAsyncStorage } from '@shared/hooks/useAsyncStorage';
 import { createLogger } from '@shared/logger';
-
-import { FavoritesSchema } from 'src/types/validation';
 import { filterValidMachineIds, validateMachineId } from '@shared/services/validation';
+
+import { FavoritesSchema } from '@typings/validation';
 
 const logger = createLogger('hooks.useFavorites');
 
@@ -73,18 +74,8 @@ interface UseFavoritesReturn {
  */
 export function useFavorites(): UseFavoritesReturn {
   const machines = useMachines();
-
-  const {
-    data: rawFavorites,
-    setData,
-    clearData,
-    isLoading,
-    error,
-  } = useAsyncStorage({
-    key: FAVORITES_STORAGE_KEY,
-    schema: FavoritesSchema,
-    defaultValue: [],
-    onValueChange: (favorites) => {
+  const handleFavoritesValueChange = useCallback(
+    (favorites: string[]) => {
       // Automatically clean up invalid machine IDs when data loads
       const validIds = filterValidMachineIds(favorites, machines);
       if (validIds.length !== favorites.length) {
@@ -93,6 +84,20 @@ export function useFavorites(): UseFavoritesReturn {
         );
       }
     },
+    [machines]
+  );
+
+  const {
+    data: rawFavorites,
+    setData,
+    clearData,
+    isLoading,
+    error,
+  } = useAsyncStorage<string[]>({
+    key: FAVORITES_STORAGE_KEY,
+    schema: FavoritesSchema,
+    defaultValue: [],
+    onValueChange: handleFavoritesValueChange,
   });
 
   // Filter out any invalid machine IDs from the stored favorites

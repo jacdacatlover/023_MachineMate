@@ -7,36 +7,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import Body from 'react-native-body-highlighter';
+import Body, { ExtendedBodyPart, Slug } from 'react-native-body-highlighter';
 import { Text } from 'react-native-paper';
 
 import { colors } from '@shared/theme';
 
 import { styles } from './AnimatedBodyHighlighter.styles';
 
-type BodyPartName =
-  | 'trapezius'
-  | 'upper-back'
-  | 'lower-back'
-  | 'chest'
-  | 'biceps'
-  | 'triceps'
-  | 'forearm'
-  | 'abs'
-  | 'obliques'
-  | 'adductors'
-  | 'hamstring'
-  | 'quadriceps'
-  | 'abductors'
-  | 'calves'
-  | 'gluteal'
-  | 'head'
-  | 'neck'
-  | 'deltoids'
-  | 'hands'
-  | 'knees'
-  | 'feet'
-  | 'tibialis';
+type BodyPartName = Slug;
 
 /**
  * Maps our muscle terminology to body-highlighter's body part names
@@ -49,7 +27,7 @@ const MUSCLE_TO_BODYPART_MAP: Record<string, BodyPartName[]> = {
   Gluteal: ['gluteal'],
   Hamstrings: ['hamstring'],
   Calves: ['calves'],
-  Abductors: ['abductors'],
+  Abductors: ['gluteal'],
   Adductors: ['adductors'],
   'Hip Flexors': ['adductors'],
 
@@ -180,7 +158,7 @@ export const AnimatedBodyHighlighter: React.FC<AnimatedBodyHighlighterProps> = (
   }, [cycleDuration]);
 
   // Prepare data for body highlighter
-  const bodyData = [
+  const bodyData: ExtendedBodyPart[] = [
     // Primary muscles - intense red
     ...primaryBodyParts.map((slug: BodyPartName) => ({
       slug,
@@ -191,7 +169,7 @@ export const AnimatedBodyHighlighter: React.FC<AnimatedBodyHighlighterProps> = (
       slug,
       intensity: highlightIntensity === 1 ? 1 : 0.5,
     })),
-  ] as any;
+  ];
 
   return (
     <View style={styles.container}>

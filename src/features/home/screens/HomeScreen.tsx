@@ -3,21 +3,26 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, Image } from 'react-native';
-import { Text, Divider } from 'react-native-paper';
+import { Image, ScrollView, View } from 'react-native';
+import { Divider, Text } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
+import MachineListItem from '@features/library/components/MachineListItem';
+
+import PrimaryButton from '@shared/components/PrimaryButton';
 import { getFavorites, setFavorites as saveFavorites } from '@shared/services/favoritesStorage';
 import { getRecentHistory } from '@shared/services/historyStorage';
 import { filterValidMachineIds } from '@shared/services/validation';
-import MachineListItem from '@features/library/components/MachineListItem';
-import PrimaryButton from '@shared/components/PrimaryButton';
-import { RecentHistoryItem } from 'src/types/history';
-import { IdentificationResult } from 'src/types/identification';
-import { MachineDefinition } from 'src/types/machine';
-import { HomeStackParamList } from 'src/types/navigation';
+
+import { RecentHistoryItem } from '@typings/history';
+import { IdentificationResult } from '@typings/identification';
+import { MachineDefinition } from '@typings/machine';
+import { HomeStackParamList } from '@typings/navigation';
 
 import { styles } from './HomeScreen.styles';
+import heroLogo from '../../../../assets/icon.png';
+
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -77,7 +82,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.heroSection}>
-        <Image source={require('../../../../assets/icon.png')} style={styles.logo} />
+        <Image source={heroLogo} style={styles.logo} />
         <Text variant="headlineSmall" style={styles.title}>
           Welcome to MachineMate
         </Text>

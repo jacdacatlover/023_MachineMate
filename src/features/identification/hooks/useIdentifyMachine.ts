@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
 import { createLogger } from '@shared/logger';
 
-import { IdentificationResult } from 'src/types/identification';
+import { IdentificationResult } from '@typings/identification';
 
 import { identifyMachine } from '../services/identifyMachine';
 

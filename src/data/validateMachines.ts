@@ -1,5 +1,6 @@
 import { createLogger } from '@shared/logger';
-import { MachineDefinition } from 'src/types/machine';
+
+import { MachineDefinition } from '@typings/machine';
 
 const logger = createLogger('data.validateMachines');
 

@@ -2,8 +2,8 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { RecentHistoryItem } from 'src/types/history';
-import { RecentHistorySchema } from 'src/types/validation';
+import { RecentHistoryItem } from '@typings/history';
+import { RecentHistorySchema } from '@typings/validation';
 
 const HISTORY_KEY = '@machinemate_history';
 const MAX_HISTORY_ITEMS = 20;

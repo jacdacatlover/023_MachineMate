@@ -21,6 +21,7 @@ interface EnvironmentConfig {
   enableAnalytics: boolean;
   enableCrashReporting: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
+  sentryDsn?: string;
 }
 
 const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
@@ -30,6 +31,7 @@ const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
     enableAnalytics: false,
     enableCrashReporting: false,
     logLevel: 'debug',
+    sentryDsn: process.env.SENTRY_DSN_DEV,
   },
   preview: {
     apiUrl: 'https://preview-api.machinemate.com/api',
@@ -37,6 +39,7 @@ const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
     enableAnalytics: true,
     enableCrashReporting: true,
     logLevel: 'info',
+    sentryDsn: process.env.SENTRY_DSN_PREVIEW ?? process.env.SENTRY_DSN,
   },
   production: {
     apiUrl: 'https://api.machinemate.com/api',
@@ -44,6 +47,7 @@ const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
     enableAnalytics: true,
     enableCrashReporting: true,
     logLevel: 'warn',
+    sentryDsn: process.env.SENTRY_DSN ?? process.env.SENTRY_DSN_PROD,
   },
 };
 
@@ -118,10 +122,24 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           photosPermission: 'Allow MachineMate to access your photos to identify gym machines.',
         },
       ],
+      [
+        'sentry-expo',
+        {
+          organization: process.env.SENTRY_ORG || 'machinemate',
+          project: process.env.SENTRY_PROJECT || 'machinemate-app',
+          deployEnv: environment,
+          setCommits: false,
+        },
+      ],
     ],
     extra: {
       ...envConfig,
       environment,
+      sentryDsn:
+        envConfig.sentryDsn ||
+        process.env.EXPO_PUBLIC_SENTRY_DSN ||
+        process.env.SENTRY_DSN ||
+        '',
       eas: {
         projectId: process.env.EAS_PROJECT_ID || 'your-project-id-here',
       },

@@ -3,10 +3,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
-import LibraryScreen from '@features/library/screens/LibraryScreen';
-import MachineDetailScreen from '@features/library/screens/MachineDetailScreen';
+import { LibraryScreen, MachineDetailScreen } from '@features/library';
+
 import { colors } from '@shared/theme';
-import { LibraryStackParamList } from 'src/types/navigation';
+
+import { LibraryStackParamList } from '@typings/navigation';
 
 const Stack = createNativeStackNavigator<LibraryStackParamList>();
 

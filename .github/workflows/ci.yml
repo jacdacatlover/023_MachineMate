@@ -1,0 +1,106 @@
+name: CI Quality Checks
+
+on:
+  push:
+    branches: [main, develop, feature-refactor]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality-checks:
+    name: Lint, Type Check, and Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: false
+
+      - name: Run TypeScript type checking
+        run: npm run type-check
+        continue-on-error: false
+
+      - name: Run tests
+        run: npm test -- --coverage
+        continue-on-error: false
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "Checking for TODO/FIXME comments..."
+          git grep -n "TODO\|FIXME" -- "*.ts" "*.tsx" || echo "No TODO/FIXME found"
+        continue-on-error: true
+
+  build-check:
+    name: Verify Build Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate app.json
+        run: |
+          echo "Validating app.json configuration..."
+          node -e "const config = require('./app.json'); console.log('App config valid:', config.expo.name)"
+
+      - name: Check for large files
+        run: |
+          echo "Checking for large files (>1MB)..."
+          find . -type f -size +1M -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./coverage/*" || echo "No large files found"
+
+  dependency-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: npm audit --production --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for outdated dependencies
+        run: npm outdated || true
+        continue-on-error: true

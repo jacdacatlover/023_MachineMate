@@ -3,11 +3,12 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
-import HomeScreen from '@features/home/screens/HomeScreen';
-import CameraScreen from '@features/identification/screens/CameraScreen';
-import MachineResultScreen from '@features/identification/screens/MachineResultScreen';
+import { HomeScreen } from '@features/home';
+import { CameraScreen, MachineResultScreen } from '@features/identification';
+
 import { colors } from '@shared/theme';
-import { HomeStackParamList } from 'src/types/navigation';
+
+import { HomeStackParamList } from '@typings/navigation';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 

@@ -5,7 +5,8 @@ import { TouchableOpacity, View } from 'react-native';
 import { Text, IconButton, Chip } from 'react-native-paper';
 
 import { colors } from '@shared/theme';
-import { MachineDefinition } from 'src/types/machine';
+
+import { MachineDefinition } from '@typings/machine';
 
 import { styles } from './MachineListItem.styles';
 

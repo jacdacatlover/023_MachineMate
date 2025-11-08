@@ -6,18 +6,25 @@ import { View, ScrollView, Image } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
+import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
+import SectionHeader from '@shared/components/SectionHeader';
 import {
   toggleFavorite,
   isFavorite as checkIsFavorite,
 } from '@shared/services/favoritesStorage';
 import { addToRecentHistory } from '@shared/services/historyStorage';
 import { validateMachineId } from '@shared/services/validation';
-import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
-import SectionHeader from '@shared/components/SectionHeader';
 import { colors } from '@shared/theme';
-import { CatalogIdentificationResult, GenericLabelResult, isCatalogResult, isGenericLabelResult } from 'src/types/identification';
-import { MachineDefinition } from 'src/types/machine';
-import { HomeStackParamList } from 'src/types/navigation';
+
+import {
+  CatalogIdentificationResult,
+  GenericLabelResult,
+  isCatalogResult,
+  isGenericLabelResult,
+} from '@typings/identification';
+import { MachineDefinition } from '@typings/machine';
+import { HomeStackParamList } from '@typings/navigation';
 
 import { styles } from './MachineResultScreen.styles';
 
@@ -32,8 +39,9 @@ export default function MachineResultScreen() {
   const genericResult = isGenericLabelResult(result) ? result : null;
   const photoUri = result.photoUri ?? routePhotoUri;
 
-  const [currentMachineId, setCurrentMachineId] = useState<string | null>(
-    catalogResult ? catalogResult.machineId : null
+  const currentMachineId = useMemo(
+    () => (catalogResult ? catalogResult.machineId : null),
+    [catalogResult]
   );
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -51,17 +59,22 @@ export default function MachineResultScreen() {
   );
 
   useEffect(() => {
-    if (!currentMachineId) {
-      setIsFavorite(false);
-      return;
-    }
+    let isMounted = true;
 
     const run = async () => {
+      if (!currentMachineId) {
+        if (isMounted) {
+          setIsFavorite(false);
+        }
+        return;
+      }
+
       try {
-        // Validate machine ID before adding to history
         validateMachineId(currentMachineId, machines);
         const favStatus = await checkIsFavorite(currentMachineId);
-        setIsFavorite(favStatus);
+        if (isMounted) {
+          setIsFavorite(favStatus);
+        }
         await addToRecentHistory(currentMachineId);
       } catch (error) {
         console.error('Error loading machine data:', error);
@@ -69,7 +82,11 @@ export default function MachineResultScreen() {
     };
 
     run();
-  }, [currentMachineId]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentMachineId, machines]);
 
   const handleToggleFavorite = async () => {
     if (!currentMachineId) return;

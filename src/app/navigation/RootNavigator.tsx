@@ -4,9 +4,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 
-import SettingsScreen from '@features/settings/screens/SettingsScreen';
+import { SettingsScreen } from '@features/settings';
+
 import { colors } from '@shared/theme';
-import { RootTabParamList } from 'src/types/navigation';
+
+import { RootTabParamList } from '@typings/navigation';
 
 import HomeStack from './HomeStack';
 import LibraryStack from './LibraryStack';

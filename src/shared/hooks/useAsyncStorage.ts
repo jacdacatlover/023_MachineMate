@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 
 import { createLogger } from '@shared/logger';
@@ -81,6 +81,17 @@ export function useAsyncStorage<T>({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const defaultValueRef = useRef(defaultValue);
+  const onValueChangeRef = useRef(onValueChange);
+
+  useEffect(() => {
+    defaultValueRef.current = defaultValue;
+  }, [defaultValue]);
+
+  useEffect(() => {
+    onValueChangeRef.current = onValueChange;
+  }, [onValueChange]);
+
   // Load from storage
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -89,8 +100,10 @@ export function useAsyncStorage<T>({
     try {
       const stored = await AsyncStorage.getItem(key);
 
+      const fallbackValue = defaultValueRef.current;
+
       if (!stored) {
-        setDataState(defaultValue);
+        setDataState(fallbackValue);
         return;
       }
 
@@ -99,23 +112,23 @@ export function useAsyncStorage<T>({
 
       if (!validated.success) {
         logger.warn(`Invalid data in storage for key "${key}", using default`, validated.error);
-        setDataState(defaultValue);
+        setDataState(fallbackValue);
         // Clear corrupted data
         await AsyncStorage.removeItem(key);
         return;
       }
 
       setDataState(validated.data);
-      onValueChange?.(validated.data);
+      onValueChangeRef.current?.(validated.data);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to load from storage');
       logger.error(`Failed to load data for key "${key}"`, error);
       setError(error);
-      setDataState(defaultValue);
+      setDataState(defaultValueRef.current);
     } finally {
       setIsLoading(false);
     }
-  }, [key, schema, defaultValue, onValueChange]);
+  }, [key, schema]);
 
   // Save to storage
   const setData = useCallback(
@@ -131,7 +144,7 @@ export function useAsyncStorage<T>({
 
         await AsyncStorage.setItem(key, JSON.stringify(validated.data));
         setDataState(validated.data);
-        onValueChange?.(validated.data);
+        onValueChangeRef.current?.(validated.data);
         setError(null);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to save to storage');
@@ -140,15 +153,16 @@ export function useAsyncStorage<T>({
         throw error; // Re-throw so caller can handle
       }
     },
-    [key, schema, data, onValueChange]
+    [key, schema, data]
   );
 
   // Clear storage
   const clearData = useCallback(async () => {
     try {
       await AsyncStorage.removeItem(key);
-      setDataState(defaultValue);
-      onValueChange?.(defaultValue);
+      const fallbackValue = defaultValueRef.current;
+      setDataState(fallbackValue);
+      onValueChangeRef.current?.(fallbackValue);
       setError(null);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to clear storage');
@@ -156,7 +170,7 @@ export function useAsyncStorage<T>({
       setError(error);
       throw error;
     }
-  }, [key, defaultValue, onValueChange]);
+  }, [key]);
 
   // Load on mount
   useEffect(() => {

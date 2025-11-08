@@ -1,21 +1,29 @@
 // Machine identification logic that relies on the backend API with a deterministic client fallback.
 
 
-import {
-  CatalogIdentificationResult,
-  GenericLabelResult,
-  IdentificationResult,
-} from 'src/types/identification';
-import { MachineDefinition } from 'src/types/machine';
-import { BackendIdentifyResponseSchema } from 'src/types/validation';
 import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 import { createLogger } from '@shared/logger';
 
+import {
+  CatalogIdentificationResult,
+  GenericLabelResult,
+  IdentificationResult,
+} from '@typings/identification';
+import { MachineDefinition } from '@typings/machine';
+import { BackendIdentifyResponseSchema } from '@typings/validation';
+
+
 import { RECOGNITION_CONFIG } from './config';
 
 const logger = createLogger('recognition.identifyMachine');
+
+type ReactNativeFile = Blob & {
+  uri: string;
+  name: string;
+  type: string;
+};
 
 const API_BASE_URL =
   (Constants?.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
@@ -29,21 +37,38 @@ export async function identifyMachine(
     throw new Error('No machines available for identification');
   }
 
-  const apiResult = await identifyWithBackendApi(photoUri, allMachines).catch(error => {
-    logger.warn('Backend API identification failed.', error);
-    return null;
-  });
+  const performanceMetadata: Record<string, unknown> = {
+    machineCount: allMachines.length,
+    backendConfigured: Boolean(API_BASE_URL),
+    strategy: 'unknown',
+  };
 
-  if (apiResult) {
-    return { ...apiResult, photoUri };
-  }
+  return logger.trackPerformance(
+    'identifyMachine',
+    async () => {
+      const apiResult = await identifyWithBackendApi(photoUri, allMachines).catch(error => {
+        logger.warn('Backend API identification failed.', error);
+        performanceMetadata.backendError = error instanceof Error ? error.message : error;
+        return null;
+      });
 
-  if (!API_BASE_URL) {
-    logger.warn('Backend API not configured; using deterministic fallback identification.');
-  }
+      if (apiResult) {
+        performanceMetadata.strategy = 'backend';
+        performanceMetadata.resultKind = apiResult.kind;
+        return { ...apiResult, photoUri };
+      }
 
-  const fallbackResult = fallbackManualRecommendation(photoUri, allMachines);
-  return { ...fallbackResult, photoUri };
+      if (!API_BASE_URL) {
+        logger.warn('Backend API not configured; using deterministic fallback identification.');
+      }
+
+      performanceMetadata.strategy = 'fallback';
+      const fallbackResult = fallbackManualRecommendation(photoUri, allMachines);
+      performanceMetadata.resultKind = fallbackResult.kind;
+      return { ...fallbackResult, photoUri };
+    },
+    performanceMetadata
+  );
 }
 
 async function identifyWithBackendApi(
@@ -66,7 +91,7 @@ async function identifyWithBackendApi(
       uri: uploadUri,
       name: fileName,
       type: mimeType,
-    } as any
+    } as ReactNativeFile
   );
 
   const controller = new AbortController();

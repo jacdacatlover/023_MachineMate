@@ -3,7 +3,8 @@ import { FlatList, View } from 'react-native';
 import { Modal, Portal, Searchbar, List, Divider, Text } from 'react-native-paper';
 
 import PrimaryButton from '@shared/components/PrimaryButton';
-import { MachineDefinition } from 'src/types/machine';
+
+import { MachineDefinition } from '@typings/machine';
 
 import { styles } from './MachinePickerModal.styles';
 

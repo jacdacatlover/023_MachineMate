@@ -1,17 +1,19 @@
 // Machine Detail screen: Full guide for a machine (accessed from Library)
 
 import { useRoute, RouteProp } from '@react-navigation/native';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
-import { toggleFavorite, isFavorite as checkIsFavorite } from '@shared/services/favoritesStorage';
-import { addToRecentHistory } from '@shared/services/historyStorage';
+
 import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
 import SectionHeader from '@shared/components/SectionHeader';
+import { toggleFavorite, isFavorite as checkIsFavorite } from '@shared/services/favoritesStorage';
+import { addToRecentHistory } from '@shared/services/historyStorage';
 import { colors } from '@shared/theme';
-import { LibraryStackParamList } from 'src/types/navigation';
+
+import { LibraryStackParamList } from '@typings/navigation';
 
 import { styles } from './MachineDetailScreen.styles';
 
@@ -26,18 +28,26 @@ export default function MachineDetailScreen() {
   const machine = machines.find(m => m.id === machineId);
 
   useEffect(() => {
-    loadFavoriteStatus();
-    addMachineToHistory();
-  }, []);
+    let isMounted = true;
 
-  const loadFavoriteStatus = async () => {
-    const favStatus = await checkIsFavorite(machineId);
-    setIsFavorite(favStatus);
-  };
+    const run = async () => {
+      try {
+        const favStatus = await checkIsFavorite(machineId);
+        if (isMounted) {
+          setIsFavorite(favStatus);
+        }
+        await addToRecentHistory(machineId);
+      } catch (error) {
+        console.error('Failed to load machine detail state', error);
+      }
+    };
 
-  const addMachineToHistory = async () => {
-    await addToRecentHistory(machineId);
-  };
+    run();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [machineId]);
 
   const handleToggleFavorite = async () => {
     await toggleFavorite(machineId);

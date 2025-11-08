@@ -1,5 +1,5 @@
 // Jest setup file for React Native Testing Library
-import '@testing-library/react-native/extend-expect';
+import '@testing-library/jest-native/extend-expect';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -29,6 +29,33 @@ jest.mock('expo-image-picker', () => ({
   ]),
   MediaType: { Images: 'images' },
 }));
+
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn(async uri => ({
+    uri,
+    width: 1000,
+    height: 1000,
+    base64: null,
+  })),
+  SaveFormat: { JPEG: 'jpeg' },
+}));
+
+jest.mock('expo-constants', () => ({
+  expoConfig: {
+    extra: {
+      apiUrl: 'https://mock.api',
+      apiBaseUrl: 'https://mock.api',
+      logLevel: 'debug',
+      environment: 'test',
+      enableCrashReporting: false,
+      sentryDsn: '',
+    },
+  },
+  manifest: {},
+  platform: { ios: {}, android: {} },
+}));
+
+process.env.EXPO_PUBLIC_LOG_LEVEL = 'debug';
 
 // Mock react-native-body-highlighter
 jest.mock('react-native-body-highlighter', () => 'Body');

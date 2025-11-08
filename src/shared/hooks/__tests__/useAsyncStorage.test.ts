@@ -1,5 +1,5 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { z } from 'zod';
 
 import { useAsyncStorage } from '../useAsyncStorage';
@@ -88,10 +88,14 @@ describe('useAsyncStorage', () => {
     });
 
     const newData = ['new-item'];
-    await result.current.setData(newData);
+    await act(async () => {
+      await result.current.setData(newData);
+    });
 
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(key, JSON.stringify(newData));
-    expect(result.current.data).toEqual(newData);
+    await waitFor(() => {
+      expect(result.current.data).toEqual(newData);
+    });
     expect(result.current.error).toBeNull();
   });
 
@@ -110,7 +114,7 @@ describe('useAsyncStorage', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    const invalidData = { invalid: 'data' } as any;
+    const invalidData = { invalid: 'data' } as unknown as string[];
 
     await expect(result.current.setData(invalidData)).rejects.toThrow();
   });
@@ -133,10 +137,14 @@ describe('useAsyncStorage', () => {
 
     expect(result.current.data).toEqual(storedData);
 
-    await result.current.clearData();
+    await act(async () => {
+      await result.current.clearData();
+    });
 
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith(key);
-    expect(result.current.data).toEqual(defaultValue);
+    await waitFor(() => {
+      expect(result.current.data).toEqual(defaultValue);
+    });
   });
 
   it('should call onValueChange callback when data changes', async () => {
@@ -160,9 +168,13 @@ describe('useAsyncStorage', () => {
     expect(onValueChange).toHaveBeenCalledWith(storedData);
 
     const newData = ['item2'];
-    await result.current.setData(newData);
+    await act(async () => {
+      await result.current.setData(newData);
+    });
 
-    expect(onValueChange).toHaveBeenCalledWith(newData);
+    await waitFor(() => {
+      expect(onValueChange).toHaveBeenCalledWith(newData);
+    });
   });
 
   it('should support function updates', async () => {
@@ -180,9 +192,13 @@ describe('useAsyncStorage', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await result.current.setData((prev) => [...prev, 'item2']);
+    await act(async () => {
+      await result.current.setData((prev) => [...prev, 'item2']);
+    });
 
-    expect(result.current.data).toEqual(['item1', 'item2']);
+    await waitFor(() => {
+      expect(result.current.data).toEqual(['item1', 'item2']);
+    });
   });
 
   it('should handle storage errors gracefully', async () => {
@@ -228,7 +244,9 @@ describe('useAsyncStorage', () => {
     // Simulate external change to storage
     (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(JSON.stringify(updatedData));
 
-    await result.current.reload();
+    await act(async () => {
+      await result.current.reload();
+    });
 
     await waitFor(() => {
       expect(result.current.data).toEqual(updatedData);

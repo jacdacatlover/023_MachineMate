@@ -21,14 +21,16 @@ import { PaperProvider, Text } from 'react-native-paper';
 
 import RootNavigator from './src/app/navigation/RootNavigator';
 import { MachinesProvider } from './src/app/providers/MachinesProvider';
-import machinesData from './src/data/machines.json';
+import machinesDataRaw from './src/data/machines.json';
 import { ErrorBoundary } from './src/shared/components/ErrorBoundary';
 import PrimaryButton from './src/shared/components/PrimaryButton';
+import { initMonitoring } from './src/shared/observability/monitoring';
 import { theme, navigationTheme, colors } from './src/shared/theme';
 import { MachineDefinition } from './src/types/machine';
 
-
 // Import machine data
+
+initMonitoring();
 
 export default function App() {
   const [machines, setMachines] = useState<MachineDefinition[]>([]);
@@ -47,11 +49,8 @@ export default function App() {
     SpaceGrotesk_700Bold,
   });
 
-  useEffect(() => {
-    loadMachines();
-  }, []);
-
   const loadMachines = useCallback(async () => {
+    const machinesData = machinesDataRaw as MachineDefinition[];
     setIsLoading(true);
     setError(null);
 
@@ -66,7 +65,7 @@ export default function App() {
       }
 
       // Validate that each machine has required fields
-      const validated = machinesData.map((machine: any) => ({
+      const validated = machinesData.map((machine) => ({
         ...machine,
         primaryMuscles: machine.primaryMuscles ?? [],
         setupSteps: machine.setupSteps ?? [],
@@ -81,6 +80,10 @@ export default function App() {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    loadMachines();
+  }, [loadMachines]);
 
   // Loading state (fonts or data)
   if (!fontsLoaded || isLoading) {

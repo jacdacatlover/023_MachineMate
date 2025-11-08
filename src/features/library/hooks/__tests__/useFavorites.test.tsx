@@ -1,10 +1,12 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
 
-import { useFavorites } from '../useFavorites';
 import { MachinesProvider } from '@app/providers/MachinesProvider';
-import { MachineDefinition } from 'src/types/machine';
+
+import { MachineDefinition } from '@typings/machine';
+
+import { useFavorites } from '../useFavorites';
 
 // Mock machines data
 const mockMachines: MachineDefinition[] = [
@@ -77,9 +79,13 @@ describe('useFavorites', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await result.current.addFavorite('machine-1');
+    await act(async () => {
+      await result.current.addFavorite('machine-1');
+    });
 
-    expect(result.current.favorites).toContain('machine-1');
+    await waitFor(() => {
+      expect(result.current.favorites).toContain('machine-1');
+    });
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       '@machinemate_favorites',
       JSON.stringify(['machine-1'])
@@ -95,9 +101,13 @@ describe('useFavorites', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await result.current.removeFavorite('machine-1');
+    await act(async () => {
+      await result.current.removeFavorite('machine-1');
+    });
 
-    expect(result.current.favorites).toEqual(['machine-2']);
+    await waitFor(() => {
+      expect(result.current.favorites).toEqual(['machine-2']);
+    });
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       '@machinemate_favorites',
       JSON.stringify(['machine-2'])
@@ -125,12 +135,20 @@ describe('useFavorites', () => {
     });
 
     // Toggle on
-    await result.current.toggleFavorite('machine-1');
-    expect(result.current.favorites).toContain('machine-1');
+    await act(async () => {
+      await result.current.toggleFavorite('machine-1');
+    });
+    await waitFor(() => {
+      expect(result.current.favorites).toContain('machine-1');
+    });
 
     // Toggle off
-    await result.current.toggleFavorite('machine-1');
-    expect(result.current.favorites).not.toContain('machine-1');
+    await act(async () => {
+      await result.current.toggleFavorite('machine-1');
+    });
+    await waitFor(() => {
+      expect(result.current.favorites).not.toContain('machine-1');
+    });
   });
 
   it('should clear all favorites', async () => {
@@ -144,9 +162,13 @@ describe('useFavorites', () => {
 
     expect(result.current.favorites).toHaveLength(2);
 
-    await result.current.clearFavorites();
+    await act(async () => {
+      await result.current.clearFavorites();
+    });
 
-    expect(result.current.favorites).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.favorites).toEqual([]);
+    });
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@machinemate_favorites');
   });
 
@@ -186,9 +208,13 @@ describe('useFavorites', () => {
 
     expect(result.current.favorites).toEqual(['machine-1']);
 
-    await result.current.addFavorite('machine-1');
+    await act(async () => {
+      await result.current.addFavorite('machine-1');
+    });
 
     // Should still have only one
-    expect(result.current.favorites).toEqual(['machine-1']);
+    await waitFor(() => {
+      expect(result.current.favorites).toEqual(['machine-1']);
+    });
   });
 });

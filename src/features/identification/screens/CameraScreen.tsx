@@ -11,10 +11,13 @@ import { View, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
 import { identifyMachine } from '@features/identification/services/identifyMachine';
+
 import PrimaryButton from '@shared/components/PrimaryButton';
 import { colors } from '@shared/theme';
-import { HomeStackParamList } from 'src/types/navigation';
+
+import { HomeStackParamList } from '@typings/navigation';
 
 import { styles } from './CameraScreen.styles';
 
@@ -67,6 +70,7 @@ export default function CameraScreen() {
       setIsRequestingPermission(true);
       await requestPermission();
     } catch (error) {
+      console.error('Failed requesting camera permission', error);
       Alert.alert(
         'Permission Error',
         'We could not request camera access. Please try again.'
@@ -111,6 +115,7 @@ export default function CameraScreen() {
       );
       return false;
     } catch (error) {
+      console.error('Failed checking photo permissions', error);
       Alert.alert(
         'Permission Error',
         'We could not check photo permissions. Please try again.'

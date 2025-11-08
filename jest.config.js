@@ -9,7 +9,8 @@ module.exports = {
     '^@app/(.*)$': '<rootDir>/src/app/$1',
     '^@features/(.*)$': '<rootDir>/src/features/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
-    '^@/data/(.*)$': '<rootDir>/src/data/$1',
+    '^@data/(.*)$': '<rootDir>/src/data/$1',
+    '^expo/src/winter$': '<rootDir>/jest/mocks/expo-winter.js',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

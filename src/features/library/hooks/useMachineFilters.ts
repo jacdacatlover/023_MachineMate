@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { useDebounce } from '@shared/hooks/useDebounce';
 
-import { MachineCategory, MachineDefinition } from 'src/types/machine';
+import { MachineCategory, MachineDefinition } from '@typings/machine';
 
 const DEBOUNCE_DELAY_MS = 300;
 

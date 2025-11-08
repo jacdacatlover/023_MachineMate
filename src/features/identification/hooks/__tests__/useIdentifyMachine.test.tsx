@@ -1,11 +1,15 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+/* eslint-env jest */
+
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
 
-import { useIdentifyMachine } from '../useIdentifyMachine';
 import { MachinesProvider } from '@app/providers/MachinesProvider';
-import { MachineDefinition } from 'src/types/machine';
+
+import { IdentificationResult } from '@typings/identification';
+import { MachineDefinition } from '@typings/machine';
+
 import * as identifyMachineService from '../../services/identifyMachine';
-import { IdentificationResult } from 'src/types/identification';
+import { useIdentifyMachine } from '../useIdentifyMachine';
 
 // Mock the identifyMachine service
 jest.mock('../../services/identifyMachine');
@@ -50,7 +54,7 @@ describe('useIdentifyMachine', () => {
       candidates: ['machine-1'],
       confidence: 0.95,
       lowConfidence: false,
-      source: 'api',
+      source: 'backend_api',
     };
 
     (identifyMachineService.identifyMachine as jest.Mock).mockResolvedValue(mockResult);
@@ -58,14 +62,19 @@ describe('useIdentifyMachine', () => {
     const { result } = renderHook(() => useIdentifyMachine(), { wrapper });
 
     const photoUri = 'file:///path/to/photo.jpg';
-    const identificationResult = await result.current.identify(photoUri);
+    let identificationResult: IdentificationResult | null = null;
+    await act(async () => {
+      identificationResult = await result.current.identify(photoUri);
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
     expect(identificationResult).toEqual(mockResult);
-    expect(result.current.result).toEqual(mockResult);
+    await waitFor(() => {
+      expect(result.current.result).toEqual(mockResult);
+    });
     expect(result.current.error).toBeNull();
     expect(identifyMachineService.identifyMachine).toHaveBeenCalledWith(photoUri, mockMachines);
   });
@@ -77,7 +86,10 @@ describe('useIdentifyMachine', () => {
     const { result } = renderHook(() => useIdentifyMachine(), { wrapper });
 
     const photoUri = 'file:///path/to/photo.jpg';
-    const identificationResult = await result.current.identify(photoUri);
+    let identificationResult: IdentificationResult | null = null;
+    await act(async () => {
+      identificationResult = await result.current.identify(photoUri);
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -85,7 +97,9 @@ describe('useIdentifyMachine', () => {
 
     expect(identificationResult).toBeNull();
     expect(result.current.result).toBeNull();
-    expect(result.current.error).toBeTruthy();
+    await waitFor(() => {
+      expect(result.current.error).toBeTruthy();
+    });
     expect(result.current.error?.message).toContain('Network error');
   });
 
@@ -96,7 +110,7 @@ describe('useIdentifyMachine', () => {
       candidates: ['machine-1'],
       confidence: 0.95,
       lowConfidence: false,
-      source: 'api',
+      source: 'backend_api',
     };
 
     // Delay the mock resolution to capture loading state
@@ -114,7 +128,9 @@ describe('useIdentifyMachine', () => {
       expect(result.current.isLoading).toBe(true);
     });
 
-    await promise;
+    await act(async () => {
+      await promise;
+    });
 
     // Should finish loading
     await waitFor(() => {
@@ -129,13 +145,15 @@ describe('useIdentifyMachine', () => {
       candidates: ['machine-1'],
       confidence: 0.95,
       lowConfidence: false,
-      source: 'api',
+      source: 'backend_api',
     };
 
     const secondResult: IdentificationResult = {
-      kind: 'generic-label',
+      kind: 'generic',
+      labelId: 'unknown-machine',
       labelName: 'Unknown Machine',
-      confidence: 0.50,
+      candidates: [],
+      confidence: 0.5,
     };
 
     (identifyMachineService.identifyMachine as jest.Mock)
@@ -145,13 +163,17 @@ describe('useIdentifyMachine', () => {
     const { result } = renderHook(() => useIdentifyMachine(), { wrapper });
 
     // First identification
-    await result.current.identify('file:///photo1.jpg');
+    await act(async () => {
+      await result.current.identify('file:///photo1.jpg');
+    });
     await waitFor(() => {
       expect(result.current.result).toEqual(firstResult);
     });
 
     // Second identification
-    await result.current.identify('file:///photo2.jpg');
+    await act(async () => {
+      await result.current.identify('file:///photo2.jpg');
+    });
     await waitFor(() => {
       expect(result.current.result).toEqual(secondResult);
     });
@@ -165,7 +187,7 @@ describe('useIdentifyMachine', () => {
       candidates: ['machine-1'],
       confidence: 0.95,
       lowConfidence: false,
-      source: 'api',
+      source: 'backend_api',
     };
 
     (identifyMachineService.identifyMachine as jest.Mock)
@@ -175,13 +197,17 @@ describe('useIdentifyMachine', () => {
     const { result } = renderHook(() => useIdentifyMachine(), { wrapper });
 
     // First call fails
-    await result.current.identify('file:///photo1.jpg');
+    await act(async () => {
+      await result.current.identify('file:///photo1.jpg');
+    });
     await waitFor(() => {
       expect(result.current.error).toBeTruthy();
     });
 
     // Second call succeeds
-    await result.current.identify('file:///photo2.jpg');
+    await act(async () => {
+      await result.current.identify('file:///photo2.jpg');
+    });
     await waitFor(() => {
       expect(result.current.error).toBeNull();
       expect(result.current.result).toEqual(mockResult);
@@ -193,7 +219,9 @@ describe('useIdentifyMachine', () => {
 
     const { result } = renderHook(() => useIdentifyMachine(), { wrapper });
 
-    await result.current.identify('file:///photo.jpg');
+    await act(async () => {
+      await result.current.identify('file:///photo.jpg');
+    });
 
     await waitFor(() => {
       expect(result.current.error).toBeTruthy();

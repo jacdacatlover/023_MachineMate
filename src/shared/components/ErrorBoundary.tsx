@@ -1,6 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+
 import { createLogger } from '@shared/logger';
+import { reportError } from '@shared/observability/monitoring';
 
 import { styles } from './ErrorBoundary.styles';
 
@@ -67,8 +69,10 @@ export class ErrorBoundary extends Component<Props, State> {
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
 
-    // In production, you might want to send to error tracking service
-    // e.g., Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } });
+    reportError(error, {
+      componentStack: errorInfo.componentStack ?? undefined,
+      extras: { boundary: 'ErrorBoundary' },
+    });
   }
 
   resetError = () => {

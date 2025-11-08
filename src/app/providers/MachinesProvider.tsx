@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 
-import { MachineDefinition } from 'src/types/machine';
+import { MachineDefinition } from '@typings/machine';
 
 type MachinesProviderProps = {
   machines: MachineDefinition[];

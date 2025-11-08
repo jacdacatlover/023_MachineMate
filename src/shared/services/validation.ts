@@ -1,6 +1,6 @@
 // Validation utilities for storage operations
 
-import { MachineDefinition } from 'src/types/machine';
+import { MachineDefinition } from '@typings/machine';
 
 /**
  * Validates if a machine ID exists in the catalog

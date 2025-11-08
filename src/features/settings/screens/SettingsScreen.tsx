@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 
+import PrimaryButton from '@shared/components/PrimaryButton';
 import { clearFavorites } from '@shared/services/favoritesStorage';
 import { clearHistory } from '@shared/services/historyStorage';
-import PrimaryButton from '@shared/components/PrimaryButton';
 
 import { styles } from './SettingsScreen.styles';
 

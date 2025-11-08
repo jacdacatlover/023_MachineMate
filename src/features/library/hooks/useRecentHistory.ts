@@ -1,12 +1,13 @@
 import { useCallback, useMemo } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+
 import { useAsyncStorage } from '@shared/hooks/useAsyncStorage';
 import { createLogger } from '@shared/logger';
-
-import { RecentHistoryItem } from 'src/types/history';
-import { RecentHistorySchema } from 'src/types/validation';
 import { filterValidMachineIds, validateMachineId } from '@shared/services/validation';
+
+import { RecentHistoryItem } from '@typings/history';
+import { RecentHistorySchema } from '@typings/validation';
 
 const logger = createLogger('hooks.useRecentHistory');
 
@@ -77,18 +78,8 @@ interface UseRecentHistoryReturn {
  */
 export function useRecentHistory(): UseRecentHistoryReturn {
   const machines = useMachines();
-
-  const {
-    data: rawHistory,
-    setData,
-    clearData,
-    isLoading,
-    error,
-  } = useAsyncStorage({
-    key: HISTORY_STORAGE_KEY,
-    schema: RecentHistorySchema,
-    defaultValue: [],
-    onValueChange: (history) => {
+  const handleHistoryValueChange = useCallback(
+    (history: RecentHistoryItem[]) => {
       // Automatically clean up invalid machine IDs when data loads
       const validMachineIds = filterValidMachineIds(
         history.map((item) => item.machineId),
@@ -104,6 +95,20 @@ export function useRecentHistory(): UseRecentHistoryReturn {
         );
       }
     },
+    [machines]
+  );
+
+  const {
+    data: rawHistory,
+    setData,
+    clearData,
+    isLoading,
+    error,
+  } = useAsyncStorage<RecentHistoryItem[]>({
+    key: HISTORY_STORAGE_KEY,
+    schema: RecentHistorySchema,
+    defaultValue: [],
+    onValueChange: handleHistoryValueChange,
   });
 
   // Filter out any invalid machine IDs from the stored history
