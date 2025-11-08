@@ -1,19 +1,22 @@
 // Camera screen: Capture a photo of a gym machine
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import type { MediaType } from 'expo-image-picker';
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import * as ImagePicker from 'expo-image-picker';
-import type { MediaType } from 'expo-image-picker';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../../../types/navigation';
-import { useMachines } from '../../../app/providers/MachinesProvider';
-import { identifyMachine } from '../../../services/recognition/identifyMachine';
-import PrimaryButton from '../../../shared/components/PrimaryButton';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '../../../shared/theme';
+
+import { useMachines } from '@app/providers/MachinesProvider';
+import { identifyMachine } from '@features/identification/services/identifyMachine';
+import PrimaryButton from '@shared/components/PrimaryButton';
+import { colors } from '@shared/theme';
+import { HomeStackParamList } from 'src/types/navigation';
+
+
 
 type CameraScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Camera'>;
 

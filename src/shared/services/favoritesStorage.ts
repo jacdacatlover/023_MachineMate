@@ -1,7 +1,8 @@
 // Storage logic for managing favorite machines using AsyncStorage
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FavoritesSchema } from '../../types/validation';
+
+import { FavoritesSchema } from 'src/types/validation';
 
 const FAVORITES_KEY = '@machinemate_favorites';
 

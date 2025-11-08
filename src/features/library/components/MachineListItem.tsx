@@ -3,8 +3,9 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, IconButton, Chip } from 'react-native-paper';
-import { MachineDefinition } from '../../types/machine';
-import { colors } from '../theme';
+
+import { colors } from '@shared/theme';
+import { MachineDefinition } from 'src/types/machine';
 
 interface MachineListItemProps {
   machine: MachineDefinition;

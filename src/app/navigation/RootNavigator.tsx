@@ -1,15 +1,15 @@
 // Root bottom tab navigator
 
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { RootTabParamList } from '../../types/navigation';
-import { colors } from '../../shared/theme';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React from 'react';
 
-// Import stack navigators and screens
+import SettingsScreen from '@features/settings/screens/SettingsScreen';
+import { colors } from '@shared/theme';
+import { RootTabParamList } from 'src/types/navigation';
+
 import HomeStack from './HomeStack';
 import LibraryStack from './LibraryStack';
-import SettingsScreen from '../../features/settings/screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 

@@ -1,21 +1,22 @@
 // Home screen: Main entry point with "Identify Machine" button and recent history
 
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../../../types/navigation';
-import { useMachines } from '../../../app/providers/MachinesProvider';
-import { MachineDefinition } from '../../../types/machine';
-import { getRecentHistory } from '../../../services/storage/historyStorage';
-import { getFavorites, setFavorites as saveFavorites } from '../../../services/storage/favoritesStorage';
-import { filterValidMachineIds } from '../../../services/storage/validation';
-import { RecentHistoryItem } from '../../../types/history';
-import PrimaryButton from '../../../shared/components/PrimaryButton';
-import MachineListItem from '../../../shared/components/MachineListItem';
-import { IdentificationResult } from '../../../types/identification';
-import { colors } from '../../../shared/theme';
+
+import { useMachines } from '@app/providers/MachinesProvider';
+import { getFavorites, setFavorites as saveFavorites } from '@shared/services/favoritesStorage';
+import { getRecentHistory } from '@shared/services/historyStorage';
+import { filterValidMachineIds } from '@shared/services/validation';
+import MachineListItem from '@features/library/components/MachineListItem';
+import PrimaryButton from '@shared/components/PrimaryButton';
+import { colors } from '@shared/theme';
+import { RecentHistoryItem } from 'src/types/history';
+import { IdentificationResult } from 'src/types/identification';
+import { MachineDefinition } from 'src/types/machine';
+import { HomeStackParamList } from 'src/types/navigation';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 

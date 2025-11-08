@@ -1,16 +1,19 @@
 // Machine identification logic that relies on the backend API with a deterministic client fallback.
 
-import { MachineDefinition } from '../../types/machine';
+
 import {
   CatalogIdentificationResult,
   GenericLabelResult,
   IdentificationResult,
-} from '../../types/identification';
-import { BackendIdentifyResponseSchema } from '../../types/validation';
-import { RECOGNITION_CONFIG } from './config';
-import * as ImageManipulator from 'expo-image-manipulator';
+} from 'src/types/identification';
+import { MachineDefinition } from 'src/types/machine';
+import { BackendIdentifyResponseSchema } from 'src/types/validation';
 import Constants from 'expo-constants';
-import { createLogger } from '../../shared/logger';
+import * as ImageManipulator from 'expo-image-manipulator';
+
+import { createLogger } from '@shared/logger';
+
+import { RECOGNITION_CONFIG } from './config';
 
 const logger = createLogger('recognition.identifyMachine');
 

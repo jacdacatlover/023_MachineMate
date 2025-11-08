@@ -7,9 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from 'react-native-paper';
 import Body from 'react-native-body-highlighter';
-import { colors } from '../theme';
+import { Text } from 'react-native-paper';
+
+import { colors } from '@shared/theme';
 
 type BodyPartName =
   | 'trapezius'

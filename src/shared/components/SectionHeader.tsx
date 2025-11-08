@@ -3,7 +3,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { colors } from '../theme';
+
+import { colors } from '@shared/theme';
 
 interface SectionHeaderProps {
   title: string;

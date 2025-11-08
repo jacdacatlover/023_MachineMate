@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Alert } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
-import { clearFavorites } from '../../../services/storage/favoritesStorage';
-import { clearHistory } from '../../../services/storage/historyStorage';
-import PrimaryButton from '../../../shared/components/PrimaryButton';
-import { colors } from '../../../shared/theme';
+
+import { clearFavorites } from '@shared/services/favoritesStorage';
+import { clearHistory } from '@shared/services/historyStorage';
+import PrimaryButton from '@shared/components/PrimaryButton';
+import { colors } from '@shared/theme';
 
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);

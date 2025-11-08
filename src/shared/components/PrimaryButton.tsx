@@ -1,10 +1,11 @@
 // Reusable primary button component with consistent touch handling
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '../theme';
+
+import { colors } from '@shared/theme';
 
 type ButtonMode = 'text' | 'outlined' | 'contained' | 'elevated' | 'contained-tonal';
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];

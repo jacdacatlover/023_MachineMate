@@ -1,15 +1,5 @@
 // Main App component with machine data context and navigation
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
-import { PaperProvider, Text } from 'react-native-paper';
-import { MachineDefinition } from './src/types/machine';
-import RootNavigator from './src/app/navigation/RootNavigator';
-import { MachinesProvider } from './src/app/providers/MachinesProvider';
-import PrimaryButton from './src/shared/components/PrimaryButton';
-import { theme, navigationTheme, colors } from './src/shared/theme';
 import {
   useFonts,
   Inter_400Regular,
@@ -23,9 +13,21 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from '@expo-google-fonts/space-grotesk';
+import { NavigationContainer } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { PaperProvider, Text } from 'react-native-paper';
+
+import RootNavigator from './src/app/navigation/RootNavigator';
+import { MachinesProvider } from './src/app/providers/MachinesProvider';
+import machinesData from './src/data/machines.json';
+import PrimaryButton from './src/shared/components/PrimaryButton';
+import { theme, navigationTheme, colors } from './src/shared/theme';
+import { MachineDefinition } from './src/types/machine';
+
 
 // Import machine data
-import machinesData from './src/data/machines.json';
 
 export default function App() {
   const [machines, setMachines] = useState<MachineDefinition[]>([]);

@@ -1,13 +1,12 @@
 // Library stack navigator: Library -> MachineDetail
 
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { LibraryStackParamList } from '../../types/navigation';
-import { colors } from '../../shared/theme';
+import React from 'react';
 
-// Import screens (will be created next)
-import LibraryScreen from '../../features/library/screens/LibraryScreen';
-import MachineDetailScreen from '../../features/library/screens/MachineDetailScreen';
+import LibraryScreen from '@features/library/screens/LibraryScreen';
+import MachineDetailScreen from '@features/library/screens/MachineDetailScreen';
+import { colors } from '@shared/theme';
+import { LibraryStackParamList } from 'src/types/navigation';
 
 const Stack = createNativeStackNavigator<LibraryStackParamList>();
 

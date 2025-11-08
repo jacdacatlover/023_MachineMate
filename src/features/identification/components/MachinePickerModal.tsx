@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Modal, Portal, Searchbar, List, Divider, Text } from 'react-native-paper';
-import { MachineDefinition } from '../../../types/machine';
-import PrimaryButton from '../../../shared/components/PrimaryButton';
+
+import PrimaryButton from '@shared/components/PrimaryButton';
+import { MachineDefinition } from 'src/types/machine';
 
 interface MachinePickerModalProps {
   visible: boolean;

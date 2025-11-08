@@ -1,6 +1,7 @@
 // Type definitions for React Navigation
 
 import { NavigatorScreenParams } from '@react-navigation/native';
+
 import { IdentificationResult } from './identification';
 
 // Root tab navigator params

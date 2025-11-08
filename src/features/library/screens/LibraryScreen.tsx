@@ -1,16 +1,17 @@
 // Library screen: Browse and search all machines
 
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Searchbar, Chip, Text } from 'react-native-paper';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { LibraryStackParamList } from '../../../types/navigation';
-import { useMachines } from '../../../app/providers/MachinesProvider';
-import { MachineCategory, MachineDefinition } from '../../../types/machine';
-import { getFavorites } from '../../../services/storage/favoritesStorage';
-import MachineListItem from '../../../shared/components/MachineListItem';
-import { colors } from '../../../shared/theme';
+
+import { useMachines } from '@app/providers/MachinesProvider';
+import { getFavorites } from '@shared/services/favoritesStorage';
+import MachineListItem from '@features/library/components/MachineListItem';
+import { colors } from '@shared/theme';
+import { MachineCategory, MachineDefinition } from 'src/types/machine';
+import { LibraryStackParamList } from 'src/types/navigation';
 
 type LibraryScreenNavigationProp = NativeStackNavigationProp<LibraryStackParamList, 'Library'>;
 

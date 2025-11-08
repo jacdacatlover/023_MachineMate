@@ -1,16 +1,17 @@
 // Machine Detail screen: Full guide for a machine (accessed from Library)
 
+import { useRoute, RouteProp } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { LibraryStackParamList } from '../../../types/navigation';
-import { useMachines } from '../../../app/providers/MachinesProvider';
-import { toggleFavorite, isFavorite as checkIsFavorite } from '../../../services/storage/favoritesStorage';
-import { addToRecentHistory } from '../../../services/storage/historyStorage';
-import SectionHeader from '../../../shared/components/SectionHeader';
-import { AnimatedBodyHighlighter } from '../../../shared/components/AnimatedBodyHighlighter';
-import { colors } from '../../../shared/theme';
+
+import { useMachines } from '@app/providers/MachinesProvider';
+import { toggleFavorite, isFavorite as checkIsFavorite } from '@shared/services/favoritesStorage';
+import { addToRecentHistory } from '@shared/services/historyStorage';
+import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
+import SectionHeader from '@shared/components/SectionHeader';
+import { colors } from '@shared/theme';
+import { LibraryStackParamList } from 'src/types/navigation';
 
 type MachineDetailScreenRouteProp = RouteProp<LibraryStackParamList, 'MachineDetail'>;
 

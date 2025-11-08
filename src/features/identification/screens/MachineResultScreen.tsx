@@ -1,22 +1,23 @@
 // Machine Result screen: Shows identified machine with photo and alternatives
 
+import { useRoute, RouteProp } from '@react-navigation/native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { HomeStackParamList } from '../../../types/navigation';
-import { useMachines } from '../../../app/providers/MachinesProvider';
-import { MachineDefinition } from '../../../types/machine';
-import { CatalogIdentificationResult, GenericLabelResult, isCatalogResult, isGenericLabelResult } from '../../../types/identification';
+
+import { useMachines } from '@app/providers/MachinesProvider';
 import {
   toggleFavorite,
   isFavorite as checkIsFavorite,
-} from '../../../services/storage/favoritesStorage';
-import { addToRecentHistory } from '../../../services/storage/historyStorage';
-import { validateMachineId } from '../../../services/storage/validation';
-import SectionHeader from '../../../shared/components/SectionHeader';
-import { AnimatedBodyHighlighter } from '../../../shared/components/AnimatedBodyHighlighter';
-import { colors } from '../../../shared/theme';
+} from '@shared/services/favoritesStorage';
+import { addToRecentHistory } from '@shared/services/historyStorage';
+import { validateMachineId } from '@shared/services/validation';
+import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
+import SectionHeader from '@shared/components/SectionHeader';
+import { colors } from '@shared/theme';
+import { CatalogIdentificationResult, GenericLabelResult, isCatalogResult, isGenericLabelResult } from 'src/types/identification';
+import { MachineDefinition } from 'src/types/machine';
+import { HomeStackParamList } from 'src/types/navigation';
 
 type MachineResultScreenRouteProp = RouteProp<HomeStackParamList, 'MachineResult'>;
 
