@@ -9,5 +9,5 @@ export { default as MachinePickerModal } from './components/MachinePickerModal';
 export * from './services/identifyMachine';
 export * from './services/config';
 
-// Hooks (will be added in Phase 2)
-// export * from './hooks';
+// Hooks
+export * from './hooks';
