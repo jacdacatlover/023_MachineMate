@@ -2,10 +2,12 @@
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, ViewStyle } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { colors } from '@shared/theme';
+
+import { styles } from './PrimaryButton.styles';
 
 type ButtonMode = 'text' | 'outlined' | 'contained' | 'elevated' | 'contained-tonal';
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -77,41 +79,3 @@ export default function PrimaryButton({
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    marginVertical: 8,
-    alignSelf: 'stretch',
-  },
-  button: {
-    minHeight: 48,
-    borderRadius: 999,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonContained: {
-    backgroundColor: colors.primary,
-  },
-  buttonContainedTonal: {
-    backgroundColor: colors.primaryDark,
-  },
-  buttonOutlined: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  icon: {
-    marginRight: 4,
-  },
-});

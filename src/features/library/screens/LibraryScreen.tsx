@@ -3,15 +3,16 @@
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { Searchbar, Chip, Text } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 import { getFavorites } from '@shared/services/favoritesStorage';
 import MachineListItem from '@features/library/components/MachineListItem';
-import { colors } from '@shared/theme';
 import { MachineCategory, MachineDefinition } from 'src/types/machine';
 import { LibraryStackParamList } from 'src/types/navigation';
+
+import { styles } from './LibraryScreen.styles';
 
 type LibraryScreenNavigationProp = NativeStackNavigationProp<LibraryStackParamList, 'Library'>;
 
@@ -189,39 +190,3 @@ export default function LibraryScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  searchBar: {
-    margin: 16,
-    elevation: 2,
-    backgroundColor: colors.surface,
-  },
-  filtersContainer: {
-    marginBottom: 8,
-  },
-  filtersContent: {
-    paddingHorizontal: 16,
-  },
-  categoryChip: {
-    marginRight: 8,
-  },
-  categoryChipText: {
-    fontSize: 13,
-  },
-  emptyState: {
-    padding: 48,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    color: colors.textTertiary,
-    textAlign: 'center',
-  },
-});

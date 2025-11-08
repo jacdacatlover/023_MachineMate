@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { Modal, Portal, Searchbar, List, Divider, Text } from 'react-native-paper';
 
 import PrimaryButton from '@shared/components/PrimaryButton';
 import { MachineDefinition } from 'src/types/machine';
+
+import { styles } from './MachinePickerModal.styles';
 
 interface MachinePickerModalProps {
   visible: boolean;
@@ -96,29 +98,3 @@ export default function MachinePickerModal({
     </Portal>
   );
 }
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    margin: 16,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    maxHeight: '80%',
-  },
-  modalTitle: {
-    marginBottom: 8,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  searchbar: {
-    marginBottom: 12,
-  },
-  list: {
-    flexGrow: 0,
-    marginBottom: 12,
-  },
-  emptyState: {
-    paddingVertical: 32,
-    alignItems: 'center',
-  },
-});

@@ -1,11 +1,13 @@
 // Reusable list item component for displaying a machine in a list
 
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Text, IconButton, Chip } from 'react-native-paper';
 
 import { colors } from '@shared/theme';
 import { MachineDefinition } from 'src/types/machine';
+
+import { styles } from './MachineListItem.styles';
 
 interface MachineListItemProps {
   machine: MachineDefinition;
@@ -48,33 +50,3 @@ export default function MachineListItem({
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  name: {
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  chip: {
-    alignSelf: 'flex-start',
-    height: 24,
-  },
-  chipText: {
-    fontSize: 12,
-    marginVertical: 0,
-  },
-});

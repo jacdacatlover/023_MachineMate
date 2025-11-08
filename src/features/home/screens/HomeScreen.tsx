@@ -3,7 +3,7 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, ScrollView, Image } from 'react-native';
+import { View, ScrollView, Image } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
@@ -12,11 +12,12 @@ import { getRecentHistory } from '@shared/services/historyStorage';
 import { filterValidMachineIds } from '@shared/services/validation';
 import MachineListItem from '@features/library/components/MachineListItem';
 import PrimaryButton from '@shared/components/PrimaryButton';
-import { colors } from '@shared/theme';
 import { RecentHistoryItem } from 'src/types/history';
 import { IdentificationResult } from 'src/types/identification';
 import { MachineDefinition } from 'src/types/machine';
 import { HomeStackParamList } from 'src/types/navigation';
+
+import { styles } from './HomeScreen.styles';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -121,51 +122,3 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  heroSection: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 16,
-  },
-  title: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: colors.text,
-  },
-  subtitle: {
-    textAlign: 'center',
-    color: colors.textSecondary,
-    marginBottom: 24,
-  },
-  recentSection: {
-    paddingTop: 16,
-  },
-  sectionTitle: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  emptyState: {
-    padding: 48,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    color: colors.textTertiary,
-    textAlign: 'center',
-  },
-});

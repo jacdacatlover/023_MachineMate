@@ -1,13 +1,14 @@
 // Settings screen: Clear data and app info
 
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 
 import { clearFavorites } from '@shared/services/favoritesStorage';
 import { clearHistory } from '@shared/services/historyStorage';
 import PrimaryButton from '@shared/components/PrimaryButton';
-import { colors } from '@shared/theme';
+
+import { styles } from './SettingsScreen.styles';
 
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);
@@ -124,44 +125,3 @@ export default function SettingsScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: colors.text,
-  },
-  sectionDescription: {
-    color: colors.textSecondary,
-    marginBottom: 16,
-  },
-  divider: {
-    marginVertical: 8,
-  },
-  aboutText: {
-    marginBottom: 12,
-    color: colors.text,
-  },
-  disclaimerBox: {
-    backgroundColor: colors.surfaceVariant,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-    padding: 16,
-    borderRadius: 4,
-  },
-  disclaimerText: {
-    marginBottom: 12,
-    color: colors.text,
-    lineHeight: 20,
-  },
-  bottomPadding: {
-    height: 32,
-  },
-});
