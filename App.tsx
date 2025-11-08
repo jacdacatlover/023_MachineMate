@@ -22,6 +22,7 @@ import { PaperProvider, Text } from 'react-native-paper';
 import RootNavigator from './src/app/navigation/RootNavigator';
 import { MachinesProvider } from './src/app/providers/MachinesProvider';
 import machinesData from './src/data/machines.json';
+import { ErrorBoundary } from './src/shared/components/ErrorBoundary';
 import PrimaryButton from './src/shared/components/PrimaryButton';
 import { theme, navigationTheme, colors } from './src/shared/theme';
 import { MachineDefinition } from './src/types/machine';
@@ -107,14 +108,16 @@ export default function App() {
   }
 
   return (
-    <MachinesProvider machines={machines}>
-      <PaperProvider theme={theme}>
-        <NavigationContainer theme={navigationTheme}>
-          <RootNavigator />
-          <StatusBar style="light" />
-        </NavigationContainer>
-      </PaperProvider>
-    </MachinesProvider>
+    <ErrorBoundary>
+      <MachinesProvider machines={machines}>
+        <PaperProvider theme={theme}>
+          <NavigationContainer theme={navigationTheme}>
+            <RootNavigator />
+            <StatusBar style="light" />
+          </NavigationContainer>
+        </PaperProvider>
+      </MachinesProvider>
+    </ErrorBoundary>
   );
 }
 
