@@ -12,6 +12,7 @@ export interface CatalogIdentificationResult {
   confidence: number | null;
   lowConfidence: boolean;
   source: IdentificationSource;
+  confidenceThreshold?: number;
   photoUri?: string;
 }
 
@@ -21,6 +22,8 @@ export interface GenericLabelResult {
   labelName: string;
   candidates: string[];
   confidence: number;
+  source: IdentificationSource;
+  confidenceThreshold?: number;
   photoUri?: string;
 }
 

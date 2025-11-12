@@ -79,6 +79,11 @@ export default function HomeScreen() {
     .map(item => machines.find((m) => m.id === item.machineId))
     .filter((machine): machine is MachineDefinition => machine !== undefined);
 
+  // Get machine objects from favorite IDs
+  const favoriteMachines = favorites
+    .map(id => machines.find((m) => m.id === id))
+    .filter((machine): machine is MachineDefinition => machine !== undefined);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.heroSection}>
@@ -97,6 +102,24 @@ export default function HomeScreen() {
       </View>
 
       <Divider />
+
+      {favoriteMachines.length > 0 && (
+        <View style={styles.recentSection}>
+          <Text variant="titleLarge" style={styles.sectionTitle}>
+            Favorite Machines
+          </Text>
+          {favoriteMachines.map((machine) => (
+            <MachineListItem
+              key={machine.id}
+              machine={machine}
+              isFavorite={true}
+              onPress={() => handleMachinePress(machine.id)}
+            />
+          ))}
+        </View>
+      )}
+
+      {favoriteMachines.length > 0 && recentMachines.length > 0 && <Divider />}
 
       {recentMachines.length > 0 && (
         <View style={styles.recentSection}>

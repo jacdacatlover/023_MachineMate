@@ -1,17 +1,42 @@
-// Settings screen: Clear data and app info
+// Settings screen: Clear data, adjust recognition preferences, and app info
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
-import { Text, Divider } from 'react-native-paper';
+import { Text, Divider, TextInput, HelperText } from 'react-native-paper';
 
+import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvider';
+import { useSession } from '@features/auth';
 import PrimaryButton from '@shared/components/PrimaryButton';
+import {
+  DEFAULT_CONFIDENCE_THRESHOLD,
+  MAX_CONFIDENCE_THRESHOLD,
+  MIN_CONFIDENCE_THRESHOLD,
+} from '@shared/constants/recognition';
 import { clearFavorites } from '@shared/services/favoritesStorage';
 import { clearHistory } from '@shared/services/historyStorage';
 
 import { styles } from './SettingsScreen.styles';
 
+const formatPercent = (value: number): string => Math.round(value * 100).toString();
+const MIN_CONFIDENCE_PERCENT = Math.round(MIN_CONFIDENCE_THRESHOLD * 100);
+const MAX_CONFIDENCE_PERCENT = Math.round(MAX_CONFIDENCE_THRESHOLD * 100);
+
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);
+  const { signOut, isLoading } = useSession();
+  const {
+    confidenceThreshold,
+    setConfidenceThreshold,
+    resetConfidenceThreshold,
+    isLoading: isConfidenceLoading,
+  } = useRecognitionSettings();
+  const [confidenceInput, setConfidenceInput] = useState(formatPercent(confidenceThreshold));
+  const [confidenceError, setConfidenceError] = useState<string | null>(null);
+  const [isSavingConfidence, setIsSavingConfidence] = useState(false);
+
+  useEffect(() => {
+    setConfidenceInput(formatPercent(confidenceThreshold));
+  }, [confidenceThreshold]);
 
   const handleClearFavorites = () => {
     Alert.alert(
@@ -53,8 +78,139 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleSaveConfidence = async () => {
+    const parsedPercent = Number(confidenceInput);
+    if (!Number.isFinite(parsedPercent)) {
+      setConfidenceError('Enter a numeric percentage.');
+      return;
+    }
+
+    const normalized = parsedPercent / 100;
+    if (normalized < MIN_CONFIDENCE_THRESHOLD || normalized > MAX_CONFIDENCE_THRESHOLD) {
+      setConfidenceError(
+        `Please enter a value between ${MIN_CONFIDENCE_PERCENT}% and ${MAX_CONFIDENCE_PERCENT}%.`
+      );
+      return;
+    }
+
+    setIsSavingConfidence(true);
+    try {
+      await setConfidenceThreshold(normalized);
+      setConfidenceError(null);
+    } catch (error) {
+      Alert.alert('Update Failed', 'We could not save the confidence level. Please try again.');
+    } finally {
+      setIsSavingConfidence(false);
+    }
+  };
+
+  const handleResetConfidence = async () => {
+    setIsSavingConfidence(true);
+    try {
+      await resetConfidenceThreshold();
+      setConfidenceError(null);
+    } catch (error) {
+      Alert.alert('Reset Failed', 'We could not reset the confidence level. Please try again.');
+    } finally {
+      setIsSavingConfidence(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out? You will need to log in again to access your favorites and history.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              // Navigation will be handled automatically by auth state change
+            } catch (error) {
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const saveDisabled = isConfidenceLoading || isSavingConfidence;
+  const resetDisabled =
+    saveDisabled ||
+    Math.abs(confidenceThreshold - DEFAULT_CONFIDENCE_THRESHOLD) < Number.EPSILON;
+
   return (
     <ScrollView style={styles.container}>
+      {/* Recognition Section */}
+      <View style={styles.section}>
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          Recognition Confidence
+        </Text>
+        <Text variant="bodyMedium" style={styles.sectionDescription}>
+          Choose how confident MachineMate must be before automatically selecting a machine. Lower
+          percentages can surface more matches but may mislabel equipment.
+        </Text>
+        <TextInput
+          label="Minimum confidence (%)"
+          mode="outlined"
+          keyboardType="numeric"
+          value={confidenceInput}
+          onChangeText={text => {
+            setConfidenceInput(text);
+            setConfidenceError(null);
+          }}
+          disabled={isConfidenceLoading}
+          returnKeyType="done"
+          style={styles.input}
+        />
+        <HelperText type={confidenceError ? 'error' : 'info'} style={styles.helperText}>
+          {confidenceError ??
+            `Valid range: ${MIN_CONFIDENCE_PERCENT}%–${MAX_CONFIDENCE_PERCENT}%. Current threshold: ${formatPercent(
+              confidenceThreshold
+            )}%.`}
+        </HelperText>
+        <View style={styles.buttonSpacer}>
+          <PrimaryButton
+            label="Save Confidence"
+            icon="content-save"
+            onPress={handleSaveConfidence}
+            loading={isSavingConfidence}
+            disabled={saveDisabled}
+          />
+        </View>
+        <View style={styles.buttonSpacer}>
+          <PrimaryButton
+            label="Reset to Default"
+            icon="backup-restore"
+            mode="outlined"
+            onPress={handleResetConfidence}
+            disabled={resetDisabled}
+          />
+        </View>
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/* Account Section */}
+      <View style={styles.section}>
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          Account
+        </Text>
+        <PrimaryButton
+          label="Sign Out"
+          icon="logout"
+          mode="outlined"
+          onPress={handleSignOut}
+          disabled={isLoading}
+        />
+      </View>
+
+      <Divider style={styles.divider} />
+
       {/* Data Section */}
       <View style={styles.section}>
         <Text variant="titleMedium" style={styles.sectionTitle}>

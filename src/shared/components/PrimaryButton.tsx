@@ -2,7 +2,7 @@
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { colors } from '@shared/theme';
@@ -19,6 +19,7 @@ interface PrimaryButtonProps {
   disabled?: boolean;
   loading?: boolean;
   mode?: ButtonMode;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function PrimaryButton({
@@ -28,6 +29,7 @@ export default function PrimaryButton({
   disabled = false,
   loading = false,
   mode = 'contained',
+  style,
 }: PrimaryButtonProps) {
   const visualMode: ButtonMode = mode === 'elevated' ? 'contained' : mode;
   const isOutlined = visualMode === 'outlined';
@@ -49,7 +51,7 @@ export default function PrimaryButton({
 
   return (
     <TouchableOpacity
-      style={styles.wrapper}
+      style={[styles.wrapper, style]}
       onPress={onPress}
       activeOpacity={0.7}
       disabled={disabled || loading}

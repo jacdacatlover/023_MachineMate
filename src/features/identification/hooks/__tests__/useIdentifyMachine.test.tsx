@@ -4,15 +4,24 @@ import { renderHook, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
 
 import { MachinesProvider } from '@app/providers/MachinesProvider';
+import { RecognitionSettingsProvider } from '@app/providers/RecognitionSettingsProvider';
 
 import { IdentificationResult } from '@typings/identification';
 import { MachineDefinition } from '@typings/machine';
+import { DEFAULT_CONFIDENCE_THRESHOLD } from '@shared/constants/recognition';
 
 import * as identifyMachineService from '../../services/identifyMachine';
 import { useIdentifyMachine } from '../useIdentifyMachine';
 
 // Mock the identifyMachine service
 jest.mock('../../services/identifyMachine');
+jest.mock('../../../../services/api/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn(() => Promise.resolve({ data: { session: null } })),
+    },
+  },
+}));
 
 const mockMachines: MachineDefinition[] = [
   {
@@ -31,7 +40,9 @@ const mockMachines: MachineDefinition[] = [
 ];
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <MachinesProvider machines={mockMachines}>{children}</MachinesProvider>
+  <RecognitionSettingsProvider>
+    <MachinesProvider machines={mockMachines}>{children}</MachinesProvider>
+  </RecognitionSettingsProvider>
 );
 
 describe('useIdentifyMachine', () => {
@@ -76,7 +87,11 @@ describe('useIdentifyMachine', () => {
       expect(result.current.result).toEqual(mockResult);
     });
     expect(result.current.error).toBeNull();
-    expect(identifyMachineService.identifyMachine).toHaveBeenCalledWith(photoUri, mockMachines);
+    expect(identifyMachineService.identifyMachine).toHaveBeenCalledWith(
+      photoUri,
+      mockMachines,
+      { confidenceThreshold: DEFAULT_CONFIDENCE_THRESHOLD }
+    );
   });
 
   it('should handle identification errors', async () => {
@@ -154,6 +169,7 @@ describe('useIdentifyMachine', () => {
       labelName: 'Unknown Machine',
       candidates: [],
       confidence: 0.5,
+      source: 'backend_api',
     };
 
     (identifyMachineService.identifyMachine as jest.Mock)

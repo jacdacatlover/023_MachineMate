@@ -11,6 +11,7 @@ import { View, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvider';
 
 import { identifyMachine } from '@features/identification/services/identifyMachine';
 
@@ -28,6 +29,7 @@ type CameraScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 
 export default function CameraScreen() {
   const navigation = useNavigation<CameraScreenNavigationProp>();
   const machines = useMachines();
+  const { confidenceThreshold } = useRecognitionSettings();
   const [permission, requestPermission] = useCameraPermissions();
   const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -128,7 +130,7 @@ export default function CameraScreen() {
     try {
       setIsProcessing(true);
 
-      const result = await identifyMachine(uri, machines);
+      const result = await identifyMachine(uri, machines, { confidenceThreshold });
 
       navigation.replace('MachineResult', {
         photoUri: uri,

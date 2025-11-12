@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
@@ -7,6 +7,8 @@ import { createLogger } from '@shared/logger';
 import { filterValidMachineIds, validateMachineId } from '@shared/services/validation';
 
 import { FavoritesSchema } from '@typings/validation';
+
+import * as favoritesApi from '../services/favoritesApi';
 
 const logger = createLogger('hooks.useFavorites');
 
@@ -50,9 +52,10 @@ interface UseFavoritesReturn {
 /**
  * Hook for managing favorite machines
  *
- * Uses AsyncStorage with:
- * - Zod schema validation
- * - Machine catalog validation
+ * Uses backend API with AsyncStorage as cache:
+ * - Syncs with backend on mount
+ * - Optimistically updates local cache
+ * - Falls back to cached data on network errors
  * - Automatic cleanup of invalid machine IDs
  * - Type-safe operations
  *
@@ -74,6 +77,8 @@ interface UseFavoritesReturn {
  */
 export function useFavorites(): UseFavoritesReturn {
   const machines = useMachines();
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const handleFavoritesValueChange = useCallback(
     (favorites: string[]) => {
       // Automatically clean up invalid machine IDs when data loads
@@ -91,8 +96,8 @@ export function useFavorites(): UseFavoritesReturn {
     data: rawFavorites,
     setData,
     clearData,
-    isLoading,
-    error,
+    isLoading: isLoadingCache,
+    error: cacheError,
   } = useAsyncStorage<string[]>({
     key: FAVORITES_STORAGE_KEY,
     schema: FavoritesSchema,
@@ -106,6 +111,37 @@ export function useFavorites(): UseFavoritesReturn {
     [rawFavorites, machines]
   );
 
+  // Sync with backend on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncFavorites() {
+      try {
+        setIsSyncing(true);
+        const backendFavorites = await favoritesApi.getFavorites();
+
+        if (isMounted) {
+          // Update cache with backend data
+          await setData(backendFavorites);
+          logger.info('Synced favorites from backend', { count: backendFavorites.length });
+        }
+      } catch (error) {
+        // On network error, use cached data (already loaded by useAsyncStorage)
+        logger.warn('Failed to sync favorites from backend, using cached data', { error });
+      } finally {
+        if (isMounted) {
+          setIsSyncing(false);
+        }
+      }
+    }
+
+    syncFavorites();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setData]);
+
   const addFavorite = useCallback(
     async (machineId: string) => {
       try {
@@ -116,8 +152,21 @@ export function useFavorites(): UseFavoritesReturn {
           return;
         }
 
-        await setData([...favorites, machineId]);
-        logger.info(`Added machine ${machineId} to favorites`);
+        const newFavorites = [...favorites, machineId];
+
+        // Optimistically update cache
+        await setData(newFavorites);
+
+        // Sync to backend
+        try {
+          await favoritesApi.addFavorite(machineId);
+          logger.info(`Added machine ${machineId} to favorites`);
+        } catch (backendError) {
+          // Rollback on backend failure
+          await setData(favorites);
+          logger.error('Failed to sync favorite to backend, rolled back', { backendError });
+          throw backendError;
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to add favorite');
         logger.error('Failed to add favorite', error);
@@ -137,8 +186,19 @@ export function useFavorites(): UseFavoritesReturn {
           return;
         }
 
+        // Optimistically update cache
         await setData(newFavorites);
-        logger.info(`Removed machine ${machineId} from favorites`);
+
+        // Sync to backend
+        try {
+          await favoritesApi.removeFavorite(machineId);
+          logger.info(`Removed machine ${machineId} from favorites`);
+        } catch (backendError) {
+          // Rollback on backend failure
+          await setData(favorites);
+          logger.error('Failed to sync favorite removal to backend, rolled back', { backendError });
+          throw backendError;
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to remove favorite');
         logger.error('Failed to remove favorite', error);
@@ -184,7 +244,7 @@ export function useFavorites(): UseFavoritesReturn {
     isFavorite,
     toggleFavorite,
     clearFavorites,
-    isLoading,
-    error,
+    isLoading: isLoadingCache || isSyncing,
+    error: cacheError,
   };
 }

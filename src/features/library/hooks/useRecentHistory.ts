@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
@@ -8,6 +8,8 @@ import { filterValidMachineIds, validateMachineId } from '@shared/services/valid
 
 import { RecentHistoryItem } from '@typings/history';
 import { RecentHistorySchema } from '@typings/validation';
+
+import * as historyApi from '../services/historyApi';
 
 const logger = createLogger('hooks.useRecentHistory');
 
@@ -40,9 +42,10 @@ interface UseRecentHistoryReturn {
 /**
  * Hook for managing recent history
  *
- * Uses AsyncStorage with:
- * - Zod schema validation
- * - Machine catalog validation
+ * Uses backend API with AsyncStorage as cache:
+ * - Syncs with backend on mount
+ * - Optimistically updates local cache
+ * - Falls back to cached data on network errors
  * - Automatic cleanup of invalid machine IDs
  * - Limit to most recent 10 items
  * - Deduplication (moves existing items to top)
@@ -78,6 +81,8 @@ interface UseRecentHistoryReturn {
  */
 export function useRecentHistory(): UseRecentHistoryReturn {
   const machines = useMachines();
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const handleHistoryValueChange = useCallback(
     (history: RecentHistoryItem[]) => {
       // Automatically clean up invalid machine IDs when data loads
@@ -102,8 +107,8 @@ export function useRecentHistory(): UseRecentHistoryReturn {
     data: rawHistory,
     setData,
     clearData,
-    isLoading,
-    error,
+    isLoading: isLoadingCache,
+    error: cacheError,
   } = useAsyncStorage<RecentHistoryItem[]>({
     key: HISTORY_STORAGE_KEY,
     schema: RecentHistorySchema,
@@ -119,6 +124,37 @@ export function useRecentHistory(): UseRecentHistoryReturn {
     );
     return rawHistory.filter((item) => validMachineIds.includes(item.machineId));
   }, [rawHistory, machines]);
+
+  // Sync with backend on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncHistory() {
+      try {
+        setIsSyncing(true);
+        const backendHistory = await historyApi.getHistory();
+
+        if (isMounted) {
+          // Update cache with backend data
+          await setData(backendHistory);
+          logger.info('Synced history from backend', { count: backendHistory.length });
+        }
+      } catch (error) {
+        // On network error, use cached data (already loaded by useAsyncStorage)
+        logger.warn('Failed to sync history from backend, using cached data', { error });
+      } finally {
+        if (isMounted) {
+          setIsSyncing(false);
+        }
+      }
+    }
+
+    syncHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setData]);
 
   const addToHistory = useCallback(
     async (machineId: string) => {
@@ -141,8 +177,18 @@ export function useRecentHistory(): UseRecentHistoryReturn {
         // Keep only the last MAX_HISTORY_ITEMS
         const trimmedHistory = newHistory.slice(0, MAX_HISTORY_ITEMS);
 
+        // Optimistically update cache
         await setData(trimmedHistory);
-        logger.debug(`Added machine ${machineId} to history`);
+
+        // Sync to backend (fire and forget - don't rollback on failure)
+        try {
+          await historyApi.addToHistory(machineId);
+          logger.debug(`Added machine ${machineId} to history`);
+        } catch (backendError) {
+          // Don't rollback - history is less critical than favorites
+          // User's local cache is still updated
+          logger.warn('Failed to sync history to backend, continuing with local cache', { backendError });
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to add to history');
         logger.error('Failed to add to history', error);
@@ -167,7 +213,7 @@ export function useRecentHistory(): UseRecentHistoryReturn {
     history,
     addToHistory,
     clearHistory,
-    isLoading,
-    error,
+    isLoading: isLoadingCache || isSyncing,
+    error: cacheError,
   };
 }

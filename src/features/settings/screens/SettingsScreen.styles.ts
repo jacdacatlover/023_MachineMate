@@ -19,6 +19,15 @@ export const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 16,
   },
+  input: {
+    marginBottom: 4,
+  },
+  helperText: {
+    marginBottom: 8,
+  },
+  buttonSpacer: {
+    marginTop: 8,
+  },
   divider: {
     marginVertical: 8,
   },

@@ -4,7 +4,9 @@
 import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+import { supabase } from '../../../services/api/supabaseClient';
 import { createLogger } from '@shared/logger';
+import { recordRecognitionBreadcrumb } from '@shared/observability/monitoring';
 
 import {
   CatalogIdentificationResult,
@@ -19,6 +21,10 @@ import { RECOGNITION_CONFIG } from './config';
 
 const logger = createLogger('recognition.identifyMachine');
 
+type IdentifyMachineOptions = {
+  confidenceThreshold?: number;
+};
+
 type ReactNativeFile = Blob & {
   uri: string;
   name: string;
@@ -29,24 +35,57 @@ const API_BASE_URL =
   (Constants?.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
   process.env.EXPO_PUBLIC_API_BASE_URL;
 
+const describeError = (value: unknown): string => {
+  if (value instanceof Error) {
+    return value.message;
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
 export async function identifyMachine(
   photoUri: string,
-  allMachines: MachineDefinition[]
+  allMachines: MachineDefinition[],
+  options?: IdentifyMachineOptions
 ): Promise<IdentificationResult> {
   if (allMachines.length === 0) {
     throw new Error('No machines available for identification');
   }
 
+  const confidenceThreshold =
+    typeof options?.confidenceThreshold === 'number'
+      ? options.confidenceThreshold
+      : RECOGNITION_CONFIG.api.confidenceThreshold;
+
+  recordRecognitionBreadcrumb('identifyMachine invoked', {
+    machineCount: allMachines.length,
+    backendConfigured: Boolean(API_BASE_URL),
+    confidenceThreshold,
+  });
+
   const performanceMetadata: Record<string, unknown> = {
     machineCount: allMachines.length,
     backendConfigured: Boolean(API_BASE_URL),
     strategy: 'unknown',
+    confidenceThreshold,
   };
 
   return logger.trackPerformance(
     'identifyMachine',
     async () => {
-      const apiResult = await identifyWithBackendApi(photoUri, allMachines).catch(error => {
+      const apiResult = await identifyWithBackendApi(
+        photoUri,
+        allMachines,
+        confidenceThreshold
+      ).catch(error => {
         logger.warn('Backend API identification failed.', error);
         performanceMetadata.backendError = error instanceof Error ? error.message : error;
         return null;
@@ -55,7 +94,7 @@ export async function identifyMachine(
       if (apiResult) {
         performanceMetadata.strategy = 'backend';
         performanceMetadata.resultKind = apiResult.kind;
-        return { ...apiResult, photoUri };
+        return { ...apiResult, confidenceThreshold, photoUri };
       }
 
       if (!API_BASE_URL) {
@@ -63,9 +102,14 @@ export async function identifyMachine(
       }
 
       performanceMetadata.strategy = 'fallback';
-      const fallbackResult = fallbackManualRecommendation(photoUri, allMachines);
+      const fallbackResult = fallbackManualRecommendation();
       performanceMetadata.resultKind = fallbackResult.kind;
-      return { ...fallbackResult, photoUri };
+      recordRecognitionBreadcrumb('Fallback identification used', {
+        strategy: 'fallback',
+        labelId: fallbackResult.labelId,
+        confidenceThreshold,
+      });
+      return { ...fallbackResult, confidenceThreshold, photoUri };
     },
     performanceMetadata
   );
@@ -73,7 +117,8 @@ export async function identifyMachine(
 
 async function identifyWithBackendApi(
   photoUri: string,
-  allMachines: MachineDefinition[]
+  allMachines: MachineDefinition[],
+  confidenceThreshold: number
 ): Promise<CatalogIdentificationResult | GenericLabelResult | null> {
   if (!API_BASE_URL) {
     return null;
@@ -98,18 +143,35 @@ async function identifyWithBackendApi(
   const timeoutId = setTimeout(() => controller.abort(), RECOGNITION_CONFIG.api.timeoutMs);
 
   try {
+    // Get JWT token for authentication
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    };
+
+    // Add authorization header if we have a token
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
       body: formData,
-      headers: {
-        Accept: 'application/json',
-      },
+      headers,
       signal: controller.signal,
     });
 
     if (!response.ok) {
       const errorPayload = await response.text();
       logger.warn('Backend API identification error', errorPayload);
+      recordRecognitionBreadcrumb('Backend identification http_error', {
+        status: response.status,
+        backendConfigured: true,
+      });
       return null;
     }
 
@@ -118,11 +180,17 @@ async function identifyWithBackendApi(
     const validationResult = BackendIdentifyResponseSchema.safeParse(rawPayload);
     if (!validationResult.success) {
       logger.warn('Backend API returned invalid payload', validationResult.error);
+      recordRecognitionBreadcrumb('Backend identification invalid_payload', {
+        issues: validationResult.error.issues.length,
+      });
       return null;
     }
 
     const payload = validationResult.data;
 
+    const normalizedMachineName = payload.machine.trim();
+    const confidence = clampConfidence(payload.confidence);
+    const lowConfidence = confidence < confidenceThreshold;
     if (payload.trace_id) {
       logger.info('Backend identification success', {
         traceId: payload.trace_id,
@@ -131,10 +199,12 @@ async function identifyWithBackendApi(
         traceUrl: `${API_BASE_URL}/traces/${payload.trace_id}`,
       });
     }
-
-    const normalizedMachineName = payload.machine.trim();
-    const confidence = clampConfidence(payload.confidence);
-    const lowConfidence = confidence < RECOGNITION_CONFIG.api.confidenceThreshold;
+    recordRecognitionBreadcrumb('Backend identification success', {
+      traceId: payload.trace_id,
+      machine: normalizedMachineName,
+      confidence,
+      lowConfidence,
+    });
 
     const matchingMachine = allMachines.find(
       machine => machine.name.toLowerCase() === normalizedMachineName.toLowerCase()
@@ -157,12 +227,19 @@ async function identifyWithBackendApi(
       labelName: normalizedMachineName,
       candidates: [],
       confidence,
+      source: 'backend_api',
     };
   } catch (error) {
     if ((error as Error)?.name === 'AbortError') {
       logger.warn('Backend API request aborted due to timeout.');
+      recordRecognitionBreadcrumb('Backend identification timeout', {
+        reason: 'abort',
+      });
       return null;
     }
+    recordRecognitionBreadcrumb('Backend identification request failed', {
+      reason: describeError(error),
+    });
     throw error;
   } finally {
     clearTimeout(timeoutId);
@@ -224,21 +301,13 @@ async function ensureUploadablePhoto(photoUri: string): Promise<string> {
   }
 }
 
-function fallbackManualRecommendation(
-  photoUri: string,
-  allMachines: MachineDefinition[]
-): CatalogIdentificationResult {
-  const sorted = [...allMachines].sort((a, b) => a.name.localeCompare(b.name));
-  const index = sorted.length ? Math.abs(hashString(photoUri)) % sorted.length : 0;
-  const primary = sorted[index] ?? sorted[0];
-
-  const candidateIds = sorted.map(machine => machine.id);
+function fallbackManualRecommendation(): GenericLabelResult {
   return {
-    kind: 'catalog',
-    machineId: primary?.id ?? allMachines[0].id,
-    candidates: candidateIds,
-    confidence: null,
-    lowConfidence: true,
+    kind: 'generic',
+    labelId: 'unknown_machine',
+    labelName: 'Unknown machine',
+    candidates: [],
+    confidence: 0,
     source: 'fallback',
   };
 }

@@ -60,6 +60,21 @@ process.env.EXPO_PUBLIC_LOG_LEVEL = 'debug';
 // Mock react-native-body-highlighter
 jest.mock('react-native-body-highlighter', () => 'Body');
 
+// Mock sentry-expo to avoid importing native modules during tests
+jest.mock('sentry-expo', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  Native: {
+    addBreadcrumb: jest.fn(),
+    configureScope: jest.fn(),
+    captureException: jest.fn(),
+    setContext: jest.fn(),
+    setUser: jest.fn(),
+    setTag: jest.fn(),
+  },
+}));
+
 // Suppress console warnings during tests
 global.console = {
   ...console,

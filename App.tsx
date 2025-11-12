@@ -21,16 +21,44 @@ import { PaperProvider, Text } from 'react-native-paper';
 
 import RootNavigator from './src/app/navigation/RootNavigator';
 import { MachinesProvider } from './src/app/providers/MachinesProvider';
+import { RecognitionSettingsProvider } from './src/app/providers/RecognitionSettingsProvider';
 import machinesDataRaw from './src/data/machines.json';
+import { AuthStack, useSession } from './src/features/auth';
+import { getMachines } from './src/features/library/services/machinesApi';
 import { ErrorBoundary } from './src/shared/components/ErrorBoundary';
 import PrimaryButton from './src/shared/components/PrimaryButton';
+import { createLogger } from './src/shared/logger';
 import { initMonitoring } from './src/shared/observability/monitoring';
 import { theme, navigationTheme, colors } from './src/shared/theme';
 import { MachineDefinition } from './src/types/machine';
 
 // Import machine data
 
-initMonitoring();
+// Temporarily disable monitoring to isolate issue
+// initMonitoring();
+
+const logger = createLogger('App');
+
+/**
+ * AppContent - Inner component that uses useSession hook
+ * (must be inside PaperProvider and NavigationContainer)
+ */
+function AppContent({ machines }: { machines: MachineDefinition[] }) {
+  const { user, isLoading: authLoading } = useSession();
+
+  // Show loading indicator while checking auth state
+  if (authLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Checking authentication...</Text>
+      </View>
+    );
+  }
+
+  // Show AuthStack if not logged in, otherwise show main app
+  return user ? <RootNavigator /> : <AuthStack />;
+}
 
 export default function App() {
   const [machines, setMachines] = useState<MachineDefinition[]>([]);
@@ -50,11 +78,22 @@ export default function App() {
   });
 
   const loadMachines = useCallback(async () => {
-    const machinesData = machinesDataRaw as MachineDefinition[];
     setIsLoading(true);
     setError(null);
 
     try {
+      let machinesData: MachineDefinition[];
+
+      // Try to fetch from backend API first
+      try {
+        machinesData = await getMachines();
+        logger.info('Loaded machines from backend API', { count: machinesData.length });
+      } catch (backendError) {
+        // Fall back to bundled JSON on network error
+        logger.warn('Failed to fetch machines from backend, using bundled data', { backendError });
+        machinesData = machinesDataRaw as MachineDefinition[];
+      }
+
       // Validate and load machines
       if (!machinesData || !Array.isArray(machinesData)) {
         throw new Error('Invalid machines data format');
@@ -64,17 +103,51 @@ export default function App() {
         throw new Error('No machines found in catalog');
       }
 
-      // Validate that each machine has required fields
-      const validated = machinesData.map((machine) => ({
-        ...machine,
-        primaryMuscles: machine.primaryMuscles ?? [],
-        setupSteps: machine.setupSteps ?? [],
-      }));
+      const fallbackMachines = (machinesDataRaw as MachineDefinition[]) ?? [];
+      const fallbackMap = new Map(fallbackMachines.map(machine => [machine.id, machine]));
+      const fetchedMap = new Map(machinesData.map(machine => [machine.id, machine]));
+
+      if (fetchedMap.size < fallbackMap.size) {
+        logger.warn('Backend catalog missing machines found in fallback data', {
+          backendCount: fetchedMap.size,
+          fallbackCount: fallbackMap.size,
+        });
+      }
+
+      const mergedIds = new Set([...fallbackMap.keys(), ...fetchedMap.keys()]);
+
+      // Normalize machine entries while merging missing guide content from the bundled JSON
+      const validated = Array.from(mergedIds).map(machineId => {
+        const fallback = fallbackMap.get(machineId);
+        const fetched = fetchedMap.get(machineId);
+        const source = fetched ?? fallback;
+
+        if (!source) {
+          throw new Error(`Machine ${machineId} missing from both backend and fallback data`);
+        }
+
+        const normalized: MachineDefinition = {
+          ...source,
+          primaryMuscles: fetched?.primaryMuscles ?? fallback?.primaryMuscles ?? [],
+          secondaryMuscles: fetched?.secondaryMuscles ?? fallback?.secondaryMuscles ?? [],
+          setupSteps: fetched?.setupSteps ?? fallback?.setupSteps ?? [],
+          howToSteps: fetched?.howToSteps ?? fallback?.howToSteps ?? [],
+          commonMistakes: fetched?.commonMistakes ?? fallback?.commonMistakes ?? [],
+          safetyTips: fetched?.safetyTips ?? fallback?.safetyTips ?? [],
+          beginnerTips: fetched?.beginnerTips ?? fallback?.beginnerTips ?? [],
+        };
+
+        if (normalized.setupSteps.length === 0 || normalized.howToSteps.length === 0) {
+          logger.warn('Machine missing guide content even after fallback', { machineId });
+        }
+
+        return normalized;
+      });
 
       setMachines(validated);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      console.error('Error loading machines:', errorMessage);
+      logger.error('Error loading machines', { error: errorMessage });
       setError(`Failed to load machine data: ${errorMessage}`);
     } finally {
       setIsLoading(false);
@@ -112,14 +185,16 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <MachinesProvider machines={machines}>
-        <PaperProvider theme={theme}>
-          <NavigationContainer theme={navigationTheme}>
-            <RootNavigator />
-            <StatusBar style="light" />
-          </NavigationContainer>
-        </PaperProvider>
-      </MachinesProvider>
+      <RecognitionSettingsProvider>
+        <MachinesProvider machines={machines}>
+          <PaperProvider theme={theme}>
+            <NavigationContainer theme={navigationTheme}>
+              <AppContent machines={machines} />
+              <StatusBar style="light" />
+            </NavigationContainer>
+          </PaperProvider>
+        </MachinesProvider>
+      </RecognitionSettingsProvider>
     </ErrorBoundary>
   );
 }

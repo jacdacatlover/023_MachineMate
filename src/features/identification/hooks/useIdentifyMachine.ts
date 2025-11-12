@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
+import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvider';
 
 import { createLogger } from '@shared/logger';
 
@@ -56,6 +57,7 @@ interface UseIdentifyMachineReturn {
  */
 export function useIdentifyMachine(): UseIdentifyMachineReturn {
   const machines = useMachines();
+  const { confidenceThreshold } = useRecognitionSettings();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [result, setResult] = useState<IdentificationResult | null>(null);
@@ -67,7 +69,9 @@ export function useIdentifyMachine(): UseIdentifyMachineReturn {
       setResult(null);
 
       try {
-        const identificationResult = await identifyMachine(photoUri, machines);
+        const identificationResult = await identifyMachine(photoUri, machines, {
+          confidenceThreshold,
+        });
         setResult(identificationResult);
         return identificationResult;
       } catch (err) {
@@ -79,7 +83,7 @@ export function useIdentifyMachine(): UseIdentifyMachineReturn {
         setIsLoading(false);
       }
     },
-    [machines]
+    [machines, confidenceThreshold]
   );
 
   return {

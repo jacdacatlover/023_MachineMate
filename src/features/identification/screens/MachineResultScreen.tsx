@@ -269,10 +269,22 @@ function deriveManualPrompt(
 ): ManualPrompt {
   if (!currentMachine || genericResult) {
     if (genericResult) {
+      const confidenceLine = describeConfidenceContext(
+        genericResult.confidence,
+        genericResult.confidenceThreshold
+      );
+
       return {
         shouldShow: true,
-        title: 'Identified machine not in catalog',
-        body: `We think this might be a ${genericResult.labelName}, but it is not in our guides yet. Try another photo once that machine is available.`,
+        title:
+          genericResult.source === 'fallback'
+            ? "We couldn't identify this machine automatically."
+            : 'Identified machine not in catalog',
+        body:
+          (confidenceLine ? `${confidenceLine}. ` : '') +
+          (genericResult.source === 'fallback'
+            ? 'Retake the photo so the equipment is centered and well lit.'
+            : `We think this might be a ${genericResult.labelName}, but it is not in our guides yet. Try another photo once that machine is available.`),
       };
     }
 
@@ -284,10 +296,15 @@ function deriveManualPrompt(
   }
 
   if (catalogResult?.lowConfidence) {
+    const confidenceLine = describeConfidenceContext(
+      catalogResult.confidence,
+      catalogResult.confidenceThreshold
+    );
+
     return {
       shouldShow: true,
       title: "We're not sure about this match.",
-      body: 'Try taking another photo so we can confirm the machine automatically.',
+      body: `${confidenceLine ? `${confidenceLine}. ` : ''}Try taking another photo so we can confirm the machine automatically.`,
     };
   }
 
@@ -303,12 +320,24 @@ function deriveConfidenceCaption(
   genericResult: GenericLabelResult | null
 ): string | null {
   if (catalogResult && typeof catalogResult.confidence === 'number') {
-    const suffix = catalogResult.source === 'fallback' ? ' (fallback)' : '';
+    const details: string[] = [];
+    if (typeof catalogResult.confidenceThreshold === 'number') {
+      details.push(`min ${formatPercent(catalogResult.confidenceThreshold)}`);
+    }
+    if (catalogResult.source === 'fallback') {
+      details.push('fallback');
+    }
+    const suffix = details.length ? ` (${details.join(', ')})` : '';
     return `Confidence: ${formatPercent(catalogResult.confidence)}${suffix}`;
   }
 
   if (genericResult) {
-    return `Confidence: ${formatPercent(genericResult.confidence)}`;
+    const details: string[] = [];
+    if (typeof genericResult.confidenceThreshold === 'number') {
+      details.push(`min ${formatPercent(genericResult.confidenceThreshold)}`);
+    }
+    const suffix = details.length ? ` (${details.join(', ')})` : '';
+    return `Confidence: ${formatPercent(genericResult.confidence)}${suffix}`;
   }
 
   return null;
@@ -320,4 +349,26 @@ function formatPercent(value: number | null | undefined): string {
   }
 
   return `${Math.round(value * 100)}%`;
+}
+
+function describeConfidenceContext(
+  confidence: number | null | undefined,
+  threshold: number | null | undefined
+): string | null {
+  const hasConfidence = typeof confidence === 'number';
+  const hasThreshold = typeof threshold === 'number';
+
+  if (hasConfidence && hasThreshold) {
+    return `${formatPercent(confidence)} confidence (needs ${formatPercent(threshold)}+)`;
+  }
+
+  if (hasConfidence) {
+    return `${formatPercent(confidence)} confidence`;
+  }
+
+  if (hasThreshold) {
+    return `Needs ${formatPercent(threshold)}+ confidence`;
+  }
+
+  return null;
 }
