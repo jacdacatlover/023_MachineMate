@@ -26,7 +26,7 @@ interface EnvironmentConfig {
 
 const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
   development: {
-    apiUrl: 'http://localhost:3000/api',
+    apiUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000',
     apiTimeout: 10000,
     enableAnalytics: false,
     enableCrashReporting: false,
@@ -34,7 +34,7 @@ const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
     sentryDsn: process.env.SENTRY_DSN_DEV,
   },
   preview: {
-    apiUrl: 'https://preview-api.machinemate.com/api',
+    apiUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://preview-api.machinemate.com/api',
     apiTimeout: 8000,
     enableAnalytics: true,
     enableCrashReporting: true,
@@ -42,7 +42,7 @@ const ENV_CONFIG: Record<AppEnvironment, EnvironmentConfig> = {
     sentryDsn: process.env.SENTRY_DSN_PREVIEW ?? process.env.SENTRY_DSN,
   },
   production: {
-    apiUrl: 'https://api.machinemate.com/api',
+    apiUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://machinemate-api-buz66rae7q-uc.a.run.app',
     apiTimeout: 8000,
     enableAnalytics: true,
     enableCrashReporting: true,

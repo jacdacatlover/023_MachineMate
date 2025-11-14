@@ -34,8 +34,10 @@ import { MachineDefinition } from './src/types/machine';
 
 // Import machine data
 
-// Temporarily disable monitoring to isolate issue
-// initMonitoring();
+// Initialize monitoring (skip in test environments)
+if (process.env.NODE_ENV !== 'test') {
+  initMonitoring();
+}
 
 const logger = createLogger('App');
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
@@ -78,6 +78,7 @@ interface UseFavoritesReturn {
 export function useFavorites(): UseFavoritesReturn {
   const machines = useMachines();
   const [isSyncing, setIsSyncing] = useState(false);
+  const isCleaningRef = useRef(false);
 
   const handleFavoritesValueChange = useCallback(
     (favorites: string[]) => {
@@ -110,6 +111,33 @@ export function useFavorites(): UseFavoritesReturn {
     () => filterValidMachineIds(rawFavorites, machines),
     [rawFavorites, machines]
   );
+
+  // Persist cleaned data if invalid IDs were filtered out
+  useEffect(() => {
+    // Only run after loading completes and sync is done
+    if (isLoadingCache || isSyncing || isCleaningRef.current) {
+      return;
+    }
+
+    // Check if cleanup is needed (rawFavorites has invalid IDs)
+    if (rawFavorites.length > 0 && favorites.length !== rawFavorites.length) {
+      isCleaningRef.current = true;
+
+      logger.debug('Persisting cleaned favorites', {
+        before: rawFavorites.length,
+        after: favorites.length,
+        removed: rawFavorites.length - favorites.length,
+      });
+
+      setData(favorites)
+        .catch((err) => {
+          logger.error('Failed to persist cleaned favorites', { error: err });
+        })
+        .finally(() => {
+          isCleaningRef.current = false;
+        });
+    }
+  }, [rawFavorites, favorites, isLoadingCache, isSyncing, setData]);
 
   // Sync with backend on mount
   useEffect(() => {
@@ -228,6 +256,16 @@ export function useFavorites(): UseFavoritesReturn {
 
   const clearFavorites = useCallback(async () => {
     try {
+      // Clear backend first
+      try {
+        await favoritesApi.clearAllFavorites();
+        logger.info('Cleared favorites from backend');
+      } catch (backendError) {
+        // Log backend error but continue to clear cache
+        logger.warn('Failed to clear favorites from backend, clearing cache only', { backendError });
+      }
+
+      // Clear local cache
       await clearData();
       logger.info('Cleared all favorites');
     } catch (err) {

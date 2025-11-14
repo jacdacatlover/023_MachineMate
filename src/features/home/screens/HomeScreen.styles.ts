@@ -36,6 +36,15 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
   },
+  loadingContainer: {
+    padding: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: colors.textSecondary,
+  },
   emptyState: {
     padding: 48,
     alignItems: 'center',

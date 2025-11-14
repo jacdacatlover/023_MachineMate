@@ -34,11 +34,44 @@ __pycache__/
 .pycache/
 .venv/
 venv/
-backend/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Local env files
 .env*.local
 .env
+backend/.env
+infra/.env
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+!terraform.tfvars.example
+
+# Supabase
+.supabase/
+supabase/.temp/
+supabase/.branches/
 
 # TypeScript
 *.tsbuildinfo
+
+# Test artifacts and logs
+test-results*.log
+coverage/
+.nyc_output/
+*.log
+!backend/logs/.gitkeep
+
+# Backup files
+*.backup
+*~
+.#*

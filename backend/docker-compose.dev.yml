@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  # FastAPI backend service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: machinemate-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Database
+      - DATABASE_URL=${DATABASE_URL}
+
+      # Supabase JWT
+      - SUPABASE_JWT_AUDIENCE=${SUPABASE_JWT_AUDIENCE:-authenticated}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_JWT_JWKS_URL=${SUPABASE_JWT_JWKS_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+
+      # AI/ML
+      - FIREWORKS_API_KEY=${FIREWORKS_API_KEY}
+
+      # Storage
+      - STORAGE_BUCKET_MACHINES=${STORAGE_BUCKET_MACHINES:-machines}
+      - STORAGE_BUCKET_TUTORIALS=${STORAGE_BUCKET_TUTORIALS:-tutorials}
+      - STORAGE_BUCKET_USER_UPLOADS=${STORAGE_BUCKET_USER_UPLOADS:-user-uploads}
+
+      # Observability
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=console
+
+      # Security
+      - CORS_ORIGINS=http://localhost:8081,exp://localhost:8081
+      - REQUIRE_AUTH=${REQUIRE_AUTH:-true}
+
+      # Environment
+      - ENVIRONMENT=development
+      - DEBUG=true
+
+      # Legacy VLM (if needed)
+      - machinemate_vlm_api_base_url=${machinemate_vlm_api_base_url}
+      - machinemate_vlm_api_key=${machinemate_vlm_api_key}
+      - machinemate_enable_mock_responses=${machinemate_enable_mock_responses:-false}
+
+    volumes:
+      # Mount source code for hot reload
+      - ./app:/app/app
+    restart: unless-stopped
+    networks:
+      - machinemate-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  machinemate-network:
+    driver: bridge

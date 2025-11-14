@@ -37,8 +37,80 @@ jobs:
         continue-on-error: false
 
       - name: Run tests
-        run: npm test -- --coverage
+        run: npm test -- --coverage --json --outputFile=test-results.json
         continue-on-error: false
+
+      - name: Generate test results summary
+        if: always()
+        run: |
+          echo "Generating TEST_RESULTS.md update..."
+
+          # Extract test counts from jest output
+          TOTAL_TESTS=$(cat test-results.json | jq '.numTotalTests // 0')
+          PASSED_TESTS=$(cat test-results.json | jq '.numPassedTests // 0')
+          FAILED_TESTS=$(cat test-results.json | jq '.numFailedTests // 0')
+          TOTAL_SUITES=$(cat test-results.json | jq '.numTotalTestSuites // 0')
+          PASSED_SUITES=$(cat test-results.json | jq '.numPassedTestSuites // 0')
+          FAILED_SUITES=$(cat test-results.json | jq '.numFailedTestSuites // 0')
+
+          # Calculate pass percentage
+          if [ "$TOTAL_TESTS" -gt 0 ]; then
+            PASS_PCT=$(awk "BEGIN {printf \"%.1f\", ($PASSED_TESTS / $TOTAL_TESTS) * 100}")
+          else
+            PASS_PCT="0.0"
+          fi
+
+          # Create summary for PR comment
+          cat > test-summary.md << EOF
+          ## 🧪 Test Results (CI Run)
+
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+
+          ### Summary
+          - ✅ **Passing:** ${PASSED_TESTS}/${TOTAL_TESTS} tests (${PASS_PCT}%)
+          - ❌ **Failing:** ${FAILED_TESTS} tests
+          - **Test Suites:** ${FAILED_SUITES} failed, ${PASSED_SUITES} passed, ${TOTAL_SUITES} total
+
+          EOF
+
+          cat test-summary.md
+
+      - name: Update TEST_RESULTS.md
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          echo "Updating TEST_RESULTS.md..."
+
+          # Prepend new results to TEST_RESULTS.md
+          cat > test-results-header.md << 'EOF'
+          # MachineMate Test Results - CI Automated Update
+
+          **Last Updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+          **Test Framework:** Jest 29.7.0
+
+          EOF
+
+          # Append test summary
+          cat test-summary.md >> test-results-header.md
+
+          # Preserve historical data by appending old file
+          echo -e "\n---\n## Historical Test Results\n" >> test-results-header.md
+          tail -n +2 TEST_RESULTS.md >> test-results-header.md || true
+
+          # Replace TEST_RESULTS.md
+          mv test-results-header.md TEST_RESULTS.md
+
+      - name: Commit updated TEST_RESULTS.md
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add TEST_RESULTS.md
+          git diff --staged --quiet || git commit -m "chore(ci): update TEST_RESULTS.md [skip ci]"
+          git push
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -83,6 +155,127 @@ jobs:
           echo "Checking for large files (>1MB)..."
           find . -type f -size +1M -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./coverage/*" || echo "No large files found"
 
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Analyze JavaScript bundle size
+        run: |
+          echo "📊 Analyzing bundle size..."
+
+          # Count total JS/TS files and their sizes
+          JS_COUNT=$(find src -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) | wc -l)
+          JS_SIZE=$(find src -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -exec cat {} \; | wc -c)
+          JS_SIZE_MB=$(echo "scale=2; $JS_SIZE / 1024 / 1024" | bc)
+
+          # Count node_modules size
+          NODE_MODULES_SIZE=$(du -sm node_modules 2>/dev/null | cut -f1 || echo "0")
+
+          # Count package dependencies
+          DEPS_COUNT=$(node -e "const pkg = require('./package.json'); console.log(Object.keys(pkg.dependencies || {}).length)")
+          DEV_DEPS_COUNT=$(node -e "const pkg = require('./package.json'); console.log(Object.keys(pkg.devDependencies || {}).length)")
+
+          # Create bundle size report
+          cat > bundle-size-report.md << EOF
+          # 📦 Bundle Size Report
+
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+
+          ## Source Code Size
+          - **Total Files:** ${JS_COUNT} TypeScript/JavaScript files
+          - **Total Size:** ${JS_SIZE_MB} MB (uncompressed)
+
+          ## Dependencies
+          - **Production Dependencies:** ${DEPS_COUNT} packages
+          - **Dev Dependencies:** ${DEV_DEPS_COUNT} packages
+          - **node_modules Size:** ${NODE_MODULES_SIZE} MB
+
+          ## Size Breakdown by Directory
+          EOF
+
+          # Add directory breakdown
+          echo "" >> bundle-size-report.md
+          echo "| Directory | Files | Size (KB) |" >> bundle-size-report.md
+          echo "|-----------|-------|-----------|" >> bundle-size-report.md
+
+          for dir in src/features/* src/shared src/services; do
+            if [ -d "$dir" ]; then
+              DIR_NAME=$(basename $dir)
+              DIR_FILES=$(find $dir -type f \( -name "*.ts" -o -name "*.tsx" \) 2>/dev/null | wc -l || echo "0")
+              DIR_SIZE=$(find $dir -type f \( -name "*.ts" -o -name "*.tsx" \) -exec cat {} \; 2>/dev/null | wc -c || echo "0")
+              DIR_SIZE_KB=$(echo "scale=1; $DIR_SIZE / 1024" | bc)
+              echo "| $DIR_NAME | $DIR_FILES | $DIR_SIZE_KB |" >> bundle-size-report.md
+            fi
+          done
+
+          echo "" >> bundle-size-report.md
+          echo "---" >> bundle-size-report.md
+          echo "" >> bundle-size-report.md
+          echo "**Note:** Sizes shown are uncompressed source code. Production bundle size will be significantly smaller after Metro bundling, tree-shaking, and compression." >> bundle-size-report.md
+
+          cat bundle-size-report.md
+
+      - name: Check for bundle size increase
+        run: |
+          echo "🔍 Checking for significant bundle size changes..."
+
+          # Get current source size
+          CURRENT_SIZE=$(find src -type f \( -name "*.ts" -o -name "*.tsx" \) -exec cat {} \; | wc -c)
+
+          # Try to get previous size from git
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            git checkout HEAD~1 -- src 2>/dev/null || true
+            PREVIOUS_SIZE=$(find src -type f \( -name "*.ts" -o -name "*.tsx" \) -exec cat {} \; 2>/dev/null | wc -c || echo "$CURRENT_SIZE")
+            git checkout HEAD -- src
+          else
+            PREVIOUS_SIZE=$CURRENT_SIZE
+          fi
+
+          # Calculate change
+          SIZE_DIFF=$((CURRENT_SIZE - PREVIOUS_SIZE))
+          SIZE_DIFF_KB=$(echo "scale=1; $SIZE_DIFF / 1024" | bc)
+
+          if [ $SIZE_DIFF -gt 51200 ]; then  # >50KB increase
+            echo "⚠️  Warning: Bundle size increased by ${SIZE_DIFF_KB} KB"
+            echo "Consider reviewing recent changes for unnecessary imports or large dependencies"
+          elif [ $SIZE_DIFF -lt -51200 ]; then  # >50KB decrease
+            echo "✅ Bundle size decreased by ${SIZE_DIFF_KB} KB - great job!"
+          else
+            echo "✅ Bundle size change: ${SIZE_DIFF_KB} KB (within acceptable range)"
+          fi
+
+      - name: Comment PR with bundle size
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('bundle-size-report.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
   dependency-audit:
     name: Security Audit
     runs-on: ubuntu-latest
@@ -104,3 +297,105 @@ jobs:
       - name: Check for outdated dependencies
         run: npm outdated || true
         continue-on-error: true
+
+  backend-tests:
+    name: Backend Tests & Security
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run pytest
+        run: |
+          cd backend
+          python -m pytest tests/ -v --tb=short --cov=app --cov-report=xml --cov-report=term
+        continue-on-error: false
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: codecov-backend
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Run pip-audit (security scan)
+        run: |
+          pip install pip-audit
+          pip-audit --require-hashes --disable-pip -r backend/requirements.txt || true
+        continue-on-error: true
+
+      - name: Check Python code quality
+        run: |
+          echo "Checking for TODO/FIXME in Python code..."
+          git grep -n "TODO\|FIXME" -- "backend/**/*.py" || echo "No TODO/FIXME found in backend"
+        continue-on-error: true
+
+  supabase-migrations:
+    name: Supabase Schema Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start ephemeral Postgres for dry run
+        run: |
+          docker run --name supabase-ci-db -e POSTGRES_PASSWORD=postgres -p 6543:5432 -d postgres:16
+          for i in {1..30}; do
+            if docker exec supabase-ci-db pg_isready -U postgres >/dev/null 2>&1; then
+              echo "Postgres is ready"
+              break
+            fi
+            echo "Waiting for Postgres to accept connections..."
+            sleep 2
+          done
+
+      - name: Lint Supabase migrations
+        working-directory: supabase
+        run: supabase db lint
+
+      - name: Apply migrations against ephemeral database
+        working-directory: supabase
+        env:
+          SUPABASE_DB_URL: postgresql://postgres:postgres@localhost:6543/postgres
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
+
+      - name: Stop ephemeral Postgres
+        if: always()
+        run: docker rm -f supabase-ci-db
+
+  backend-docker-build:
+    name: Backend Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t machinemate-backend-ci -f backend/Dockerfile backend

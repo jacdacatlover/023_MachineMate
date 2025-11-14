@@ -1,21 +1,20 @@
 // Home screen: Main entry point with "Identify Machine" button and recent history
 
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState, useCallback } from 'react';
-import { Image, ScrollView, View } from 'react-native';
+import React from 'react';
+import { Image, ScrollView, View, ActivityIndicator } from 'react-native';
 import { Divider, Text } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
 import MachineListItem from '@features/library/components/MachineListItem';
+import { useFavorites } from '@features/library/hooks/useFavorites';
+import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
 
 import PrimaryButton from '@shared/components/PrimaryButton';
-import { getFavorites, setFavorites as saveFavorites } from '@shared/services/favoritesStorage';
-import { getRecentHistory } from '@shared/services/historyStorage';
-import { filterValidMachineIds } from '@shared/services/validation';
+import { colors } from '@shared/theme';
 
-import { RecentHistoryItem } from '@typings/history';
 import { IdentificationResult } from '@typings/identification';
 import { MachineDefinition } from '@typings/machine';
 import { HomeStackParamList } from '@typings/navigation';
@@ -29,32 +28,15 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'H
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const machines = useMachines();
-  const [recentHistory, setRecentHistory] = useState<RecentHistoryItem[]>([]);
-  const [favorites, setFavorites] = useState<string[]>([]);
 
-  const loadData = useCallback(async () => {
-    const history = await getRecentHistory();
-    const favs = await getFavorites();
+  // Use hooks for favorites and history - they handle sync automatically
+  const { favorites, isLoading: favoritesLoading } = useFavorites();
+  const { history, isLoading: historyLoading } = useRecentHistory();
 
-    // Validate and clean up invalid machine IDs
-    const validFavs = filterValidMachineIds(favs, machines);
-    if (validFavs.length !== favs.length) {
-      // Save cleaned favorites back to storage
-      await saveFavorites(validFavs).catch(err =>
-        console.error('Failed to save cleaned favorites:', err)
-      );
-    }
+  const isLoading = favoritesLoading || historyLoading;
 
-    setRecentHistory(history.slice(0, 5)); // Show only last 5
-    setFavorites(validFavs);
-  }, [machines]);
-
-  // Load recent history and favorites when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+  // Show only last 5 history items on home screen
+  const recentHistory = history.slice(0, 5);
 
   const handleIdentifyMachine = () => {
     navigation.navigate('Camera');
@@ -103,7 +85,16 @@ export default function HomeScreen() {
 
       <Divider />
 
-      {favoriteMachines.length > 0 && (
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text variant="bodyMedium" style={styles.loadingText}>
+            Loading your data...
+          </Text>
+        </View>
+      )}
+
+      {!isLoading && favoriteMachines.length > 0 && (
         <View style={styles.recentSection}>
           <Text variant="titleLarge" style={styles.sectionTitle}>
             Favorite Machines
@@ -119,9 +110,9 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {favoriteMachines.length > 0 && recentMachines.length > 0 && <Divider />}
+      {!isLoading && favoriteMachines.length > 0 && recentMachines.length > 0 && <Divider />}
 
-      {recentMachines.length > 0 && (
+      {!isLoading && recentMachines.length > 0 && (
         <View style={styles.recentSection}>
           <Text variant="titleLarge" style={styles.sectionTitle}>
             Recent Machines
@@ -137,7 +128,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {recentMachines.length === 0 && (
+      {!isLoading && recentMachines.length === 0 && favoriteMachines.length === 0 && (
         <View style={styles.emptyState}>
           <Text variant="bodyLarge" style={styles.emptyText}>
             No recent machines yet.

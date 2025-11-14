@@ -6,20 +6,22 @@ import { Text, Divider, TextInput, HelperText } from 'react-native-paper';
 
 import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvider';
 import { useSession } from '@features/auth';
+import { useFavorites } from '@features/library/hooks/useFavorites';
+import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
+
 import PrimaryButton from '@shared/components/PrimaryButton';
 import {
   DEFAULT_CONFIDENCE_THRESHOLD,
   MAX_CONFIDENCE_THRESHOLD,
   MIN_CONFIDENCE_THRESHOLD,
 } from '@shared/constants/recognition';
-import { clearFavorites } from '@shared/services/favoritesStorage';
-import { clearHistory } from '@shared/services/historyStorage';
 
 import { styles } from './SettingsScreen.styles';
 
 const formatPercent = (value: number): string => Math.round(value * 100).toString();
 const MIN_CONFIDENCE_PERCENT = Math.round(MIN_CONFIDENCE_THRESHOLD * 100);
 const MAX_CONFIDENCE_PERCENT = Math.round(MAX_CONFIDENCE_THRESHOLD * 100);
+const DEFAULT_CONFIDENCE_PERCENT = formatPercent(DEFAULT_CONFIDENCE_THRESHOLD);
 
 export default function SettingsScreen() {
   const [isClearing, setIsClearing] = useState(false);
@@ -33,6 +35,10 @@ export default function SettingsScreen() {
   const [confidenceInput, setConfidenceInput] = useState(formatPercent(confidenceThreshold));
   const [confidenceError, setConfidenceError] = useState<string | null>(null);
   const [isSavingConfidence, setIsSavingConfidence] = useState(false);
+
+  // Use hooks for clearing data - these now sync with backend
+  const { clearFavorites } = useFavorites();
+  const { clearHistory } = useRecentHistory();
 
   useEffect(() => {
     setConfidenceInput(formatPercent(confidenceThreshold));
@@ -108,6 +114,7 @@ export default function SettingsScreen() {
     setIsSavingConfidence(true);
     try {
       await resetConfidenceThreshold();
+      setConfidenceInput(DEFAULT_CONFIDENCE_PERCENT);
       setConfidenceError(null);
     } catch (error) {
       Alert.alert('Reset Failed', 'We could not reset the confidence level. Please try again.');
@@ -138,10 +145,13 @@ export default function SettingsScreen() {
     );
   };
 
-  const saveDisabled = isConfidenceLoading || isSavingConfidence;
-  const resetDisabled =
-    saveDisabled ||
+  const isBusy = isConfidenceLoading || isSavingConfidence;
+  const isSavedDefault =
     Math.abs(confidenceThreshold - DEFAULT_CONFIDENCE_THRESHOLD) < Number.EPSILON;
+  const isInputDefault = confidenceInput.trim() === DEFAULT_CONFIDENCE_PERCENT;
+
+  const saveDisabled = isBusy;
+  const resetDisabled = isBusy || (isSavedDefault && isInputDefault);
 
   return (
     <ScrollView style={styles.container}>

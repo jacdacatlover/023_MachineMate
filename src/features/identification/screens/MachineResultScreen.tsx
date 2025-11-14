@@ -1,19 +1,17 @@
 // Machine Result screen: Shows identified machine with photo and alternatives
 
 import { useRoute, RouteProp } from '@react-navigation/native';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, ScrollView, Image } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
+import { useFavorites } from '@features/library/hooks/useFavorites';
+import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
+
 import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
 import SectionHeader from '@shared/components/SectionHeader';
-import {
-  toggleFavorite,
-  isFavorite as checkIsFavorite,
-} from '@shared/services/favoritesStorage';
-import { addToRecentHistory } from '@shared/services/historyStorage';
 import { validateMachineId } from '@shared/services/validation';
 import { colors } from '@shared/theme';
 
@@ -35,6 +33,10 @@ export default function MachineResultScreen() {
   const { photoUri: routePhotoUri, result } = route.params;
   const machines = useMachines();
 
+  // Use hooks for favorites and history tracking
+  const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
+  const { addToHistory } = useRecentHistory();
+
   const catalogResult = isCatalogResult(result) ? result : null;
   const genericResult = isGenericLabelResult(result) ? result : null;
   const photoUri = result.photoUri ?? routePhotoUri;
@@ -43,7 +45,8 @@ export default function MachineResultScreen() {
     () => (catalogResult ? catalogResult.machineId : null),
     [catalogResult]
   );
-  const [isFavorite, setIsFavorite] = useState(false);
+
+  const isFavorite = currentMachineId ? checkIsFavorite(currentMachineId) : false;
 
   const currentMachine = useMemo(
     () => machines.find(machine => machine.id === currentMachineId),
@@ -58,40 +61,30 @@ export default function MachineResultScreen() {
     [catalogResult, genericResult]
   );
 
+  // Add to history when screen loads with a valid machine
   useEffect(() => {
-    let isMounted = true;
+    if (!currentMachineId) {
+      return;
+    }
 
-    const run = async () => {
-      if (!currentMachineId) {
-        if (isMounted) {
-          setIsFavorite(false);
-        }
-        return;
-      }
-
-      try {
-        validateMachineId(currentMachineId, machines);
-        const favStatus = await checkIsFavorite(currentMachineId);
-        if (isMounted) {
-          setIsFavorite(favStatus);
-        }
-        await addToRecentHistory(currentMachineId);
-      } catch (error) {
-        console.error('Error loading machine data:', error);
-      }
-    };
-
-    run();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentMachineId, machines]);
+    try {
+      validateMachineId(currentMachineId, machines);
+      addToHistory(currentMachineId).catch((error) => {
+        console.error('Error adding to history:', error);
+      });
+    } catch (error) {
+      console.error('Invalid machine ID:', error);
+    }
+  }, [currentMachineId, machines, addToHistory]);
 
   const handleToggleFavorite = async () => {
     if (!currentMachineId) return;
-    await toggleFavorite(currentMachineId);
-    setIsFavorite(prev => !prev);
+
+    try {
+      await toggleFavorite(currentMachineId);
+    } catch (error) {
+      console.error('Failed to toggle favorite', error);
+    }
   };
 
   return (

@@ -8,6 +8,21 @@ import { MachineDefinition } from '@typings/machine';
 
 import { useFavorites } from '../useFavorites';
 
+// Mock the favorites API
+jest.mock('../../services/favoritesApi', () => ({
+  getFavorites: jest.fn(),
+  addFavorite: jest.fn(),
+  removeFavorite: jest.fn(),
+  clearAllFavorites: jest.fn(),
+}));
+
+import * as favoritesApi from '../../services/favoritesApi';
+
+const mockedGetFavorites = favoritesApi.getFavorites as jest.MockedFunction<typeof favoritesApi.getFavorites>;
+const mockedAddFavorite = favoritesApi.addFavorite as jest.MockedFunction<typeof favoritesApi.addFavorite>;
+const mockedRemoveFavorite = favoritesApi.removeFavorite as jest.MockedFunction<typeof favoritesApi.removeFavorite>;
+const mockedClearAllFavorites = favoritesApi.clearAllFavorites as jest.MockedFunction<typeof favoritesApi.clearAllFavorites>;
+
 // Mock machines data
 const mockMachines: MachineDefinition[] = [
   {
@@ -43,10 +58,57 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MachinesProvider machines={mockMachines}>{children}</MachinesProvider>
 );
 
+type BackendState = {
+  set: (favorites: string[]) => void;
+  get: () => string[];
+};
+
+let backendState: BackendState = {
+  set: () => {
+    throw new Error('Backend state not initialized');
+  },
+  get: () => [],
+};
+
+const setupBackendMocks = (initialFavorites: string[] = []) => {
+  let currentFavorites = [...initialFavorites];
+
+  mockedGetFavorites.mockImplementation(async () => [...currentFavorites]);
+
+  mockedAddFavorite.mockImplementation(async (machineId: string) => {
+    if (!currentFavorites.includes(machineId)) {
+      currentFavorites = [...currentFavorites, machineId];
+    }
+  });
+
+  mockedRemoveFavorite.mockImplementation(async (machineId: string) => {
+    currentFavorites = currentFavorites.filter(id => id !== machineId);
+  });
+
+  mockedClearAllFavorites.mockImplementation(async () => {
+    currentFavorites = [];
+  });
+
+  backendState = {
+    set: (favorites: string[]) => {
+      currentFavorites = [...favorites];
+    },
+    get: () => currentFavorites,
+  };
+};
+
+const primeStoredFavorites = (favorites: string[]) => {
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(favorites));
+  backendState.set(favorites);
+};
+
 describe('useFavorites', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+
+    // Default mock implementations for favorites API
+    setupBackendMocks([]);
   });
 
   it('should initialize with empty favorites', async () => {
@@ -61,15 +123,13 @@ describe('useFavorites', () => {
 
   it('should load existing favorites from storage', async () => {
     const storedFavorites = ['machine-1', 'machine-2'];
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedFavorites));
+    primeStoredFavorites(storedFavorites);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toEqual(storedFavorites);
     });
-
-    expect(result.current.favorites).toEqual(storedFavorites);
   });
 
   it('should add a machine to favorites', async () => {
@@ -83,9 +143,7 @@ describe('useFavorites', () => {
       await result.current.addFavorite('machine-1');
     });
 
-    await waitFor(() => {
-      expect(result.current.favorites).toContain('machine-1');
-    });
+    expect(result.current.favorites).toContain('machine-1');
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       '@machinemate_favorites',
       JSON.stringify(['machine-1'])
@@ -93,21 +151,19 @@ describe('useFavorites', () => {
   });
 
   it('should remove a machine from favorites', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(['machine-1', 'machine-2']));
+    primeStoredFavorites(['machine-1', 'machine-2']);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toEqual(['machine-1', 'machine-2']);
     });
 
     await act(async () => {
       await result.current.removeFavorite('machine-1');
     });
 
-    await waitFor(() => {
-      expect(result.current.favorites).toEqual(['machine-2']);
-    });
+    expect(result.current.favorites).toEqual(['machine-2']);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       '@machinemate_favorites',
       JSON.stringify(['machine-2'])
@@ -115,12 +171,12 @@ describe('useFavorites', () => {
   });
 
   it('should check if a machine is favorited', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(['machine-1']));
+    primeStoredFavorites(['machine-1']);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toEqual(['machine-1']);
     });
 
     expect(result.current.isFavorite('machine-1')).toBe(true);
@@ -138,52 +194,43 @@ describe('useFavorites', () => {
     await act(async () => {
       await result.current.toggleFavorite('machine-1');
     });
-    await waitFor(() => {
-      expect(result.current.favorites).toContain('machine-1');
-    });
+    expect(result.current.favorites).toContain('machine-1');
 
     // Toggle off
     await act(async () => {
       await result.current.toggleFavorite('machine-1');
     });
-    await waitFor(() => {
-      expect(result.current.favorites).not.toContain('machine-1');
-    });
+    expect(result.current.favorites).not.toContain('machine-1');
   });
 
   it('should clear all favorites', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(['machine-1', 'machine-2']));
+    primeStoredFavorites(['machine-1', 'machine-2']);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toHaveLength(2);
     });
-
-    expect(result.current.favorites).toHaveLength(2);
 
     await act(async () => {
       await result.current.clearFavorites();
     });
 
-    await waitFor(() => {
-      expect(result.current.favorites).toEqual([]);
-    });
+    expect(result.current.favorites).toEqual([]);
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@machinemate_favorites');
   });
 
   it('should filter out invalid machine IDs', async () => {
     const storedFavorites = ['machine-1', 'invalid-machine', 'machine-2'];
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedFavorites));
+    primeStoredFavorites(storedFavorites);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toEqual(['machine-1', 'machine-2']);
     });
 
     // Should only contain valid machine IDs
-    expect(result.current.favorites).toEqual(['machine-1', 'machine-2']);
     expect(result.current.favorites).not.toContain('invalid-machine');
   });
 
@@ -198,23 +245,18 @@ describe('useFavorites', () => {
   });
 
   it('should not add duplicate favorites', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(['machine-1']));
+    primeStoredFavorites(['machine-1']);
 
     const { result } = renderHook(() => useFavorites(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.favorites).toEqual(['machine-1']);
     });
-
-    expect(result.current.favorites).toEqual(['machine-1']);
 
     await act(async () => {
       await result.current.addFavorite('machine-1');
     });
 
-    // Should still have only one
-    await waitFor(() => {
-      expect(result.current.favorites).toEqual(['machine-1']);
-    });
+    expect(result.current.favorites).toEqual(['machine-1']);
   });
 });

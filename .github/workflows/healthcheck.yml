@@ -1,0 +1,63 @@
+name: API & Supabase Health
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Every 10 minutes
+  workflow_dispatch:
+
+jobs:
+  healthcheck:
+    name: Endpoint Probes
+    runs-on: ubuntu-latest
+    env:
+      API_BASE_URL: ${{ secrets.HEALTHCHECK_API_BASE_URL }}
+      API_MACHINE_PATH: /api/v1/machines
+      SUPABASE_REST_URL: ${{ secrets.HEALTHCHECK_SUPABASE_REST_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.HEALTHCHECK_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Validate configuration
+        run: |
+          set -euo pipefail
+          missing=0
+          for var in API_BASE_URL SUPABASE_REST_URL SUPABASE_ANON_KEY; do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::Missing secret for $var"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Check /health endpoint
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent \
+            --max-time 20 \
+            --retry 2 \
+            --retry-all-errors \
+            "${API_BASE_URL}/health" > /tmp/health.json
+          cat /tmp/health.json
+
+      - name: Check machines API
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent \
+            --max-time 20 \
+            --retry 2 \
+            --retry-all-errors \
+            "${API_BASE_URL}${API_MACHINE_PATH}?limit=1" > /tmp/machines.json
+          cat /tmp/machines.json
+
+      - name: Check Supabase favorites endpoint
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent \
+            --max-time 20 \
+            --retry 2 \
+            --retry-all-errors \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_REST_URL}/rest/v1/favorites?select=count&limit=1" > /tmp/favorites.json
+          cat /tmp/favorites.json

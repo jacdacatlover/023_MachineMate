@@ -1,6 +1,6 @@
 // Library screen: Browse and search all machines
 
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, FlatList } from 'react-native';
@@ -9,8 +9,7 @@ import { Searchbar, Chip, Text } from 'react-native-paper';
 import { useMachines } from '@app/providers/MachinesProvider';
 
 import MachineListItem from '@features/library/components/MachineListItem';
-
-import { getFavorites } from '@shared/services/favoritesStorage';
+import { useFavorites } from '@features/library/hooks/useFavorites';
 
 import { MachineCategory, MachineDefinition } from '@typings/machine';
 import { LibraryStackParamList } from '@typings/navigation';
@@ -80,19 +79,9 @@ export default function LibraryScreen() {
   const machines = useMachines();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MachineCategory | 'All'>('All');
-  const [favorites, setFavorites] = useState<string[]>([]);
 
-  const loadFavorites = useCallback(async () => {
-    const favs = await getFavorites();
-    setFavorites(favs);
-  }, []);
-
-  // Load favorites when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadFavorites();
-    }, [loadFavorites])
-  );
+  // Use hook for favorites - automatically syncs with backend
+  const { favorites } = useFavorites();
 
   // Filter machines based on search and category (memoized for performance)
   const filteredMachines = useMemo(() => {

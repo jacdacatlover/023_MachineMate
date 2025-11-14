@@ -23,4 +23,12 @@ module.exports = {
     '**/?(*.)+(spec|test).{ts,tsx}',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  coverageThreshold: {
+    global: {
+      statements: 70,
+      branches: 65,
+      functions: 70,
+      lines: 70,
+    },
+  },
 };

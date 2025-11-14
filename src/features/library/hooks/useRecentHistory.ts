@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
@@ -82,6 +82,7 @@ interface UseRecentHistoryReturn {
 export function useRecentHistory(): UseRecentHistoryReturn {
   const machines = useMachines();
   const [isSyncing, setIsSyncing] = useState(false);
+  const isCleaningRef = useRef(false);
 
   const handleHistoryValueChange = useCallback(
     (history: RecentHistoryItem[]) => {
@@ -124,6 +125,33 @@ export function useRecentHistory(): UseRecentHistoryReturn {
     );
     return rawHistory.filter((item) => validMachineIds.includes(item.machineId));
   }, [rawHistory, machines]);
+
+  // Persist cleaned data if invalid IDs were filtered out
+  useEffect(() => {
+    // Only run after loading completes and sync is done
+    if (isLoadingCache || isSyncing || isCleaningRef.current) {
+      return;
+    }
+
+    // Check if cleanup is needed (rawHistory has invalid IDs)
+    if (rawHistory.length > 0 && history.length !== rawHistory.length) {
+      isCleaningRef.current = true;
+
+      logger.debug('Persisting cleaned history', {
+        before: rawHistory.length,
+        after: history.length,
+        removed: rawHistory.length - history.length,
+      });
+
+      setData(history)
+        .catch((err) => {
+          logger.error('Failed to persist cleaned history', { error: err });
+        })
+        .finally(() => {
+          isCleaningRef.current = false;
+        });
+    }
+  }, [rawHistory, history, isLoadingCache, isSyncing, setData]);
 
   // Sync with backend on mount
   useEffect(() => {
@@ -200,6 +228,16 @@ export function useRecentHistory(): UseRecentHistoryReturn {
 
   const clearHistory = useCallback(async () => {
     try {
+      // Clear backend first
+      try {
+        await historyApi.clearAllHistory();
+        logger.info('Cleared history from backend');
+      } catch (backendError) {
+        // Log backend error but continue to clear cache
+        logger.warn('Failed to clear history from backend, clearing cache only', { backendError });
+      }
+
+      // Clear local cache
       await clearData();
       logger.info('Cleared all history');
     } catch (err) {

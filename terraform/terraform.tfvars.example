@@ -1,0 +1,22 @@
+# MachineMate Terraform Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+project_id = "your-gcp-project-id"
+region     = "us-central1"
+environment = "production"
+
+# Supabase Configuration
+supabase_jwt_issuer = "https://your-project.supabase.co/auth/v1"
+supabase_jwks_url   = "https://your-project.supabase.co/auth/v1/jwks"
+
+# Cloud Run Configuration
+min_instances = 1
+max_instances = 10
+cpu_limit     = "1000m"
+memory_limit  = "512Mi"
+
+# Security
+cors_origins = "https://your-app.com,https://www.your-app.com"
+
+# Logging
+log_level = "INFO"

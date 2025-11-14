@@ -1,0 +1,191 @@
+{
+  "alertPolicies": [
+    {
+      "displayName": "MachineMate - High Error Rate (>1%)",
+      "documentation": {
+        "content": "## MachineMate Backend Error Rate Alert\n\nThe error rate has exceeded 1% over the last 5 minutes.\n\n### Runbook\n1. Check the Cloud Run logs for errors: https://console.cloud.google.com/run\n2. Look for patterns in the error logs (trace_id, path, error messages)\n3. Check if it's affecting specific endpoints or all traffic\n4. Review recent deployments if error started after a deploy\n5. Check Sentry for detailed error traces\n\n### Escalation\n- If error rate >5%: Page on-call engineer immediately\n- If error rate 1-5%: Alert in Slack #machinemate-alerts\n\n### Common Causes\n- Database connection issues (check connection pool)\n- External API failures (Fireworks AI, Supabase)\n- Invalid input validation\n- Resource exhaustion (CPU, memory)",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "Error rate >1% for 5 minutes",
+          "conditionThreshold": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_count\" AND metric.label.response_code_class=\"5xx\"",
+            "aggregations": [
+              {
+                "alignmentPeriod": "60s",
+                "perSeriesAligner": "ALIGN_RATE",
+                "crossSeriesReducer": "REDUCE_SUM"
+              }
+            ],
+            "comparison": "COMPARISON_GT",
+            "thresholdValue": 0.01,
+            "duration": "300s"
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": [],
+      "alertStrategy": {
+        "autoClose": "1800s",
+        "notificationRateLimit": {
+          "period": "300s"
+        }
+      }
+    },
+    {
+      "displayName": "MachineMate - High Latency P95 (>1s)",
+      "documentation": {
+        "content": "## MachineMate Backend Latency Alert\n\nThe P95 request latency has exceeded 1 second for more than 5 minutes.\n\n### Runbook\n1. Check the request latency dashboard\n2. Identify slow endpoints using trace_id in logs\n3. Check database query performance\n4. Review VLM API call latency (Fireworks AI)\n5. Check container CPU/memory utilization\n\n### Common Causes\n- Database slow queries (missing indexes, large scans)\n- VLM inference timeout or slow response\n- Cold start latency spike\n- High CPU/memory pressure\n- External API slowdown",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "P95 latency >1s for 5 minutes",
+          "conditionThreshold": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_latencies\"",
+            "aggregations": [
+              {
+                "alignmentPeriod": "60s",
+                "perSeriesAligner": "ALIGN_DELTA",
+                "crossSeriesReducer": "REDUCE_PERCENTILE_95"
+              }
+            ],
+            "comparison": "COMPARISON_GT",
+            "thresholdValue": 1000,
+            "duration": "300s"
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": [],
+      "alertStrategy": {
+        "autoClose": "1800s"
+      }
+    },
+    {
+      "displayName": "MachineMate - Availability SLO Violation (<99.5%)",
+      "documentation": {
+        "content": "## MachineMate Availability SLO Breach\n\nThe service availability has dropped below the 99.5% SLO threshold.\n\n### Runbook\n1. Check Cloud Run service health\n2. Review error logs for root cause\n3. Check if traffic spike caused issues\n4. Verify database connectivity\n5. Check external dependencies (Supabase, Fireworks AI)\n\n### SLO Budget\n- Monthly error budget: 0.5% of requests\n- If budget exhausted: Hold non-critical releases\n- Focus on stability improvements",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "Success rate <99.5% over 1 hour",
+          "conditionThreshold": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_count\" AND metric.label.response_code_class!=\"5xx\"",
+            "aggregations": [
+              {
+                "alignmentPeriod": "60s",
+                "perSeriesAligner": "ALIGN_RATE",
+                "crossSeriesReducer": "REDUCE_SUM"
+              }
+            ],
+            "comparison": "COMPARISON_LT",
+            "thresholdValue": 0.995,
+            "duration": "3600s"
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": []
+    },
+    {
+      "displayName": "MachineMate - Database Connection Pool Exhausted",
+      "documentation": {
+        "content": "## Database Connection Pool Alert\n\nThe database connection pool is exhausted or approaching limits.\n\n### Runbook\n1. Check current connection count in Supabase dashboard\n2. Review long-running queries\n3. Check for connection leaks (unclosed sessions)\n4. Consider increasing pool size in config\n5. Review recent code changes for DB-heavy operations\n\n### Immediate Actions\n- Restart Cloud Run service if needed\n- Scale up connection pool temporarily\n- Investigate and fix connection leaks",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "Database connection errors",
+          "conditionMatchedLog": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND (jsonPayload.event=\"database_pool_exhausted\" OR jsonPayload.event=\"database_connection_failed\")",
+            "labelExtractors": {}
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": []
+    },
+    {
+      "displayName": "MachineMate - Cold Start Latency High (>5s P99)",
+      "documentation": {
+        "content": "## Cold Start Performance Alert\n\nCold start latency (container startup) has exceeded 5 seconds.\n\n### Runbook\n1. Check container startup logs\n2. Review application initialization code\n3. Check if minimum instances should be increased\n4. Review recent changes that might slow startup\n\n### Optimization Strategies\n- Set minimum instances >0 to avoid cold starts\n- Optimize application initialization\n- Consider startup probes\n- Review dependency loading",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "Cold start >5s P99",
+          "conditionThreshold": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/startup_latencies\"",
+            "aggregations": [
+              {
+                "alignmentPeriod": "300s",
+                "perSeriesAligner": "ALIGN_DELTA",
+                "crossSeriesReducer": "REDUCE_PERCENTILE_99"
+              }
+            ],
+            "comparison": "COMPARISON_GT",
+            "thresholdValue": 5000,
+            "duration": "600s"
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": []
+    },
+    {
+      "displayName": "MachineMate - Memory Utilization High (>90%)",
+      "documentation": {
+        "content": "## Memory Utilization Alert\n\nContainer memory utilization has exceeded 90%.\n\n### Runbook\n1. Check memory usage trends in dashboard\n2. Look for memory leaks in recent changes\n3. Review large data processing operations\n4. Check if memory limit should be increased\n5. Investigate OOM kills in logs\n\n### Common Causes\n- Memory leaks\n- Large file uploads\n- Inefficient data processing\n- Too many concurrent requests",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "Memory >90% for 10 minutes",
+          "conditionThreshold": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/container/memory/utilizations\"",
+            "aggregations": [
+              {
+                "alignmentPeriod": "60s",
+                "perSeriesAligner": "ALIGN_MEAN",
+                "crossSeriesReducer": "REDUCE_MEAN"
+              }
+            ],
+            "comparison": "COMPARISON_GT",
+            "thresholdValue": 0.9,
+            "duration": "600s"
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": []
+    },
+    {
+      "displayName": "MachineMate - VLM API Failures",
+      "documentation": {
+        "content": "## VLM API Failure Alert\n\nThe Fireworks AI VLM service is experiencing failures.\n\n### Runbook\n1. Check Fireworks AI status page\n2. Verify API key is valid\n3. Check rate limiting issues\n4. Review error logs for specific failure modes\n5. Consider fallback to mock responses if critical\n\n### Mitigation\n- Enable mock responses temporarily if needed\n- Check API quota/billing\n- Contact Fireworks AI support if persistent",
+        "mimeType": "text/markdown"
+      },
+      "conditions": [
+        {
+          "displayName": "VLM API error rate high",
+          "conditionMatchedLog": {
+            "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND jsonPayload.event=\"vlm_request_failed\" AND severity>=ERROR",
+            "labelExtractors": {}
+          }
+        }
+      ],
+      "combiner": "OR",
+      "enabled": true,
+      "notificationChannels": []
+    }
+  ]
+}

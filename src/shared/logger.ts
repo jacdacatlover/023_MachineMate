@@ -2,12 +2,34 @@
 
 import Constants from 'expo-constants';
 
+import {
+  isCrashReportingEnabled,
+  recordBreadcrumb,
+  type MonitoringBreadcrumbCategory,
+} from '@shared/observability/monitoring';
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 type LogContext = Record<string, unknown>;
 type InternalLogContext = LogContext & { extra?: unknown[] };
 
 type LogMethod = (...args: unknown[]) => void;
+
+const LOG_LEVEL_TO_BREADCRUMB_LEVEL = {
+  debug: 'debug',
+  info: 'info',
+  warn: 'warning',
+  error: 'error',
+} as const;
+
+const BREADCRUMB_NAMESPACE_MAP: Array<{
+  test: RegExp;
+  category: MonitoringBreadcrumbCategory;
+}> = [
+  { test: /^auth\./i, category: 'auth' },
+  { test: /recognition/i, category: 'recognition' },
+  { test: /(upload|media)/i, category: 'uploads' },
+];
 
 const LEVEL_PRIORITY: Record<LogLevel, number> = {
   debug: 10,
@@ -99,31 +121,104 @@ function emitLog(
   namespace: string,
   args: unknown[]
 ): void {
-  if (!shouldLog(level)) {
+  // Wrap everything in try-catch for maximum safety
+  try {
+    if (!shouldLog(level)) {
+      return;
+    }
+
+    // Early safety check: ensure console is available
+    if (typeof console === 'undefined' || !console || typeof console !== 'object') {
+      return;
+    }
+
+    // Check if console.log exists as a baseline
+    if (typeof console.log !== 'function') {
+      return;
+    }
+
+    const { message, metadata } = normalizeArgs(args);
+    const timestamp = new Date().toISOString();
+    const payload = metadata
+      ? { ...metadata, level, timestamp }
+      : { level, timestamp };
+
+    const prefix = `[${namespace}]`;
+
+    // Safely get console method with multiple fallbacks
+    let consoleMethod = console.log; // Default fallback
+
+    if (level === 'debug' && typeof console.debug === 'function') {
+      consoleMethod = console.debug;
+    } else if (level === 'info' && typeof console.log === 'function') {
+      consoleMethod = console.log;
+    } else if (level === 'warn' && typeof console.warn === 'function') {
+      consoleMethod = console.warn;
+    } else if (level === 'error' && typeof console.error === 'function') {
+      consoleMethod = console.error;
+    }
+
+    // Final safety check before calling
+    if (consoleMethod && typeof consoleMethod === 'function') {
+      consoleMethod(prefix, message, payload);
+    }
+
+    // Forward to monitoring (skip in test environments)
+    if (process.env.NODE_ENV !== 'test') {
+      try {
+        forwardToMonitoring(level, namespace, message, metadata);
+      } catch {
+        // Silently ignore monitoring errors
+      }
+    }
+  } catch (err) {
+    // Silently fail - we're in the logger, can't log this!
+    // Do absolutely nothing to avoid any potential errors
+  }
+}
+
+function forwardToMonitoring(
+  level: LogLevel,
+  namespace: string,
+  message: string,
+  metadata?: LogContext
+): void {
+  if (!shouldRecordBreadcrumb(level)) {
     return;
   }
 
-  const { message, metadata } = normalizeArgs(args);
-  const timestamp = new Date().toISOString();
-  const payload = metadata
-    ? { ...metadata, level, timestamp }
-    : { level, timestamp };
-
-  const prefix = `[${namespace}]`;
-  const consoleMethod =
-    level === 'debug'
-      ? console.debug ?? console.log
-      : level === 'info'
-        ? console.log
-        : level === 'warn'
-          ? console.warn
-          : console.error;
+  const breadcrumbData: Record<string, unknown> = {
+    namespace,
+    level,
+  };
 
   if (metadata) {
-    consoleMethod(prefix, message, payload);
-  } else {
-    consoleMethod(prefix, message, payload);
+    Object.assign(breadcrumbData, metadata);
   }
+
+  recordBreadcrumb({
+    category: resolveBreadcrumbCategory(namespace),
+    message,
+    data: breadcrumbData,
+    level: LOG_LEVEL_TO_BREADCRUMB_LEVEL[level],
+  });
+}
+
+function resolveBreadcrumbCategory(namespace: string): MonitoringBreadcrumbCategory {
+  const match = BREADCRUMB_NAMESPACE_MAP.find(entry => entry.test.test(namespace));
+  return match ? match.category : 'log';
+}
+
+function shouldRecordBreadcrumb(level: LogLevel): boolean {
+  if (!isCrashReportingEnabled()) {
+    return false;
+  }
+
+  if (__DEV__ && level === 'debug') {
+    return false;
+  }
+
+  return true;
 }
 
 export type Logger = {
@@ -139,10 +234,21 @@ export type Logger = {
 };
 
 export function createLogger(namespace: string): Logger {
-  const info: LogMethod = (...args) => emitLog('info', namespace, args);
-  const debug: LogMethod = (...args) => emitLog('debug', namespace, args);
-  const warn: LogMethod = (...args) => emitLog('warn', namespace, args);
-  const error: LogMethod = (...args) => emitLog('error', namespace, args);
+  // No-op functions for safety - only log if console is definitely available
+  const safeEmit = (level: LogLevel, args: unknown[]) => {
+    try {
+      if (typeof console !== 'undefined' && console && typeof console.log === 'function') {
+        emitLog(level, namespace, args);
+      }
+    } catch {
+      // Silently ignore
+    }
+  };
+
+  const info: LogMethod = (...args) => safeEmit('info', args);
+  const debug: LogMethod = (...args) => safeEmit('debug', args);
+  const warn: LogMethod = (...args) => safeEmit('warn', args);
+  const error: LogMethod = (...args) => safeEmit('error', args);
 
   const trackPerformance: Logger['trackPerformance'] = async (
     operation,

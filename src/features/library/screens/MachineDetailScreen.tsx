@@ -1,16 +1,17 @@
 // Machine Detail screen: Full guide for a machine (accessed from Library)
 
 import { useRoute, RouteProp } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, IconButton, Chip, Divider } from 'react-native-paper';
 
 import { useMachines } from '@app/providers/MachinesProvider';
 
+import { useFavorites } from '@features/library/hooks/useFavorites';
+import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
+
 import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
 import SectionHeader from '@shared/components/SectionHeader';
-import { toggleFavorite, isFavorite as checkIsFavorite } from '@shared/services/favoritesStorage';
-import { addToRecentHistory } from '@shared/services/historyStorage';
 import { colors } from '@shared/theme';
 
 import { LibraryStackParamList } from '@typings/navigation';
@@ -23,35 +24,27 @@ export default function MachineDetailScreen() {
   const route = useRoute<MachineDetailScreenRouteProp>();
   const { machineId } = route.params;
   const machines = useMachines();
-  const [isFavorite, setIsFavorite] = useState(false);
 
+  // Use hooks for favorites and history tracking
+  const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
+  const { addToHistory } = useRecentHistory();
+
+  const isFavorite = checkIsFavorite(machineId);
   const machine = machines.find(m => m.id === machineId);
 
+  // Add to history when screen loads
   useEffect(() => {
-    let isMounted = true;
-
-    const run = async () => {
-      try {
-        const favStatus = await checkIsFavorite(machineId);
-        if (isMounted) {
-          setIsFavorite(favStatus);
-        }
-        await addToRecentHistory(machineId);
-      } catch (error) {
-        console.error('Failed to load machine detail state', error);
-      }
-    };
-
-    run();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [machineId]);
+    addToHistory(machineId).catch((error) => {
+      console.error('Failed to add to history', error);
+    });
+  }, [machineId, addToHistory]);
 
   const handleToggleFavorite = async () => {
-    await toggleFavorite(machineId);
-    setIsFavorite(!isFavorite);
+    try {
+      await toggleFavorite(machineId);
+    } catch (error) {
+      console.error('Failed to toggle favorite', error);
+    }
   };
 
   if (!machine) {

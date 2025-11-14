@@ -83,6 +83,7 @@ export function useAsyncStorage<T>({
 
   const defaultValueRef = useRef(defaultValue);
   const onValueChangeRef = useRef(onValueChange);
+  const dataRef = useRef(data);
 
   useEffect(() => {
     defaultValueRef.current = defaultValue;
@@ -91,6 +92,10 @@ export function useAsyncStorage<T>({
   useEffect(() => {
     onValueChangeRef.current = onValueChange;
   }, [onValueChange]);
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   // Load from storage
   const loadData = useCallback(async () => {
@@ -134,7 +139,9 @@ export function useAsyncStorage<T>({
   const setData = useCallback(
     async (value: T | ((prev: T) => T)) => {
       try {
-        const newValue = typeof value === 'function' ? (value as (prev: T) => T)(data) : value;
+        const previousValue = dataRef.current;
+        const newValue =
+          typeof value === 'function' ? (value as (prev: T) => T)(previousValue) : value;
 
         // Validate before saving
         const validated = schema.safeParse(newValue);
@@ -144,6 +151,7 @@ export function useAsyncStorage<T>({
 
         await AsyncStorage.setItem(key, JSON.stringify(validated.data));
         setDataState(validated.data);
+        dataRef.current = validated.data;
         onValueChangeRef.current?.(validated.data);
         setError(null);
       } catch (err) {
@@ -153,7 +161,7 @@ export function useAsyncStorage<T>({
         throw error; // Re-throw so caller can handle
       }
     },
-    [key, schema, data]
+    [key, schema]
   );
 
   // Clear storage
