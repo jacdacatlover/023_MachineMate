@@ -22,6 +22,7 @@ class FakeVLMClient:
         self._response = response
         self._error = error
         self.prompt = "Prompt"
+        self.prompt_variant = "enhanced_baseline"
 
     async def classify(self, image_bytes: bytes) -> VLMResponse | None:
         if self._error:

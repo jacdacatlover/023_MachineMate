@@ -126,18 +126,18 @@ async def get_jwks() -> dict:
             return jwks_data
 
     except httpx.HTTPError as exc:
-        logger.error(f"Failed to fetch JWKS from {jwks_url}: {exc}")
+        logger.error(f"Failed to fetch JWKS from {jwks_url}: {exc}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Unable to fetch JWKS for token verification",
+            detail=f"Unable to fetch JWKS for token verification: {str(exc)}",
         )
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error(f"Unexpected error fetching JWKS: {exc}")
+        logger.error(f"Unexpected error fetching JWKS: {exc}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="JWKS fetch failed",
+            detail=f"JWKS fetch failed: {str(exc)}",
         )
 
 
@@ -263,10 +263,10 @@ async def verify_token(token: str) -> dict:
         raise
 
     except Exception as exc:
-        logger.error(f"Unexpected error during token verification: {exc}")
+        logger.error(f"Unexpected error during token verification: {exc}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Token verification failed",
+            detail=f"Token verification failed: {str(exc)}",
         )
 
 

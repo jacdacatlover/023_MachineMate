@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from app.main import app
@@ -22,6 +24,23 @@ class FakeBucket:
 
     def remove(self, paths):
         self.removed.extend(paths)
+
+
+class ErrorBucket(FakeBucket):
+    def __init__(self, upload_error: Exception | None = None, remove_error: Exception | None = None):
+        super().__init__()
+        self._upload_error = upload_error
+        self._remove_error = remove_error
+
+    def upload(self, *, path, file, file_options):
+        if self._upload_error:
+            raise self._upload_error
+        return super().upload(path=path, file=file, file_options=file_options)
+
+    def remove(self, paths):
+        if self._remove_error:
+            raise self._remove_error
+        super().remove(paths)
 
 
 class FakeStorage:
@@ -81,3 +100,46 @@ async def test_delete_media_success(async_client, override_get_current_user, fak
     response = await async_client.delete(f"/api/v1/media/delete/{file_path}")
     assert response.status_code == 204
     assert fake_supabase_client.storage.bucket.removed == [file_path]
+
+
+@pytest.mark.asyncio
+async def test_upload_media_rejects_empty_file(async_client, override_get_current_user, fake_supabase_client):
+    response = await async_client.post(
+        "/api/v1/media/upload",
+        files={"file": ("photo.jpg", b"", "image/jpeg")},
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Empty file"
+    assert not fake_supabase_client.storage.bucket.uploaded
+
+
+@pytest.mark.asyncio
+async def test_upload_media_handles_storage_failure(
+    async_client, override_get_current_user, fake_supabase_client, caplog
+):
+    fake_supabase_client.storage.bucket = ErrorBucket(upload_error=RuntimeError("boom"))
+    caplog.set_level(logging.ERROR)
+
+    response = await async_client.post(
+        "/api/v1/media/upload",
+        files={"file": ("photo.jpg", b"image-bytes", "image/jpeg")},
+    )
+
+    assert response.status_code == 500
+    assert "Failed to upload file" in response.json()["detail"]
+    assert any(record.message == "media.upload_failed" for record in caplog.records)
+
+
+@pytest.mark.asyncio
+async def test_delete_media_handles_storage_failure(
+    async_client, override_get_current_user, fake_supabase_client, mock_user, caplog
+):
+    fake_supabase_client.storage.bucket = ErrorBucket(remove_error=RuntimeError("boom"))
+    caplog.set_level(logging.ERROR)
+
+    file_path = f"{mock_user.id}/photo.jpg"
+    response = await async_client.delete(f"/api/v1/media/delete/{file_path}")
+
+    assert response.status_code == 500
+    assert "Failed to delete file" in response.json()["detail"]
+    assert any(record.message == "media.delete_failed" for record in caplog.records)

@@ -7,22 +7,77 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "APP_ENV": "development"
-      }
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_API_BASE_URL": "http://localhost:8000",
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "SENTRY_DSN": "",
+        "SENTRY_ORG": "machinemate",
+        "SENTRY_PROJECT": "machinemate-app",
+        "EAS_PROJECT_ID": ""
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_ENV": "preview"
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_API_BASE_URL": "https://preview-api.machinemate.com/api",
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "SENTRY_DSN": "",
+        "SENTRY_ORG": "machinemate",
+        "SENTRY_PROJECT": "machinemate-app",
+        "EAS_PROJECT_ID": ""
+      },
+      "channel": "preview",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_BASE_URL": "https://machinemate-api-buz66rae7q-uc.a.run.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "SENTRY_DSN": "",
+        "SENTRY_ORG": "machinemate",
+        "SENTRY_PROJECT": "machinemate-app",
+        "EAS_PROJECT_ID": ""
+      },
+      "channel": "production",
+      "autoIncrement": true,
+      "ios": {
+        "buildType": "app-store"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "production-simulator": {
+      "extends": "production",
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "buildType": "simulator"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "your-asc-app-id",
+        "appleTeamId": "your-team-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
   }
 }

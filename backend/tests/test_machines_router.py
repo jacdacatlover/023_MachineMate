@@ -10,6 +10,7 @@ Tests cover:
 """
 
 from copy import deepcopy
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -198,3 +199,44 @@ async def test_list_difficulties(async_client, test_db, override_get_db, sample_
     assert response.status_code == 200
     difficulties = response.json()
     assert set(difficulties) == {"beginner", "intermediate"}
+
+
+@pytest.mark.asyncio
+async def test_list_machines_invalid_pagination(async_client, override_get_db):
+    """Test validation errors when pagination params are invalid."""
+    response = await async_client.get("/api/v1/machines?page=0&page_size=10")
+    assert response.status_code == 422
+
+    response = await async_client.get("/api/v1/machines?page=1&page_size=0")
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_list_machines_inactive_filter(
+    async_client, test_db, override_get_db, sample_machine_data
+):
+    """Ensure inactive machines are hidden by default but retrievable when requested."""
+    active_machine = Machine(**sample_machine_data)
+    inactive_payload = deepcopy(sample_machine_data)
+    inactive_payload.update(
+        {
+            "id": "retired-machine",
+            "name": "Retired Press",
+            "is_active": False,
+        }
+    )
+    inactive_machine = Machine(**inactive_payload)
+    test_db.add_all([active_machine, inactive_machine])
+    await test_db.commit()
+
+    default_response = await async_client.get("/api/v1/machines")
+    assert default_response.status_code == 200
+    default_data = default_response.json()
+    assert len(default_data["machines"]) == 1
+    assert default_data["machines"][0]["id"] == sample_machine_data["id"]
+
+    inactive_response = await async_client.get("/api/v1/machines?is_active=false")
+    assert inactive_response.status_code == 200
+    inactive_data = inactive_response.json()
+    assert len(inactive_data["machines"]) == 1
+    assert inactive_data["machines"][0]["id"] == "retired-machine"

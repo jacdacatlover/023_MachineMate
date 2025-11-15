@@ -14,6 +14,7 @@ This module tests the Supabase JWT validation middleware including:
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
+import httpx
 from fastapi import HTTPException, status
 from jose import jwt
 
@@ -163,6 +164,31 @@ async def test_get_jwks_invalid_response():
         assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
 
 
+@pytest.mark.asyncio
+async def test_get_jwks_missing_configuration(monkeypatch):
+    """JWKS fetch should fail fast when URL is not configured."""
+    reset_jwks_cache()
+    monkeypatch.setattr(settings, "SUPABASE_JWT_JWKS_URL", None)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_jwks()
+
+    assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "not configured" in exc_info.value.detail
+
+
+@pytest.mark.asyncio
+async def test_get_jwks_http_error():
+    """httpx.HTTPError should map to 503."""
+    reset_jwks_cache()
+    with patch("httpx.AsyncClient.get") as mock_get:
+        mock_get.side_effect = httpx.HTTPError("boom")
+        with pytest.raises(HTTPException) as exc_info:
+            await get_jwks()
+
+    assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+
+
 # ============================================================================
 # Test: Token Verification
 # ============================================================================
@@ -220,6 +246,31 @@ async def test_verify_token_no_signing_key(mock_jwks):
             assert "signing key" in exc_info.value.detail.lower()
 
 
+@pytest.mark.asyncio
+async def test_verify_token_jwt_error(mock_jwks):
+    """Generic JWT failures should return 401."""
+    with patch("app.auth.get_jwks", return_value=mock_jwks):
+        with patch("app.auth.get_signing_key", return_value="mock-key"):
+            with patch("app.auth.jwt.decode", side_effect=jwt.JWTError("boom")):
+                with pytest.raises(HTTPException) as exc_info:
+                    await verify_token("invalid-token")
+
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "Could not validate" in exc_info.value.detail
+
+
+@pytest.mark.asyncio
+async def test_verify_token_unexpected_error(mock_jwks):
+    """Unexpected decode errors bubble up as 500."""
+    with patch("app.auth.get_jwks", return_value=mock_jwks):
+        with patch("app.auth.get_signing_key", return_value="mock-key"):
+            with patch("app.auth.jwt.decode", side_effect=RuntimeError("boom")):
+                with pytest.raises(HTTPException) as exc_info:
+                    await verify_token("token")
+
+    assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
 # ============================================================================
 # Test: get_current_user Dependency
 # ============================================================================
@@ -257,8 +308,8 @@ async def test_get_current_user_missing_sub():
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user(mock_credentials)
 
-            assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-            assert "user id" in exc_info.value.detail.lower()
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "sub" in exc_info.value.detail.lower()
 
 
 @pytest.mark.asyncio

@@ -23,6 +23,13 @@ describe('monitoring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.EXPO_PUBLIC_SENTRY_DSN;
+    // Ensure expoConfig and extra are defined for tests
+    if (!Constants.expoConfig) {
+      Constants.expoConfig = {};
+    }
+    if (!Constants.expoConfig.extra) {
+      Constants.expoConfig.extra = {};
+    }
     Constants.expoConfig.extra.enableCrashReporting = true;
     resetMonitoringForTests();
   });

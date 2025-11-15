@@ -2,41 +2,41 @@ import { MD3DarkTheme } from 'react-native-paper';
 
 // Modern dark theme inspired by Discord, VS Code, and Material Design
 export const colors = {
-  // Dark backgrounds (Material Design + VS Code inspired)
-  background: '#121212', // Material Design dark background (not pure black)
-  surface: '#1E1E1E', // VS Code-like surface color
-  surfaceVariant: '#2D2D30', // Elevated surfaces
+  // Dark backgrounds
+  background: '#121212', // Very dark grey, almost black
+  surface: '#1E1E1E', // Dark grey for cards/surfaces
+  surfaceVariant: '#2D2D30', // Slightly lighter grey
 
-  // Discord Blurple as primary (signature color)
-  primary: '#5865F2', // Discord's Blurple
-  primaryLight: '#7289DA', // Lighter blurple for hover
-  primaryDark: '#4752C4', // Darker blurple for pressed states
+  // Primary accent color
+  primary: '#08A87E', // Vibrant green from the image
+  primaryLight: '#0AC093',
+  primaryDark: '#068265',
 
-  // Accent colors (modern coding aesthetic)
-  accent: '#00D9FF', // Bright cyan (Discord online status inspired)
-  accentSecondary: '#9D84FF', // Soft purple (Dracula theme inspired)
-  accentTertiary: '#57F287', // Discord green
+  // Accent colors
+  accent: '#08A87E', // Using primary green as accent
+  accentSecondary: '#FFFFFF', // White for contrast
+  accentTertiary: '#B9BBBE', // Light grey
 
-  // Text colors (desaturated for better dark mode readability)
-  text: '#DCDDDE', // Light gray (Discord primary text)
-  textSecondary: '#B9BBBE', // Medium gray (Discord secondary text)
-  textTertiary: '#72767D', // Muted gray (Discord muted text)
+  // Text colors
+  text: '#FFFFFF', // White
+  textSecondary: '#B9BBBE', // Light grey
+  textTertiary: '#72767D', // Muted grey
 
-  // Status colors (vibrant but not harsh)
-  success: '#57F287', // Discord green
-  warning: '#FEE75C', // Discord yellow
-  error: '#ED4245', // Discord red
-  info: '#00D9FF', // Cyan
+  // Status colors
+  success: '#08A87E', // Green for success
+  warning: '#FEE75C', // A suitable yellow
+  error: '#ED4245', // A suitable red
+  info: '#00D9FF', // A suitable cyan
 
   // UI elements
-  border: '#2F3136', // Subtle border (Discord channel list)
-  borderActive: '#5865F2', // Blurple border for active states
+  border: '#2F3136', // Subtle border
+  borderActive: '#08A87E', // Green for active states
   shadow: '#000000',
   white: '#FFFFFF',
 
-  // Gradient colors for special effects
+  // Gradient colors
   gradientStart: '#121212',
-  gradientEnd: '#1E1E2E',
+  gradientEnd: '#1E1E1E',
 };
 
 // React Native Paper theme configuration

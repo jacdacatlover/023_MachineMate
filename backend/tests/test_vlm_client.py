@@ -55,6 +55,9 @@ class DummySettings:
         self.enable_mock_responses = True
         self.REQUIRE_AUTH = True
         self.ENVIRONMENT = "test"
+        self.prompt_variant = "enhanced_baseline"
+        self.prompt_ab_testing_enabled = False
+        self.enable_prompt_metadata = True
         for key, value in overrides.items():
             setattr(self, key, value)
 

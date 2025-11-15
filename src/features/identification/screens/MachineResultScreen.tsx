@@ -12,6 +12,7 @@ import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
 
 import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
 import SectionHeader from '@shared/components/SectionHeader';
+import { createLogger } from '@shared/logger';
 import { validateMachineId } from '@shared/services/validation';
 import { colors } from '@shared/theme';
 
@@ -27,6 +28,8 @@ import { HomeStackParamList } from '@typings/navigation';
 import { styles } from './MachineResultScreen.styles';
 
 type MachineResultScreenRouteProp = RouteProp<HomeStackParamList, 'MachineResult'>;
+
+const logger = createLogger('MachineResultScreen');
 
 export default function MachineResultScreen() {
   const route = useRoute<MachineResultScreenRouteProp>();
@@ -70,10 +73,10 @@ export default function MachineResultScreen() {
     try {
       validateMachineId(currentMachineId, machines);
       addToHistory(currentMachineId).catch((error) => {
-        console.error('Error adding to history:', error);
+        logger.error('Error adding to history', error);
       });
     } catch (error) {
-      console.error('Invalid machine ID:', error);
+      logger.error('Invalid machine ID', error);
     }
   }, [currentMachineId, machines, addToHistory]);
 
@@ -83,7 +86,7 @@ export default function MachineResultScreen() {
     try {
       await toggleFavorite(currentMachineId);
     } catch (error) {
-      console.error('Failed to toggle favorite', error);
+      logger.error('Failed to toggle favorite', error);
     }
   };
 

@@ -29,14 +29,20 @@ import { ErrorBoundary } from './src/shared/components/ErrorBoundary';
 import PrimaryButton from './src/shared/components/PrimaryButton';
 import { createLogger } from './src/shared/logger';
 import { initMonitoring } from './src/shared/observability/monitoring';
+import {
+  initializePerformanceTracking,
+  trackColdStart,
+  markAppReady,
+} from './src/shared/observability/performance';
 import { theme, navigationTheme, colors } from './src/shared/theme';
 import { MachineDefinition } from './src/types/machine';
 
 // Import machine data
 
-// Initialize monitoring (skip in test environments)
+// Initialize monitoring and performance tracking (skip in test environments)
 if (process.env.NODE_ENV !== 'test') {
   initMonitoring();
+  initializePerformanceTracking();
 }
 
 const logger = createLogger('App');
@@ -159,6 +165,19 @@ export default function App() {
   useEffect(() => {
     loadMachines();
   }, [loadMachines]);
+
+  // Track cold start when app is ready
+  useEffect(() => {
+    if (fontsLoaded && !isLoading && process.env.NODE_ENV !== 'test') {
+      // Track cold start on first render
+      trackColdStart();
+
+      // Mark app as fully ready
+      setTimeout(() => {
+        markAppReady();
+      }, 100); // Small delay to ensure navigation is complete
+    }
+  }, [fontsLoaded, isLoading]);
 
   // Loading state (fonts or data)
   if (!fontsLoaded || isLoading) {

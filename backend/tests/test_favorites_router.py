@@ -15,6 +15,7 @@ from copy import deepcopy
 from uuid import UUID
 
 import pytest
+from sqlalchemy import select
 
 from app.models import Machine, Favorite
 
@@ -247,3 +248,63 @@ async def test_clear_all_favorites(
     # Verify all deleted
     response = await async_client.get("/api/v1/favorites")
     assert response.json()["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_favorite_forbidden_for_other_user(
+    async_client, test_db, override_get_db, override_get_current_user, sample_machine_data
+):
+    """Ensure deleting another user's favorite returns 404 without removing it."""
+    machine = Machine(**sample_machine_data)
+    test_db.add(machine)
+    await test_db.commit()
+
+    other_user_id = UUID("660e8400-e29b-41d4-a716-446655440001")
+    favorite = Favorite(
+        user_id=other_user_id,
+        machine_id="test-machine-1",
+        notes="Belongs to someone else",
+    )
+    test_db.add(favorite)
+    await test_db.commit()
+
+    response = await async_client.delete("/api/v1/favorites/test-machine-1")
+    assert response.status_code == 404
+
+    remaining = await test_db.execute(select(Favorite).where(Favorite.user_id == other_user_id))
+    assert remaining.scalar_one() is not None
+
+
+@pytest.mark.asyncio
+async def test_clear_all_favorites_only_affects_current_user(
+    async_client, test_db, override_get_db, override_get_current_user, mock_user, sample_machine_data
+):
+    """Ensure bulk clear removes only the authenticated user's favorites."""
+    machine_payloads = []
+    for idx, machine_id in enumerate(["owned-machine-1", "owned-machine-2", "other-machine"]):
+        payload = deepcopy(sample_machine_data)
+        payload.update({"id": machine_id, "name": f"Machine {idx}"})
+        machine_payloads.append(Machine(**payload))
+    test_db.add_all(machine_payloads)
+    await test_db.commit()
+
+    current_user_id = UUID(mock_user.id)
+    other_user_id = UUID("660e8400-e29b-41d4-a716-446655440001")
+
+    favorites = [
+        Favorite(user_id=current_user_id, machine_id="owned-machine-1"),
+        Favorite(user_id=current_user_id, machine_id="owned-machine-2"),
+        Favorite(user_id=other_user_id, machine_id="other-machine"),
+    ]
+    test_db.add_all(favorites)
+    await test_db.commit()
+
+    response = await async_client.delete("/api/v1/favorites")
+    assert response.status_code == 204
+
+    response = await async_client.get("/api/v1/favorites")
+    assert response.status_code == 200
+    assert response.json()["total"] == 0
+
+    other_favorites = await test_db.execute(select(Favorite).where(Favorite.user_id == other_user_id))
+    assert other_favorites.scalar_one() is not None

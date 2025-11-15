@@ -16,15 +16,16 @@ import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvid
 import { identifyMachine } from '@features/identification/services/identifyMachine';
 
 import PrimaryButton from '@shared/components/PrimaryButton';
+import { createLogger } from '@shared/logger';
 import { colors } from '@shared/theme';
 
 import { HomeStackParamList } from '@typings/navigation';
 
 import { styles } from './CameraScreen.styles';
 
-
-
 type CameraScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Camera'>;
+
+const logger = createLogger('CameraScreen');
 
 export default function CameraScreen() {
   const navigation = useNavigation<CameraScreenNavigationProp>();
@@ -72,7 +73,7 @@ export default function CameraScreen() {
       setIsRequestingPermission(true);
       await requestPermission();
     } catch (error) {
-      console.error('Failed requesting camera permission', error);
+      logger.error('Failed requesting camera permission', error);
       Alert.alert(
         'Permission Error',
         'We could not request camera access. Please try again.'
@@ -117,7 +118,7 @@ export default function CameraScreen() {
       );
       return false;
     } catch (error) {
-      console.error('Failed checking photo permissions', error);
+      logger.error('Failed checking photo permissions', error);
       Alert.alert(
         'Permission Error',
         'We could not check photo permissions. Please try again.'
@@ -137,7 +138,7 @@ export default function CameraScreen() {
         result,
       });
     } catch (error) {
-      console.error('Error identifying machine:', error);
+      logger.error('Error identifying machine', error);
       Alert.alert(
         'Recognition Failed',
         'We ran into a problem analyzing that photo. Please try again.'
@@ -202,7 +203,7 @@ export default function CameraScreen() {
 
       await processPhoto(photo.uri);
     } catch (error) {
-      console.error('Error capturing photo:', error);
+      logger.error('Error capturing photo', error);
       Alert.alert(
         'Capture Failed',
         'We could not capture a photo. Please try again.'
@@ -240,7 +241,7 @@ export default function CameraScreen() {
 
       await processPhoto(asset.uri);
     } catch (error) {
-      console.error('Error selecting photo:', error);
+      logger.error('Error selecting photo', error);
       Alert.alert(
         'Selection Failed',
         'We could not open that photo. Please try again.'

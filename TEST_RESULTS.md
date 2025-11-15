@@ -251,6 +251,60 @@ beforeEach(() => {
 
 ---
 
+## Backend Router Regression Spot Checks (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_favorites_router.py tests/test_machines_router.py`
+- **Status:** ✅ 24 tests passed (favorites + machines suites only)
+- **Notes:**
+  - Added favorites router scenarios that ensure cross-user deletes return 404 and that `DELETE /favorites` only clears the authenticated user's rows (exercising `backend/app/routers/favorites.py` lines 194-281).
+  - Added machines router guard rails for invalid pagination (422) and the `is_active` filter toggle so inactive catalog entries are only returned when explicitly requested (`backend/app/routers/machines.py` lines 52-83).
+  - Coverage reporting was intentionally disabled via `-o addopts=''` for this focused run; the full-suite command still enforces the 80% gate logged in `docs/test-execution-log.md`.
+
+---
+
+## Media Router Failure Paths (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_media_router.py`
+- **Status:** ✅ 7 tests passed
+- **Notes:**
+  - Added explicit rejection for empty uploads plus storage failure simulations on both upload and delete flows to cover the error branches in `backend/app/routers/media.py` (lines 45-122).
+  - Leveraged a new `ErrorBucket` helper so we can force Supabase storage clients to raise and verify the router returns 500 + logs `media.upload_failed` / `media.delete_failed`.
+  - This run only targets the media suite, so coverage gating stays in the full command logged under `docs/test-execution-log.md`.
+
+---
+
+## Inference + VLM Client Regression Suite (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_inference_service.py tests/test_vlm_client.py`
+- **Status:** ✅ 20 tests passed
+- **Notes:**
+  - Extended the `FakeVLMClient` in `backend/tests/test_inference_service.py` with a `prompt_variant` field so the mock pathway can populate the trace store now that `InferenceService` records prompt metadata.
+  - Updated the `DummySettings` used by `test_vlm_client.py` to include `prompt_variant`, `prompt_ab_testing_enabled`, and `enable_prompt_metadata`, keeping the fixture aligned with the new prompt-engineering knobs introduced in `backend/app/services/vlm_client.py`.
+  - Focused run bypasses the coverage gate; rerun the full backend suite once remaining modules (e.g., auth) receive their additional coverage.
+
+---
+
+## Auth Failure-Path Coverage (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_auth.py`
+- **Status:** ✅ 22 tests passed
+- **Notes:**
+  - Added tests for missing JWKS configuration, httpx HTTP errors, generic JWTError handling, unexpected decode exceptions, missing `sub` claims, and `require_role` denial paths so `backend/app/auth.py` lines 97-178 and 315-390 stay exercised.
+  - These cases ensure we cover the HTTP 401/403/500 branches without relying on live Supabase, shrinking the remaining uncovered region to just the `get_signing_key` helper.
+
+---
+
+## Backend Full Suite Rerun (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest --cov=app --cov-report=term-missing --cov-report=html`
+- **Status:** ✅ 100 tests passed, coverage 82.07% (>=80% gate)
+- **Notes:**
+  - Confirms the broadened router/media/inference/auth changes keep the gate green with 100 collected tests.
+  - Coverage deltas highlight routers (favorites/history/machines) as the primary remaining gaps; auth now reports 88% thanks to the new negative-path suite.
+  - HTML report refreshed at `backend/htmlcov/index.html`; raw log captured in `backend/test-results-backend.log` and summarized in `docs/test-execution-log.md`.
+
+---
+
 ## Coverage Report
 
 | Category | Statements | Branches | Functions | Lines |

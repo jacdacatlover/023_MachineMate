@@ -92,6 +92,10 @@ jest.mock('@sentry/react-native', () => ({
 
 - **Status Update (2025-11-14, media failure paths):** Exercised the media router’s unhappy paths by forcing Supabase storage upload/delete errors and empty payloads. Command: `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_media_router.py` ✅ 7/7 tests passing, guarding `backend/app/routers/media.py` error branches while deferring the global coverage gate to the full suite.
 
+- **Status Update (2025-11-14, inference/vlm fixtures):** Patched the inference and VLM client tests to respect the new prompt variant plumbing (FakeVLMClient now exposes `prompt_variant`, DummySettings gained prompt config flags). Command: `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_inference_service.py tests/test_vlm_client.py` ✅ 20/20 tests passing prior to re-running the cov-gated backend suite.
+
+- **Status Update (2025-11-14, auth negative paths):** Added JWKS misconfiguration/httpx failure tests plus JWT decode error + role-denial cases so `backend/app/auth.py` is now at 88% coverage. Commands: `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_auth.py` and the subsequent full suite (100 tests, 82.07% coverage) to verify the global gate.
+
 - `backend/tests/conftest.py` - Test client, mock Supabase, mock Fireworks
 - `backend/tests/test_machines_router.py`
 - `backend/tests/test_favorites_router.py`

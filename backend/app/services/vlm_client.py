@@ -380,6 +380,7 @@ class VLMClient:
                 error=error,
                 model=self.settings.vlm_model,
                 prompt=self._prompt,
+                prompt_variant=self.prompt_variant,
             )
         )
 

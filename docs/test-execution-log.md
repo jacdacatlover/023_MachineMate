@@ -153,6 +153,57 @@ TOTAL                                  1118    212    81%
 
 </details>
 
+### Backend Rerun – Router + inference updates (2025-11-14)
+
+- **Command:** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest --cov=app --cov-report=term-missing --cov-report=html`
+- **Log file:** `test-results-backend.log`
+- **Status:** ✅ Exit 0 (96 tests passed, coverage 81.44% vs. 80% gate)
+- **Notes:**
+  - Includes the new favorites/machines/media edge-case tests plus the updated inference/VLM fixtures, so we’re validating 96 tests vs. the earlier 89 run.
+  - `app/auth.py` coverage is now at 81%, but deeper negative-path assertions are still pending; router files remain the primary coverage delta in the new report.
+  - HTML report refreshed under `backend/htmlcov/index.html` for this run; logs archived in `test-results-backend.log`.
+
+<details>
+<summary>Key log excerpt</summary>
+
+```text
+============================= test session starts ==============================
+collected 96 items
+...
+---------- coverage: platform darwin, python 3.9.6-final-0 -----------
+TOTAL                             1277    237    81%
+Coverage HTML written to dir htmlcov
+Required test coverage of 80% reached. Total coverage: 81.44%
+======================= 96 passed, 47 warnings in 4.08s ========================
+```
+
+</details>
+
+### Backend Auth Focus + Full Rerun (2025-11-14)
+
+- **Command (auth only):** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest -o addopts='' tests/test_auth.py`
+- **Command (full suite):** `PYTHONPATH=/Users/jac/Projects/023_MachineMate python3 -m pytest --cov=app --cov-report=term-missing --cov-report=html`
+- **Log file:** `test-results-backend.log`
+- **Status:** ✅ Exit 0 (auth only: 22 tests; full suite: 100 tests, coverage 82.07% vs. 80% gate)
+- **Notes:**
+  - Auth suite now covers missing JWKS config, httpx failures, JWTError handling, unexpected decode errors, optional auth flow, and role denials—raising `app/auth.py` to 88% statements.
+  - Full rerun picks up the auth additions, increasing total collected tests to 100 and nudging coverage to 82.07%; routers remain the dominant uncovered area.
+  - HTML coverage refreshed; logs updated in `backend/test-results-backend.log`.
+
+<details>
+<summary>Key log excerpt</summary>
+
+```text
+tests/test_auth.py ......................                                [ 22%]
+...
+---------- coverage: platform darwin, python 3.9.6-final-0 -----------
+TOTAL                             1277    229    82%
+Required test coverage of 80% reached. Total coverage: 82.07%
+======================= 100 passed, 47 warnings in 2.58s =======================
+```
+
+</details>
+
 ---
 
 ### Files Referenced

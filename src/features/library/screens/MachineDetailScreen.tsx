@@ -12,6 +12,7 @@ import { useRecentHistory } from '@features/library/hooks/useRecentHistory';
 
 import { AnimatedBodyHighlighter } from '@shared/components/AnimatedBodyHighlighter';
 import SectionHeader from '@shared/components/SectionHeader';
+import { createLogger } from '@shared/logger';
 import { colors } from '@shared/theme';
 
 import { LibraryStackParamList } from '@typings/navigation';
@@ -19,6 +20,8 @@ import { LibraryStackParamList } from '@typings/navigation';
 import { styles } from './MachineDetailScreen.styles';
 
 type MachineDetailScreenRouteProp = RouteProp<LibraryStackParamList, 'MachineDetail'>;
+
+const logger = createLogger('MachineDetailScreen');
 
 export default function MachineDetailScreen() {
   const route = useRoute<MachineDetailScreenRouteProp>();
@@ -35,7 +38,7 @@ export default function MachineDetailScreen() {
   // Add to history when screen loads
   useEffect(() => {
     addToHistory(machineId).catch((error) => {
-      console.error('Failed to add to history', error);
+      logger.error('Failed to add to history', error);
     });
   }, [machineId, addToHistory]);
 
@@ -43,7 +46,7 @@ export default function MachineDetailScreen() {
     try {
       await toggleFavorite(machineId);
     } catch (error) {
-      console.error('Failed to toggle favorite', error);
+      logger.error('Failed to toggle favorite', error);
     }
   };
 

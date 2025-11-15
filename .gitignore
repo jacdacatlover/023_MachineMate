@@ -27,6 +27,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# Temporary clipboard files
+.gemini-clipboard/
+
 # Python
 __pycache__/
 *.py[cod]
