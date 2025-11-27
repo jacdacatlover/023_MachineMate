@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     vlm_api_base_url: Optional[str] = None
     vlm_api_key: Optional[str] = None
     vlm_model: Optional[str] = None
-    vlm_request_timeout: float = 20.0
+    vlm_request_timeout: float = 60.0
     enable_mock_responses: bool = True
 
     # Prompt Engineering Configuration (machinemate_ prefix)
@@ -91,6 +91,7 @@ class Settings(BaseSettings):
     # Supabase JWT configuration (no prefix)
     SUPABASE_JWT_AUDIENCE: str = Field(default="authenticated", validation_alias="SUPABASE_JWT_AUDIENCE")
     SUPABASE_JWT_ISSUER: Optional[str] = Field(default=None, validation_alias="SUPABASE_JWT_ISSUER")
+    SUPABASE_JWT_SECRET: Optional[str] = Field(default=None, validation_alias="SUPABASE_JWT_SECRET")
     SUPABASE_JWT_JWKS_URL: Optional[str] = Field(default=None, validation_alias="SUPABASE_JWT_JWKS_URL")
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = Field(default=None, validation_alias="SUPABASE_SERVICE_ROLE_KEY")
 

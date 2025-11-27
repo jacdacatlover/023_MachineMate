@@ -136,26 +136,52 @@ class VLMClient:
         if response.status_code >= 500:
             logger.warning(
                 "vlm.server_error",
-                extra={"status": response.status_code, "trace_id": trace_id, "body": response.text[:512]},
+                extra={
+                    "status": response.status_code,
+                    "trace_id": trace_id,
+                    "body": response.text[:512],
+                    "endpoint": endpoint,
+                    "model": self.settings.vlm_model,
+                },
             )
             return None
 
         if response.status_code >= 400:
             logger.error(
-                "vlm.client_error status=%s trace_id=%s body=%s",
-                response.status_code,
-                trace_id,
-                response.text[:512],
+                "vlm.client_error",
+                extra={
+                    "status": response.status_code,
+                    "trace_id": trace_id,
+                    "body": response.text[:512],
+                    "endpoint": endpoint,
+                    "model": self.settings.vlm_model,
+                    "api_key_prefix": self.settings.vlm_api_key[:10] if self.settings.vlm_api_key else None,
+                },
             )
             return None
 
-        message_text = self._extract_message_text(response.json())
+        response_data = response.json()
+        message_text = self._extract_message_text(response_data)
         if not message_text:
-            logger.warning("vlm.empty_response", extra={"trace_id": trace_id})
+            logger.warning(
+                "vlm.empty_response",
+                extra={
+                    "trace_id": trace_id,
+                    "response_keys": list(response_data.keys()) if isinstance(response_data, dict) else None,
+                    "response_sample": str(response_data)[:200],
+                },
+            )
             return None
 
         parsed = self._parse_machine_json(message_text, trace_id)
         if not parsed:
+            logger.warning(
+                "vlm.parse_failed",
+                extra={
+                    "trace_id": trace_id,
+                    "message_text": message_text[:200],
+                },
+            )
             return None
 
         return VLMResponse(
@@ -205,19 +231,30 @@ class VLMClient:
 
         if response.status_code >= 500:
             logger.warning(
-                "vlm.server_error status=%s trace_id=%s body=%s",
-                response.status_code,
-                trace_id,
-                response.text[:512],
+                "vlm.server_error",
+                extra={
+                    "status": response.status_code,
+                    "trace_id": trace_id,
+                    "body": response.text[:512],
+                    "endpoint": self.base_url,
+                    "model": self.settings.vlm_model,
+                    "api_mode": "huggingface",
+                },
             )
             return None
 
         if response.status_code >= 400:
             logger.error(
-                "vlm.client_error status=%s trace_id=%s body=%s",
-                response.status_code,
-                trace_id,
-                response.text[:512],
+                "vlm.client_error",
+                extra={
+                    "status": response.status_code,
+                    "trace_id": trace_id,
+                    "body": response.text[:512],
+                    "endpoint": self.base_url,
+                    "model": self.settings.vlm_model,
+                    "api_mode": "huggingface",
+                    "api_key_prefix": self.settings.vlm_api_key[:10] if self.settings.vlm_api_key else None,
+                },
             )
             return None
 
@@ -235,6 +272,13 @@ class VLMClient:
 
         parsed = self._parse_machine_json(message_text, trace_id)
         if not parsed:
+            logger.warning(
+                "vlm.hf_parse_failed",
+                extra={
+                    "trace_id": trace_id,
+                    "message_text": message_text[:200],
+                },
+            )
             return None
 
         return VLMResponse(

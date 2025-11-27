@@ -56,7 +56,9 @@ describe('useRecentHistory', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.history).toEqual(storedHistory);
+    expect(result.current.history).toHaveLength(2);
+    expect(result.current.history.map(item => item.machineId)).toEqual(['machine-1', 'machine-2']);
+    expect(result.current.history.every(item => typeof item.entryId === 'string')).toBe(true);
   });
 
   it('should add a machine to history', async () => {
@@ -80,8 +82,8 @@ describe('useRecentHistory', () => {
   it('should move existing machine to top when added again', async () => {
     const oldTimestamp = '2025-01-01T00:00:00.000Z';
     const storedHistory: RecentHistoryItem[] = [
-      { machineId: 'machine-1', viewedAt: oldTimestamp },
-      { machineId: 'machine-2', viewedAt: '2025-01-02T00:00:00.000Z' },
+      { entryId: 'entry-1', machineId: 'machine-1', viewedAt: oldTimestamp },
+      { entryId: 'entry-2', machineId: 'machine-2', viewedAt: '2025-01-02T00:00:00.000Z' },
     ];
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedHistory));
 
@@ -108,6 +110,7 @@ describe('useRecentHistory', () => {
   it('should limit history to 10 items', async () => {
     // Create history with 10 items
     const storedHistory: RecentHistoryItem[] = Array.from({ length: 10 }, (_, i) => ({
+      entryId: `entry-${i + 1}`,
       machineId: `machine-${i + 1}`,
       viewedAt: `2025-01-${String(i + 1).padStart(2, '0')}T00:00:00.000Z`,
     }));
@@ -133,8 +136,8 @@ describe('useRecentHistory', () => {
 
   it('should clear all history', async () => {
     const storedHistory: RecentHistoryItem[] = [
-      { machineId: 'machine-1', viewedAt: '2025-01-01T00:00:00.000Z' },
-      { machineId: 'machine-2', viewedAt: '2025-01-02T00:00:00.000Z' },
+      { entryId: 'entry-1', machineId: 'machine-1', viewedAt: '2025-01-01T00:00:00.000Z' },
+      { entryId: 'entry-2', machineId: 'machine-2', viewedAt: '2025-01-02T00:00:00.000Z' },
     ];
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedHistory));
 
@@ -158,9 +161,9 @@ describe('useRecentHistory', () => {
 
   it('should filter out invalid machine IDs', async () => {
     const storedHistory: RecentHistoryItem[] = [
-      { machineId: 'machine-1', viewedAt: '2025-01-01T00:00:00.000Z' },
-      { machineId: 'invalid-machine', viewedAt: '2025-01-02T00:00:00.000Z' },
-      { machineId: 'machine-2', viewedAt: '2025-01-03T00:00:00.000Z' },
+      { entryId: 'entry-1', machineId: 'machine-1', viewedAt: '2025-01-01T00:00:00.000Z' },
+      { entryId: 'entry-2', machineId: 'invalid-machine', viewedAt: '2025-01-02T00:00:00.000Z' },
+      { entryId: 'entry-3', machineId: 'machine-2', viewedAt: '2025-01-03T00:00:00.000Z' },
     ];
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(storedHistory));
 

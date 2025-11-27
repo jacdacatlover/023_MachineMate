@@ -13,11 +13,17 @@ const logger = createLogger('library.history');
 
 export interface HistoryResponse {
   id: string;
-  user_id: string;
   machine_id: string;
-  viewed_at: string;
+  taken_at: string;
   created_at: string;
-  updated_at: string;
+  photo_uri?: string | null;
+}
+
+export interface HistoryListResponse {
+  history: HistoryResponse[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 /**
@@ -25,12 +31,14 @@ export interface HistoryResponse {
  */
 export async function getHistory(): Promise<RecentHistoryItem[]> {
   try {
-    const history = await apiGet<HistoryResponse[]>('/api/v1/history');
+    const response = await apiGet<HistoryListResponse>('/api/v1/history');
+    const history = response?.history ?? [];
 
     // Transform to RecentHistoryItem format for compatibility
-    return history.map((item) => ({
+    return history.map(item => ({
+      entryId: item.id,
       machineId: item.machine_id,
-      viewedAt: item.viewed_at,
+      viewedAt: item.taken_at,
     }));
   } catch (error) {
     logger.error('Failed to fetch history', { error });

@@ -30,11 +30,11 @@ describe('favoritesApi', () => {
   describe('getFavorites', () => {
     it('should fetch favorites and return machine IDs', async () => {
       const mockFavorites = [
-        { id: '1', user_id: 'user1', machine_id: 'machine1', created_at: '2024-01-01', updated_at: '2024-01-01' },
-        { id: '2', user_id: 'user1', machine_id: 'machine2', created_at: '2024-01-01', updated_at: '2024-01-01' },
+        { machine_id: 'machine1', created_at: '2024-01-01T00:00:00Z', notes: null },
+        { machine_id: 'machine2', created_at: '2024-01-02T00:00:00Z', notes: 'note' },
       ];
 
-      mockedApiGet.mockResolvedValue(mockFavorites);
+      mockedApiGet.mockResolvedValue({ favorites: mockFavorites, total: 2 });
 
       const result = await getFavorites();
 
@@ -43,7 +43,7 @@ describe('favoritesApi', () => {
     });
 
     it('should handle empty favorites', async () => {
-      mockedApiGet.mockResolvedValue([]);
+      mockedApiGet.mockResolvedValue({ favorites: [], total: 0 });
 
       const result = await getFavorites();
 

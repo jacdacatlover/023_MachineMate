@@ -102,8 +102,13 @@ async def get_jwks() -> dict:
         )
 
     try:
+        # Supabase JWKS endpoint requires an API key in headers
+        headers = {}
+        if settings.SUPABASE_SERVICE_ROLE_KEY:
+            headers["apikey"] = settings.SUPABASE_SERVICE_ROLE_KEY
+
         async with httpx.AsyncClient() as client:
-            response = await client.get(jwks_url, timeout=10.0)
+            response = await client.get(jwks_url, headers=headers, timeout=10.0)
             response.raise_for_status()
             jwks_data = response.json()
 
@@ -183,7 +188,7 @@ async def verify_token(token: str) -> dict:
     Verify and decode a Supabase JWT token.
 
     Validates:
-    - Token signature using JWKS
+    - Token signature using JWKS (RS256) or JWT secret (HS256)
     - Token expiration
     - Issuer (iss) matches Supabase project
     - Audience (aud) is 'authenticated'
@@ -198,42 +203,123 @@ async def verify_token(token: str) -> dict:
         HTTPException: If token is invalid, expired, or verification fails
     """
     try:
-        # Fetch JWKS for signature verification
-        jwks_data = await get_jwks()
+        # Inspect the JWT header to determine the algorithm
+        try:
+            unverified_header = jwt.get_unverified_header(token)
+            algorithm = unverified_header.get("alg", "").upper()
 
-        # Get signing key matching token's kid
-        signing_key = get_signing_key(token, jwks_data)
-        if not signing_key:
+            logger.debug(
+                "JWT header inspection",
+                extra={
+                    "algorithm": algorithm,
+                    "kid": unverified_header.get("kid"),
+                    "typ": unverified_header.get("typ"),
+                },
+            )
+        except JWTError as exc:
+            logger.error(f"Failed to decode JWT header: {exc}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unable to find signing key for token",
+                detail="Invalid token format",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # Verify and decode token
-        payload = jwt.decode(
-            token,
-            signing_key,
-            algorithms=["RS256"],  # Supabase uses RS256
-            audience=settings.SUPABASE_JWT_AUDIENCE,
-            issuer=settings.SUPABASE_JWT_ISSUER,
-            options={
-                "verify_signature": True,
-                "verify_exp": True,
-                "verify_aud": True,
-                "verify_iss": True,
-                "require_exp": True,
-                "require_aud": True,
-                "require_iss": True,
-            },
-        )
+        # Handle RS256 algorithm with JWKS
+        if algorithm == "RS256":
+            if not settings.SUPABASE_JWT_JWKS_URL:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Token requires RS256 verification but JWKS URL not configured",
+                )
 
-        logger.debug(
-            "Token verified successfully",
-            extra={"user_id": payload.get("sub"), "email": payload.get("email")},
-        )
+            # Fetch JWKS for signature verification
+            jwks_data = await get_jwks()
 
-        return payload
+            # Get signing key matching token's kid
+            signing_key = get_signing_key(token, jwks_data)
+            if not signing_key:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="No matching key found in JWKS for token verification",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
+            # Verify and decode token using RS256
+            payload = jwt.decode(
+                token,
+                signing_key,
+                algorithms=["RS256"],
+                audience=settings.SUPABASE_JWT_AUDIENCE,
+                issuer=settings.SUPABASE_JWT_ISSUER,
+                options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_aud": True,
+                    "verify_iss": True,
+                    "require_exp": True,
+                    "require_aud": True,
+                    "require_iss": True,
+                },
+            )
+
+            logger.debug(
+                "Token verified successfully using RS256",
+                extra={"user_id": payload.get("sub"), "email": payload.get("email")},
+            )
+
+            return payload
+
+        # Handle HS256 algorithm with JWT secret
+        elif algorithm == "HS256":
+            if not settings.SUPABASE_JWT_SECRET:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Token requires HS256 verification but JWT secret not configured",
+                )
+
+            # Log verification attempt details
+            logger.info(
+                "Attempting HS256 JWT verification",
+                extra={
+                    "audience_expected": settings.SUPABASE_JWT_AUDIENCE,
+                    "issuer_expected": settings.SUPABASE_JWT_ISSUER,
+                    "has_secret": bool(settings.SUPABASE_JWT_SECRET),
+                },
+            )
+
+            # Verify and decode token using HS256
+            payload = jwt.decode(
+                token,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                audience=settings.SUPABASE_JWT_AUDIENCE,
+                issuer=settings.SUPABASE_JWT_ISSUER,
+                options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_aud": True,
+                    "verify_iss": True,
+                    "require_exp": True,
+                    "require_aud": True,
+                    "require_iss": True,
+                },
+            )
+
+            logger.debug(
+                "Token verified successfully using HS256",
+                extra={"user_id": payload.get("sub"), "email": payload.get("email")},
+            )
+
+            return payload
+
+        # Unsupported algorithm
+        else:
+            logger.error(f"Unsupported JWT algorithm: {algorithm}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Unsupported JWT algorithm: {algorithm}",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     except jwt.ExpiredSignatureError:
         logger.warning("Token expired")
@@ -244,7 +330,16 @@ async def verify_token(token: str) -> dict:
         )
 
     except jwt.JWTClaimsError as exc:
-        logger.warning(f"Invalid token claims: {exc}")
+        logger.error(f"JWT claims verification failed: {exc}", exc_info=True)
+        logger.error(
+            "Token verification failed with JWTClaimsError",
+            extra={
+                "error_type": type(exc).__name__,
+                "error_message": str(exc),
+                "audience_expected": settings.SUPABASE_JWT_AUDIENCE,
+                "issuer_expected": settings.SUPABASE_JWT_ISSUER,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token claims: {exc}",
@@ -252,7 +347,14 @@ async def verify_token(token: str) -> dict:
         )
 
     except JWTError as exc:
-        logger.error(f"JWT verification failed: {exc}")
+        logger.error(f"JWT verification failed with JWTError: {exc}", exc_info=True)
+        logger.error(
+            "Token verification failed with generic JWTError",
+            extra={
+                "error_type": type(exc).__name__,
+                "error_message": str(exc),
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

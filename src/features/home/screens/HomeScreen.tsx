@@ -57,9 +57,21 @@ export default function HomeScreen() {
   };
 
   // Get machine objects from IDs in recent history
-  const recentMachines = recentHistory
-    .map(item => machines.find((m) => m.id === item.machineId))
-    .filter((machine): machine is MachineDefinition => machine !== undefined);
+  const recentMachineEntries = recentHistory
+    .map(item => {
+      const machine = machines.find((m) => m.id === item.machineId);
+      if (!machine) {
+        return null;
+      }
+
+      return {
+        machine,
+        entryId: item.entryId ?? `${machine.id}-${item.viewedAt}`,
+      };
+    })
+    .filter(
+      (entry): entry is { machine: MachineDefinition; entryId: string } => entry !== null
+    );
 
   // Get machine objects from favorite IDs
   const favoriteMachines = favorites
@@ -110,16 +122,16 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {!isLoading && favoriteMachines.length > 0 && recentMachines.length > 0 && <Divider />}
+      {!isLoading && favoriteMachines.length > 0 && recentMachineEntries.length > 0 && <Divider />}
 
-      {!isLoading && recentMachines.length > 0 && (
+      {!isLoading && recentMachineEntries.length > 0 && (
         <View style={styles.recentSection}>
           <Text variant="titleLarge" style={styles.sectionTitle}>
             Recent Machines
           </Text>
-          {recentMachines.map((machine) => (
+          {recentMachineEntries.map(({ machine, entryId }) => (
             <MachineListItem
-              key={machine.id}
+              key={entryId}
               machine={machine}
               isFavorite={favorites.includes(machine.id)}
               onPress={() => handleMachinePress(machine.id)}
@@ -128,7 +140,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {!isLoading && recentMachines.length === 0 && favoriteMachines.length === 0 && (
+      {!isLoading && recentMachineEntries.length === 0 && favoriteMachines.length === 0 && (
         <View style={styles.emptyState}>
           <Text variant="bodyLarge" style={styles.emptyText}>
             No recent machines yet.

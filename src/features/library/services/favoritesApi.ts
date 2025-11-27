@@ -6,16 +6,20 @@
 
 import { apiGet, apiPost, apiDelete } from '../../../services/api/apiClient';
 import { createLogger } from '../../../shared/logger';
+import { MachineDefinition } from '../../../types/machine';
 
 const logger = createLogger('library.favorites');
 
 export interface FavoriteResponse {
-  id: string;
-  user_id: string;
   machine_id: string;
-  notes?: string;
   created_at: string;
-  updated_at: string;
+  notes?: string | null;
+  machine?: MachineDefinition | null;
+}
+
+export interface FavoriteListResponse {
+  favorites: FavoriteResponse[];
+  total: number;
 }
 
 /**
@@ -23,10 +27,11 @@ export interface FavoriteResponse {
  */
 export async function getFavorites(): Promise<string[]> {
   try {
-    const favorites = await apiGet<FavoriteResponse[]>('/api/v1/favorites');
+    const response = await apiGet<FavoriteListResponse>('/api/v1/favorites');
+    const favorites = response?.favorites ?? [];
 
     // Extract just the machine IDs for compatibility with existing code
-    return favorites.map((fav) => fav.machine_id);
+    return favorites.map(fav => fav.machine_id);
   } catch (error) {
     logger.error('Failed to fetch favorites', { error });
     throw error;

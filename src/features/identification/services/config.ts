@@ -2,7 +2,7 @@
 
 export const API_CONFIG = {
   confidenceThreshold: 0.7,
-  timeoutMs: 15000,
+  timeoutMs: 30000,
 } as const;
 
 export const RECOGNITION_CONFIG = {

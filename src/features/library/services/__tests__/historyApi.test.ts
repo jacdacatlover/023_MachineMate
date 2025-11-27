@@ -32,35 +32,31 @@ describe('historyApi', () => {
       const mockHistory = [
         {
           id: '1',
-          user_id: 'user1',
           machine_id: 'machine1',
-          viewed_at: '2024-01-01T10:00:00Z',
+          taken_at: '2024-01-01T10:00:00Z',
           created_at: '2024-01-01',
-          updated_at: '2024-01-01',
         },
         {
           id: '2',
-          user_id: 'user1',
           machine_id: 'machine2',
-          viewed_at: '2024-01-02T11:00:00Z',
+          taken_at: '2024-01-02T11:00:00Z',
           created_at: '2024-01-02',
-          updated_at: '2024-01-02',
         },
       ];
 
-      mockedApiGet.mockResolvedValue(mockHistory);
+      mockedApiGet.mockResolvedValue({ history: mockHistory, total: 2, page: 1, page_size: 20 });
 
       const result = await getHistory();
 
       expect(mockedApiGet).toHaveBeenCalledWith('/api/v1/history');
       expect(result).toEqual([
-        { machineId: 'machine1', viewedAt: '2024-01-01T10:00:00Z' },
-        { machineId: 'machine2', viewedAt: '2024-01-02T11:00:00Z' },
+        { entryId: '1', machineId: 'machine1', viewedAt: '2024-01-01T10:00:00Z' },
+        { entryId: '2', machineId: 'machine2', viewedAt: '2024-01-02T11:00:00Z' },
       ]);
     });
 
     it('should handle empty history', async () => {
-      mockedApiGet.mockResolvedValue([]);
+      mockedApiGet.mockResolvedValue({ history: [], total: 0, page: 1, page_size: 20 });
 
       const result = await getHistory();
 

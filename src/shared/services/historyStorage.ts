@@ -19,7 +19,11 @@ export async function getRecentHistory(): Promise<RecentHistoryItem[]> {
 
     const parsed = JSON.parse(value);
     const validated = RecentHistorySchema.parse(parsed);
-    return validated;
+    return validated.map((item: RecentHistoryItem, index: number) => ({
+      ...item,
+      entryId:
+        item.entryId || `${item.machineId}-${item.viewedAt || index}-${index}`,
+    }));
   } catch (error) {
     console.error('Error reading/validating history, clearing corrupted data:', error);
     // Clear corrupted data
@@ -43,6 +47,7 @@ export async function addToRecentHistory(machineId: string): Promise<RecentHisto
 
     // Add new entry at the beginning (most recent)
     const newItem: RecentHistoryItem = {
+      entryId: `${machineId}-${Date.now()}`,
       machineId,
       viewedAt: new Date().toISOString(),
     };

@@ -15,6 +15,7 @@ export const FavoritesSchema = z.array(z.string().min(1).max(100));
 export const RecentHistoryItemSchema = z.object({
   machineId: z.string().min(1).max(100),
   viewedAt: z.string().datetime(), // ISO 8601 date string
+  entryId: z.string().min(1).optional(),
 }).strict();
 
 /**

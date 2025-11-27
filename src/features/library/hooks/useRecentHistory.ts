@@ -3,6 +3,7 @@ import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useMachines } from '@app/providers/MachinesProvider';
 
 import { useAsyncStorage } from '@shared/hooks/useAsyncStorage';
+import { useNetworkStatus } from '@shared/hooks/useNetworkStatus';
 import { createLogger } from '@shared/logger';
 import { filterValidMachineIds, validateMachineId } from '@shared/services/validation';
 
@@ -81,6 +82,9 @@ interface UseRecentHistoryReturn {
  */
 export function useRecentHistory(): UseRecentHistoryReturn {
   const machines = useMachines();
+  const { isConnected, isInternetReachable } = useNetworkStatus();
+  // Treat null as "unknown/assume online" so we only skip when we know the device is offline
+  const canSyncHistory = isConnected !== false && isInternetReachable !== false;
   const [isSyncing, setIsSyncing] = useState(false);
   const isCleaningRef = useRef(false);
 
@@ -123,7 +127,21 @@ export function useRecentHistory(): UseRecentHistoryReturn {
       rawHistory.map((item) => item.machineId),
       machines
     );
-    return rawHistory.filter((item) => validMachineIds.includes(item.machineId));
+
+    return rawHistory
+      .filter((item) => validMachineIds.includes(item.machineId))
+      .map((item, index) => {
+        const entryId =
+          item.entryId ||
+          `${item.machineId}-${item.viewedAt || index}-${index}`;
+        const viewedAt = item.viewedAt || new Date().toISOString();
+
+        return {
+          ...item,
+          entryId,
+          viewedAt,
+        };
+      });
   }, [rawHistory, machines]);
 
   // Persist cleaned data if invalid IDs were filtered out
@@ -133,17 +151,41 @@ export function useRecentHistory(): UseRecentHistoryReturn {
       return;
     }
 
-    // Check if cleanup is needed (rawHistory has invalid IDs)
-    if (rawHistory.length > 0 && history.length !== rawHistory.length) {
+    // Filter to valid machine IDs
+    const validMachineIds = filterValidMachineIds(
+      rawHistory.map((item) => item.machineId),
+      machines
+    );
+
+    const needsInvalidIdCleanup = rawHistory.length > validMachineIds.length;
+    const needsNormalization = rawHistory.some((item) => !item.entryId || !item.viewedAt);
+
+    if (needsInvalidIdCleanup || needsNormalization) {
       isCleaningRef.current = true;
+
+      // Compute normalized history inline to avoid circular dependency
+      const normalizedHistory = rawHistory
+        .filter((item) => validMachineIds.includes(item.machineId))
+        .map((item, index) => {
+          const entryId =
+            item.entryId ||
+            `${item.machineId}-${item.viewedAt || index}-${index}`;
+          const viewedAt = item.viewedAt || new Date().toISOString();
+
+          return {
+            ...item,
+            entryId,
+            viewedAt,
+          };
+        });
 
       logger.debug('Persisting cleaned history', {
         before: rawHistory.length,
-        after: history.length,
-        removed: rawHistory.length - history.length,
+        after: normalizedHistory.length,
+        removed: rawHistory.length - normalizedHistory.length,
       });
 
-      setData(history)
+      setData(normalizedHistory)
         .catch((err) => {
           logger.error('Failed to persist cleaned history', { error: err });
         })
@@ -151,10 +193,15 @@ export function useRecentHistory(): UseRecentHistoryReturn {
           isCleaningRef.current = false;
         });
     }
-  }, [rawHistory, history, isLoadingCache, isSyncing, setData]);
+  }, [rawHistory, machines, isLoadingCache, isSyncing, setData]);
 
   // Sync with backend on mount
   useEffect(() => {
+    if (!canSyncHistory) {
+      logger.debug('Skipping history sync while offline');
+      return;
+    }
+
     let isMounted = true;
 
     async function syncHistory() {
@@ -182,40 +229,45 @@ export function useRecentHistory(): UseRecentHistoryReturn {
     return () => {
       isMounted = false;
     };
-  }, [setData]);
+  }, [setData, canSyncHistory]);
 
   const addToHistory = useCallback(
     async (machineId: string) => {
       try {
         validateMachineId(machineId, machines);
 
-        // Remove existing entry for this machine if it exists
-        const filteredHistory = history.filter(
-          (item) => item.machineId !== machineId
-        );
-
         // Add new entry at the beginning (most recent)
         const newItem: RecentHistoryItem = {
+          entryId: `${machineId}-${Date.now()}`,
           machineId,
           viewedAt: new Date().toISOString(),
         };
 
-        const newHistory = [newItem, ...filteredHistory];
+        // Use functional setState to avoid circular dependency
+        await setData((currentHistory) => {
+          // Remove existing entry for this machine if it exists
+          const filteredHistory = currentHistory.filter(
+            (item) => item.machineId !== machineId
+          );
 
-        // Keep only the last MAX_HISTORY_ITEMS
-        const trimmedHistory = newHistory.slice(0, MAX_HISTORY_ITEMS);
+          const newHistory = [newItem, ...filteredHistory];
 
-        // Optimistically update cache
-        await setData(trimmedHistory);
+          // Keep only the last MAX_HISTORY_ITEMS
+          return newHistory.slice(0, MAX_HISTORY_ITEMS);
+        });
 
         // Sync to backend (fire and forget - don't rollback on failure)
-        try {
-          await historyApi.addToHistory(machineId);
-          logger.debug(`Added machine ${machineId} to history`);
-        } catch (backendError) {
-          // Don't rollback - history is less critical than favorites
-          // User's local cache is still updated
-          logger.warn('Failed to sync history to backend, continuing with local cache', { backendError });
+        if (!canSyncHistory) {
+          logger.debug('Skipping backend history sync while offline', { machineId });
+        } else {
+          try {
+            await historyApi.addToHistory(machineId);
+            logger.debug(`Added machine ${machineId} to history`);
+          } catch (backendError) {
+            // Don't rollback - history is less critical than favorites
+            // User's local cache is still updated
+            logger.warn('Failed to sync history to backend, continuing with local cache', { backendError });
+          }
         }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to add to history');
@@ -223,18 +275,22 @@ export function useRecentHistory(): UseRecentHistoryReturn {
         throw error;
       }
     },
-    [history, machines, setData]
+    [canSyncHistory, machines, setData]
   );
 
   const clearHistory = useCallback(async () => {
     try {
       // Clear backend first
-      try {
-        await historyApi.clearAllHistory();
-        logger.info('Cleared history from backend');
-      } catch (backendError) {
-        // Log backend error but continue to clear cache
-        logger.warn('Failed to clear history from backend, clearing cache only', { backendError });
+      if (!canSyncHistory) {
+        logger.debug('Skipping backend history clear while offline');
+      } else {
+        try {
+          await historyApi.clearAllHistory();
+          logger.info('Cleared history from backend');
+        } catch (backendError) {
+          // Log backend error but continue to clear cache
+          logger.warn('Failed to clear history from backend, clearing cache only', { backendError });
+        }
       }
 
       // Clear local cache
@@ -245,7 +301,7 @@ export function useRecentHistory(): UseRecentHistoryReturn {
       logger.error('Failed to clear history', error);
       throw error;
     }
-  }, [clearData]);
+  }, [canSyncHistory, clearData]);
 
   return {
     history,

@@ -5,8 +5,8 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from backend.app.main import app
-from backend.app.services.trace_store import trace_store
+from app.main import app
+from app.services.trace_store import trace_store
 
 
 def _sample_image_bytes() -> bytes:
@@ -41,6 +41,25 @@ class IdentifyEndpointTests(unittest.TestCase):
         self.assertGreaterEqual(payload["confidence"], 0)
         self.assertLessEqual(payload["confidence"], 1)
 
+    def test_identify_mock_returns_unknown_with_zero_confidence(self):
+        """Test that mock responses specifically return 'Unknown' with 0.0 confidence."""
+        files = {"image": ("pixel.png", _sample_image_bytes(), "image/png")}
+        response = self.client.post("/identify", files=files)
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+
+        # Verify specific mock values in the identify response
+        self.assertEqual(payload["machine"], "Unknown")
+        self.assertEqual(payload["confidence"], 0.0)
+        self.assertTrue(payload["mocked"])
+
+        # Verify the trace also has unmapped=True
+        trace_id = payload["trace_id"]
+        trace_response = self.client.get(f"/traces/{trace_id}")
+        self.assertEqual(trace_response.status_code, 200)
+        trace_payload = trace_response.json()
+        self.assertTrue(trace_payload["unmapped"])
+
     def test_trace_endpoint_returns_latest_entry(self):
         files = {"image": ("pixel.png", _sample_image_bytes(), "image/png")}
         response = self.client.post("/identify", files=files)
@@ -55,7 +74,8 @@ class IdentifyEndpointTests(unittest.TestCase):
         self.assertIn("created_at", payload)
         self.assertIn("prompt", payload)
         self.assertEqual(payload["machine"], payload["raw_machine"])
-        self.assertFalse(payload["unmapped"])
+        # Mock responses now return "Unknown", which is unmapped
+        self.assertTrue(payload["unmapped"])
 
     def test_identify_rejects_non_images(self):
         files = {"image": ("bad.txt", b"not an image", "text/plain")}

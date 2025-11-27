@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import random
 import uuid
 
 from ..config import DEFAULT_MACHINE_OPTIONS, get_settings
@@ -12,15 +11,10 @@ from .vlm_client import InferenceUnavailable, VLMClient
 
 logger = logging.getLogger("machinemate.inference")
 
-
-MOCK_CHOICES = [
-    ("Chest Press Machine", 0.82),
-    ("Lat Pulldown", 0.76),
-    ("Seated Cable Row", 0.68),
-    ("Seated Leg Press", 0.91),
-    ("Shoulder Press Machine", 0.74),
-    ("Treadmill", 0.66),
-]
+# Safe fallback response whenever the VLM is unavailable.
+# Returning "Unknown" prevents random hallucinated machines from propagating
+# through the mobile app (favorites/history, instructions, etc.).
+UNKNOWN_FALLBACK = ("Unknown", 0.0)
 
 
 class InferenceService:
@@ -96,7 +90,7 @@ class InferenceService:
         return response
 
     def _mock_response(self) -> IdentifyResponse:
-        machine, confidence = random.choice(MOCK_CHOICES)
+        machine, confidence = UNKNOWN_FALLBACK
         trace_id = str(uuid.uuid4())
         logger.info(
             "inference.mock_response",
@@ -110,8 +104,8 @@ class InferenceService:
                 confidence=confidence,
                 mocked=True,
                 raw_machine=machine,
-                match_score=1.0,
-                unmapped=False,
+                match_score=0.0,
+                unmapped=True,
                 model=self.settings.vlm_model,
                 prompt=self.vlm_client.prompt,
                 prompt_variant=self.vlm_client.prompt_variant,
