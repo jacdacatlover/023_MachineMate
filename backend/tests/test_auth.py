@@ -197,63 +197,71 @@ async def test_get_jwks_http_error():
 @pytest.mark.asyncio
 async def test_verify_token_success(valid_token_payload, mock_jwks):
     """Test successful token verification."""
-    # Mock JWKS fetch
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        # Mock JWT decode
-        with patch("app.auth.jwt.decode", return_value=valid_token_payload):
-            with patch("app.auth.get_signing_key", return_value="mock-key"):
-                payload = await verify_token("valid-token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.jwt.decode", return_value=valid_token_payload):
+                with patch("app.auth.get_signing_key", return_value="mock-key"):
+                    payload = await verify_token("valid-token")
 
-                assert payload == valid_token_payload
-                assert payload["sub"] == "550e8400-e29b-41d4-a716-446655440000"
-                assert payload["email"] == "test@example.com"
+                    assert payload == valid_token_payload
+                    assert payload["sub"] == "550e8400-e29b-41d4-a716-446655440000"
+                    assert payload["email"] == "test@example.com"
 
 
 @pytest.mark.asyncio
 async def test_verify_token_expired(mock_jwks):
     """Test token verification with expired token."""
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        with patch("app.auth.get_signing_key", return_value="mock-key"):
-            with patch("app.auth.jwt.decode", side_effect=jwt.ExpiredSignatureError("Token expired")):
-                with pytest.raises(HTTPException) as exc_info:
-                    await verify_token("expired-token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.get_signing_key", return_value="mock-key"):
+                with patch("app.auth.jwt.decode", side_effect=jwt.ExpiredSignatureError("Token expired")):
+                    with pytest.raises(HTTPException) as exc_info:
+                        await verify_token("expired-token")
 
-                assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-                assert "expired" in exc_info.value.detail.lower()
+                    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+                    assert "expired" in exc_info.value.detail.lower()
 
 
 @pytest.mark.asyncio
 async def test_verify_token_wrong_audience(mock_jwks):
     """Test token verification with wrong audience."""
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        with patch("app.auth.get_signing_key", return_value="mock-key"):
-            with patch("app.auth.jwt.decode", side_effect=jwt.JWTClaimsError("Invalid audience")):
-                with pytest.raises(HTTPException) as exc_info:
-                    await verify_token("wrong-audience-token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.get_signing_key", return_value="mock-key"):
+                with patch("app.auth.jwt.decode", side_effect=jwt.JWTClaimsError("Invalid audience")):
+                    with pytest.raises(HTTPException) as exc_info:
+                        await verify_token("wrong-audience-token")
 
-                assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+                    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.asyncio
 async def test_verify_token_no_signing_key(mock_jwks):
     """Test token verification when signing key cannot be found."""
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        with patch("app.auth.get_signing_key", return_value=None):
-            with pytest.raises(HTTPException) as exc_info:
-                await verify_token("no-key-token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.get_signing_key", return_value=None):
+                with pytest.raises(HTTPException) as exc_info:
+                    await verify_token("no-key-token")
 
-            assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-            assert "signing key" in exc_info.value.detail.lower()
+                assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+                assert "matching key" in exc_info.value.detail.lower()
 
 
 @pytest.mark.asyncio
 async def test_verify_token_jwt_error(mock_jwks):
     """Generic JWT failures should return 401."""
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        with patch("app.auth.get_signing_key", return_value="mock-key"):
-            with patch("app.auth.jwt.decode", side_effect=jwt.JWTError("boom")):
-                with pytest.raises(HTTPException) as exc_info:
-                    await verify_token("invalid-token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.get_signing_key", return_value="mock-key"):
+                with patch("app.auth.jwt.decode", side_effect=jwt.JWTError("boom")):
+                    with pytest.raises(HTTPException) as exc_info:
+                        await verify_token("invalid-token")
 
     assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
     assert "Could not validate" in exc_info.value.detail
@@ -262,11 +270,13 @@ async def test_verify_token_jwt_error(mock_jwks):
 @pytest.mark.asyncio
 async def test_verify_token_unexpected_error(mock_jwks):
     """Unexpected decode errors bubble up as 500."""
-    with patch("app.auth.get_jwks", return_value=mock_jwks):
-        with patch("app.auth.get_signing_key", return_value="mock-key"):
-            with patch("app.auth.jwt.decode", side_effect=RuntimeError("boom")):
-                with pytest.raises(HTTPException) as exc_info:
-                    await verify_token("token")
+    mock_header = {"alg": "RS256", "kid": "test-key-id", "typ": "JWT"}
+    with patch("app.auth.jwt.get_unverified_header", return_value=mock_header):
+        with patch("app.auth.get_jwks", return_value=mock_jwks):
+            with patch("app.auth.get_signing_key", return_value="mock-key"):
+                with patch("app.auth.jwt.decode", side_effect=RuntimeError("boom")):
+                    with pytest.raises(HTTPException) as exc_info:
+                        await verify_token("token")
 
     assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
