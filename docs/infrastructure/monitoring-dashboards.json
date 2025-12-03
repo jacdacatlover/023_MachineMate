@@ -13,12 +13,14 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_count\"",
+                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/request_count\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_RATE",
                       "crossSeriesReducer": "REDUCE_SUM",
-                      "groupByFields": ["metric.label.response_code_class"]
+                      "groupByFields": [
+                        "metric.label.response_code_class"
+                      ]
                     }
                   }
                 },
@@ -32,15 +34,7 @@
             },
             "chartOptions": {
               "mode": "COLOR"
-            },
-            "thresholds": [
-              {
-                "value": 0.995,
-                "color": "RED",
-                "direction": "BELOW",
-                "label": "99.5% SLO Threshold"
-              }
-            ]
+            }
           }
         }
       },
@@ -55,7 +49,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_latencies\"",
+                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/request_latencies\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_DELTA",
@@ -70,21 +64,7 @@
             "yAxis": {
               "label": "Latency (ms)",
               "scale": "LINEAR"
-            },
-            "thresholds": [
-              {
-                "value": 500,
-                "color": "YELLOW",
-                "direction": "ABOVE",
-                "label": "500ms SLO Warning"
-              },
-              {
-                "value": 1000,
-                "color": "RED",
-                "direction": "ABOVE",
-                "label": "1000ms Critical"
-              }
-            ]
+            }
           }
         }
       },
@@ -97,7 +77,7 @@
           "scorecard": {
             "timeSeriesQuery": {
               "timeSeriesFilter": {
-                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/request_count\" AND metric.label.response_code_class=\"5xx\"",
+                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/request_count\" AND metric.label.response_code_class=\"5xx\"",
                 "aggregation": {
                   "alignmentPeriod": "3600s",
                   "perSeriesAligner": "ALIGN_RATE",
@@ -133,7 +113,7 @@
           "scorecard": {
             "timeSeriesQuery": {
               "timeSeriesFilter": {
-                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/container/instance_count\"",
+                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/container/instance_count\"",
                 "aggregation": {
                   "alignmentPeriod": "60s",
                   "perSeriesAligner": "ALIGN_MEAN",
@@ -157,7 +137,7 @@
           "scorecard": {
             "timeSeriesQuery": {
               "timeSeriesFilter": {
-                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/startup_latencies\"",
+                "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/startup_latencies\"",
                 "aggregation": {
                   "alignmentPeriod": "3600s",
                   "perSeriesAligner": "ALIGN_DELTA",
@@ -184,37 +164,6 @@
         }
       },
       {
-        "yPos": 8,
-        "width": 12,
-        "height": 4,
-        "widget": {
-          "title": "Log-Based Error Rate by Endpoint",
-          "xyChart": {
-            "dataSets": [
-              {
-                "timeSeriesQuery": {
-                  "timeSeriesFilter": {
-                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND severity>=ERROR",
-                    "aggregation": {
-                      "alignmentPeriod": "60s",
-                      "perSeriesAligner": "ALIGN_RATE",
-                      "crossSeriesReducer": "REDUCE_SUM",
-                      "groupByFields": ["jsonPayload.path"]
-                    }
-                  }
-                },
-                "plotType": "STACKED_AREA",
-                "targetAxis": "Y1"
-              }
-            ],
-            "yAxis": {
-              "label": "Errors/sec",
-              "scale": "LINEAR"
-            }
-          }
-        }
-      },
-      {
         "yPos": 12,
         "width": 6,
         "height": 4,
@@ -225,7 +174,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/container/cpu/utilizations\"",
+                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/container/cpu/utilizations\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_MEAN",
@@ -240,19 +189,7 @@
             "yAxis": {
               "label": "CPU %",
               "scale": "LINEAR"
-            },
-            "thresholds": [
-              {
-                "value": 0.8,
-                "color": "YELLOW",
-                "direction": "ABOVE"
-              },
-              {
-                "value": 0.9,
-                "color": "RED",
-                "direction": "ABOVE"
-              }
-            ]
+            }
           }
         }
       },
@@ -268,7 +205,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-backend\" AND metric.type=\"run.googleapis.com/container/memory/utilizations\"",
+                    "filter": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"machinemate-api\" AND metric.type=\"run.googleapis.com/container/memory/utilizations\"",
                     "aggregation": {
                       "alignmentPeriod": "60s",
                       "perSeriesAligner": "ALIGN_MEAN",
@@ -283,19 +220,7 @@
             "yAxis": {
               "label": "Memory %",
               "scale": "LINEAR"
-            },
-            "thresholds": [
-              {
-                "value": 0.8,
-                "color": "YELLOW",
-                "direction": "ABOVE"
-              },
-              {
-                "value": 0.9,
-                "color": "RED",
-                "direction": "ABOVE"
-              }
-            ]
+            }
           }
         }
       },
@@ -307,7 +232,7 @@
           "title": "Database Connection Pool Status",
           "logsPanel": {
             "resourceNames": [
-              "projects/PROJECT_ID/locations/REGION/services/machinemate-backend"
+              "projects/machinemate-023"
             ],
             "filter": "jsonPayload.event=\"database_connection\" OR jsonPayload.event=\"database_pool_exhausted\""
           }
