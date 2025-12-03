@@ -28,10 +28,11 @@ app = FastAPI(
     description="Backend API for MachineMate - Machine identification and workout guidance",
 )
 
-# Configure CORS
+# Configure CORS from settings
+_settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_settings.get_cors_origins_list(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
