@@ -15,11 +15,10 @@ terraform {
     }
   }
 
-  # Uncomment to use remote state in GCS
-  # backend "gcs" {
-  #   bucket = "machinemate-terraform-state"
-  #   prefix = "prod"
-  # }
+  backend "gcs" {
+    bucket = "machinemate-023-tfstate"
+    prefix = "prod"
+  }
 }
 
 provider "google" {
