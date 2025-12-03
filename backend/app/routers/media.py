@@ -35,7 +35,14 @@ def get_supabase_client(settings: Annotated[Settings, Depends(get_settings)]) ->
             detail="Supabase configuration not available",
         )
 
-    supabase_url = settings.SUPABASE_JWT_ISSUER.rstrip("/")
+    # Extract base URL from JWT issuer (remove /auth/v1 suffix)
+    # SUPABASE_JWT_ISSUER is like: https://xxxxx.supabase.co/auth/v1
+    # Supabase client needs: https://xxxxx.supabase.co
+    jwt_issuer = settings.SUPABASE_JWT_ISSUER.rstrip("/")
+    if jwt_issuer.endswith("/auth/v1"):
+        supabase_url = jwt_issuer[:-8]  # Remove "/auth/v1"
+    else:
+        supabase_url = jwt_issuer
     service_key = settings.SUPABASE_SERVICE_ROLE_KEY
 
     return create_client(supabase_url, service_key)

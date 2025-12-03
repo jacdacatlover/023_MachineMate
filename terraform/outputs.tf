@@ -27,6 +27,7 @@ output "secret_ids" {
   value = {
     database_url              = google_secret_manager_secret.database_url.secret_id
     supabase_service_role_key = google_secret_manager_secret.supabase_service_role_key.secret_id
+    supabase_jwt_secret       = google_secret_manager_secret.supabase_jwt_secret.secret_id
     fireworks_api_key         = google_secret_manager_secret.fireworks_api_key.secret_id
     sentry_dsn                = google_secret_manager_secret.sentry_dsn.secret_id
   }

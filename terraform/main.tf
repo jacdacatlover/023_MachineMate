@@ -98,6 +98,19 @@ resource "google_secret_manager_secret" "sentry_dsn" {
   }
 }
 
+resource "google_secret_manager_secret" "supabase_jwt_secret" {
+  secret_id = "machinemate-supabase-jwt-secret"
+
+  replication {
+    auto {}
+  }
+
+  labels = {
+    app = "machinemate"
+    env = var.environment
+  }
+}
+
 # ============================================================================
 # Service Account for Cloud Run
 # ============================================================================
@@ -129,6 +142,12 @@ resource "google_secret_manager_secret_iam_member" "fireworks_key_access" {
 
 resource "google_secret_manager_secret_iam_member" "sentry_dsn_access" {
   secret_id = google_secret_manager_secret.sentry_dsn.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.machinemate_api.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "supabase_jwt_secret_access" {
+  secret_id = google_secret_manager_secret.supabase_jwt_secret.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.machinemate_api.email}"
 }
@@ -248,6 +267,16 @@ resource "google_cloud_run_v2_service" "machinemate_api" {
         value_source {
           secret_key_ref {
             secret  = google_secret_manager_secret.sentry_dsn.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "SUPABASE_JWT_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.supabase_jwt_secret.secret_id
             version = "latest"
           }
         }

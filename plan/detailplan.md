@@ -109,7 +109,8 @@ This plan assumes the current Expo/React Native client, FastAPI backend prototyp
      - ✅ Docker build & push to Artifact Registry
      - ✅ Automated Cloud Run deployment
      - ✅ Post-deployment health checks
-     - ✅ Workload Identity Federation support (ready for configuration)
+     - ✅ Workload Identity Federation fully configured and operational (see Phase 3.8)
+     - ✅ Terraform remote state in GCS bucket `machinemate-023-tfstate` (see Phase 3.8)
   5. ✅ Enhanced monitoring and observability:
      - ✅ Enhanced `/health` endpoint with database connectivity check
      - ✅ `/health/ready` and `/health/live` probes for Cloud Run
@@ -130,9 +131,9 @@ This plan assumes the current Expo/React Native client, FastAPI backend prototyp
   - ✅ All API endpoints implemented and tested locally
 - ✅ Docker container builds successfully
 - ✅ Terraform configuration complete and validated
-- ✅ CI/CD pipeline configured
+- ✅ CI/CD pipeline configured and fully operational
 - ✅ Health checks functional
-- ⏳ Production deployment pending (next step below)
+- ✅ Production deployment complete (see Phase 3.5, 3.8)
 
 ### Phase 2.5 — Future-Proofing Gate (Pre-Deployment)
 
@@ -1387,6 +1388,165 @@ pytest -v --ignore=tests/test_auth.py
 
 ---
 
+### Phase 3.8 — GCP Deployment Hardening (2025-12-03) ✅ COMPLETED
+
+**Objective**: Harden the GCP deployment infrastructure with proper health checks, remote state management, keyless CI/CD authentication, and production-ready configurations.
+
+#### Infrastructure Improvements
+
+**1. ✅ Cloud Run Health Probes Enabled**
+- **File**: `terraform/main.tf`
+- **Changes**:
+  - Added `startup_probe` - checks if container started successfully (HTTP GET `/health/live`, port 8080)
+  - Added `liveness_probe` - checks if container is still running (HTTP GET `/health/live`, port 8080)
+  - Initial delay: 5s, period: 10s (startup), 30s (liveness), timeout: 5s
+- **Impact**: Cloud Run now automatically restarts unhealthy containers
+
+**2. ✅ Terraform Remote State (GCS)**
+- **Bucket**: `machinemate-023-tfstate` (us-central1)
+- **Features**:
+  - Versioning enabled for state history
+  - Uniform bucket-level access
+  - State prefix: `prod`
+- **Migration**: Ran `terraform init -migrate-state` to move local state to GCS
+- **Benefits**: Team collaboration, state locking, disaster recovery
+
+**3. ✅ Workload Identity Federation (WIF)**
+- **Workload Identity Pool**: `github-actions` (projects/machinemate-023/locations/global/workloadIdentityPools/github-actions)
+- **OIDC Provider**: Configured for `jacdacatlover/023_MachineMate` repository
+- **IAM Bindings**:
+  - `roles/iam.workloadIdentityUser` - Allows GitHub Actions to impersonate service account
+  - `roles/iam.serviceAccountUser` - Allows deployment operations
+  - Service account self-impersonation binding for Cloud Run deployments
+- **GitHub Secrets Added**:
+  - `GCP_PROJECT_ID`: machinemate-023
+  - `GCP_SERVICE_ACCOUNT`: machinemate-api@machinemate-023.iam.gserviceaccount.com
+  - `GCP_WORKLOAD_IDENTITY_PROVIDER`: Full provider path
+- **Benefits**: No JSON keys needed, automatic credential rotation, audit logging
+
+**4. ✅ IAM Credentials API Enabled**
+- Enabled `iamcredentials.googleapis.com` for WIF token exchange
+- Required for `auth/google-github-actions/auth@v2` action
+
+**5. ✅ Monitoring Dashboard Deployed**
+- **File**: `docs/infrastructure/monitoring-dashboards.json`
+- **Fixes Applied**:
+  - Removed unsupported `color` and `direction` fields from xyChart thresholds
+  - Fixed `logsPanel` resourceNames format
+  - Removed log-based error rate widget (API incompatibility)
+- **Dashboard URL**: Deployed to Cloud Monitoring console
+
+#### Code Fixes
+
+**6. ✅ CORS Configuration Fix**
+- **File**: `backend/app/main.py`
+- **Issue**: CORS origins were hardcoded to `["*"]` instead of using settings
+- **Fix**: Changed to use `settings.get_cors_origins_list()` from config
+- **Impact**: Production CORS now properly restricted to configured origins
+
+**7. ✅ Auth Tests Fixed**
+- **File**: `backend/tests/test_auth.py`
+- **Issue**: 5 tests failing because `jwt.get_unverified_header` wasn't mocked
+- **Fix**: Added mock for header extraction step in all affected tests
+- **Tests Fixed**:
+  - `test_verify_token_success`
+  - `test_verify_token_expired`
+  - `test_verify_token_missing_claims`
+  - `test_verify_token_invalid_audience`
+  - `test_get_current_user_success`
+
+**8. ✅ Git Cleanup**
+- Added `tfplan` and `*.tfplan` to `.gitignore`
+- Removed `terraform/tfplan` from git tracking
+- Prevents accidental commit of terraform plan files (contain sensitive data)
+
+#### CI/CD Verification
+
+**9. ✅ GitHub Actions Deployment Pipeline**
+- **Workflow**: `.github/workflows/deploy-backend.yml`
+- **Status**: Fully operational with keyless GCP authentication
+- **Deployment Flow**:
+  1. Authenticate via Workload Identity Federation (no JSON keys)
+  2. Build Docker image for linux/amd64 platform
+  3. Push to Artifact Registry
+  4. Deploy to Cloud Run via Terraform
+  5. Run post-deployment health checks
+- **Verification**: Multiple successful deployments confirmed
+
+#### Technical Details
+
+**Workload Identity Federation Configuration**:
+```bash
+# Pool creation
+gcloud iam workload-identity-pools create github-actions \
+  --location=global \
+  --description="GitHub Actions pool"
+
+# Provider creation
+gcloud iam workload-identity-pools providers create-oidc github \
+  --location=global \
+  --workload-identity-pool=github-actions \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository"
+
+# IAM binding
+gcloud iam service-accounts add-iam-policy-binding machinemate-api@machinemate-023.iam.gserviceaccount.com \
+  --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github-actions/attribute.repository/jacdacatlover/023_MachineMate"
+```
+
+**Terraform Backend Configuration**:
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "machinemate-023-tfstate"
+    prefix = "prod"
+  }
+}
+```
+
+#### Files Modified
+- `terraform/main.tf` - Health probes, GCS backend
+- `backend/app/main.py` - CORS fix
+- `backend/tests/test_auth.py` - Test fixes
+- `.gitignore` - tfplan exclusion
+- `docs/infrastructure/monitoring-dashboards.json` - Dashboard fixes
+
+#### Acceptance Criteria
+
+All criteria met and verified:
+- ✅ Health probes enabled and functioning (Cloud Run auto-restarts unhealthy containers)
+- ✅ Terraform state stored in GCS with versioning
+- ✅ GitHub Actions authenticates via WIF (no JSON keys)
+- ✅ CI/CD pipeline completes successfully
+- ✅ CORS properly configured from settings
+- ✅ All auth tests passing
+- ✅ Monitoring dashboard deployed
+
+#### Project Status Summary (Post Phase 3.8)
+
+**Deployment Infrastructure**: 100% complete
+- Cloud Run service healthy
+- Artifact Registry configured
+- Secret Manager secrets in place
+- Health probes operational
+- Remote state in GCS
+- Workload Identity Federation active
+
+**CI/CD Pipeline**: 100% complete
+- GitHub Actions workflow operational
+- Keyless GCP authentication working
+- Docker build for correct platform (linux/amd64)
+- Automated deployments on push to main
+
+**Remaining for Launch**:
+- Phase 4: Enhanced observability and structured logging
+- Phase 5: QA, compliance, App Store submission
+
+**Status**: ✅ **COMPLETE** - GCP deployment infrastructure fully hardened
+
+---
+
 ### Phase 4a — Code Cleanup & Codebase Audit (Pre-Observability) ⏳ IN PROGRESS
 - **Objectives**
   - Clean up technical debt, remove artifacts, consolidate documentation, and audit dependencies before adding observability infrastructure.
@@ -1470,7 +1630,8 @@ pytest -v --ignore=tests/test_auth.py
   4. Reliability dashboards + alerts (DevOps owner):
      - ✅ SLOs + incident response guide drafted in `docs/operations/reliability.md` (latency ≤400 ms p95, uptime ≥99.9 %, crash-free ≥99.5 %).
      - ✅ `docs/operations/oncall.md` + `docs/operations/incidents/TEMPLATE.md` capture rotation, contacts, and reporting.
-     - ⏳ Provision Cloud Monitoring dashboards/alerts for the SLOs above and pipe alert notifications to the on-call channel.
+     - ✅ Cloud Monitoring dashboard deployed (see Phase 3.8) - Fixed JSON API compatibility issues.
+     - ⏳ Configure alert policies and pipe notifications to the on-call channel.
   5. Automated health checks & alerting:
      - ✅ Scheduled GitHub Action (`.github/workflows/healthcheck.yml`) pings `/health`, `/api/v1/machines`, and Supabase PostgREST (see `docs/operations/reliability.md`).
      - ⏳ Connect health-check failures and Cloud Run/Sentry regressions to Email/Slack alerts so incidents page the on-call engineer automatically.
