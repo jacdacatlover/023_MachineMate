@@ -254,8 +254,28 @@ resource "google_cloud_run_v2_service" "machinemate_api" {
         }
       }
 
-      # Temporarily disable health probes to debug startup issues
-      # Will re-enable once we verify the service can start successfully
+      # Startup probe - checks if the container has started successfully
+      startup_probe {
+        http_get {
+          path = "/health/live"
+          port = 8080
+        }
+        initial_delay_seconds = 5
+        period_seconds        = 10
+        timeout_seconds       = 5
+        failure_threshold     = 3
+      }
+
+      # Liveness probe - checks if the container is still running
+      liveness_probe {
+        http_get {
+          path = "/health/live"
+          port = 8080
+        }
+        period_seconds    = 30
+        timeout_seconds   = 5
+        failure_threshold = 3
+      }
     }
 
     timeout = "300s"

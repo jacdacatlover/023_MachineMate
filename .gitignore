@@ -54,6 +54,8 @@ infra/.env
 *.tfstate
 *.tfstate.*
 *.tfstate.backup
+*.tfplan
+tfplan
 .terraform/
 .terraform.lock.hcl
 terraform.tfvars
