@@ -30,5 +30,6 @@ output "secret_ids" {
     supabase_jwt_secret       = google_secret_manager_secret.supabase_jwt_secret.secret_id
     fireworks_api_key         = google_secret_manager_secret.fireworks_api_key.secret_id
     sentry_dsn                = google_secret_manager_secret.sentry_dsn.secret_id
+    vlm_api_key               = google_secret_manager_secret.vlm_api_key.secret_id
   }
 }

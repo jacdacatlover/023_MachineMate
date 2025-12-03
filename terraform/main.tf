@@ -111,6 +111,19 @@ resource "google_secret_manager_secret" "supabase_jwt_secret" {
   }
 }
 
+resource "google_secret_manager_secret" "vlm_api_key" {
+  secret_id = "machinemate-vlm-api-key"
+
+  replication {
+    auto {}
+  }
+
+  labels = {
+    app = "machinemate"
+    env = var.environment
+  }
+}
+
 # ============================================================================
 # Service Account for Cloud Run
 # ============================================================================
@@ -148,6 +161,12 @@ resource "google_secret_manager_secret_iam_member" "sentry_dsn_access" {
 
 resource "google_secret_manager_secret_iam_member" "supabase_jwt_secret_access" {
   secret_id = google_secret_manager_secret.supabase_jwt_secret.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.machinemate_api.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "vlm_api_key_access" {
+  secret_id = google_secret_manager_secret.vlm_api_key.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.machinemate_api.email}"
 }
@@ -280,6 +299,32 @@ resource "google_cloud_run_v2_service" "machinemate_api" {
             version = "latest"
           }
         }
+      }
+
+      # VLM (Vision Language Model) Configuration
+      env {
+        name  = "MACHINEMATE_VLM_API_BASE_URL"
+        value = "https://api.fireworks.ai/inference/v1"
+      }
+
+      env {
+        name  = "MACHINEMATE_VLM_MODEL"
+        value = "accounts/fireworks/models/qwen2p5-vl-32b-instruct"
+      }
+
+      env {
+        name = "MACHINEMATE_VLM_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.vlm_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name  = "MACHINEMATE_ENABLE_MOCK_RESPONSES"
+        value = "false"
       }
 
       # Startup probe - checks if the container has started successfully
