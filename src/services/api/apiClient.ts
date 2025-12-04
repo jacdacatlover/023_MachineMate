@@ -6,6 +6,7 @@
  */
 
 import Constants from 'expo-constants';
+
 import { supabase } from './supabaseClient';
 import { createLogger } from '../../shared/logger';
 
@@ -37,6 +38,8 @@ export interface ApiRequestOptions extends RequestInit {
   requireAuth?: boolean;
   /** Custom headers to merge with defaults */
   headers?: HeadersInit;
+  /** Query parameters to append to the URL */
+  params?: Record<string, string | number | boolean | undefined | null>;
 }
 
 /**
@@ -57,10 +60,23 @@ export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<T> {
-  const { requireAuth = true, headers = {}, ...fetchOptions } = options;
+  const { requireAuth = true, headers = {}, params, ...fetchOptions } = options;
 
-  // Build full URL
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  // Build full URL with query parameters
+  let url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+  if (params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, String(value));
+      }
+    }
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  }
 
   // Get JWT token if authentication is required
   let token: string | undefined;

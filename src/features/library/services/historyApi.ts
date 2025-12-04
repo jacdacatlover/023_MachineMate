@@ -4,10 +4,11 @@
  * Handles all history-related API calls to the backend
  */
 
+import { RecentHistoryItem } from '@typings/history';
+
 import { apiGet, apiPost, apiDelete } from '../../../services/api/apiClient';
 import { createLogger } from '../../../shared/logger';
 
-import { RecentHistoryItem } from '@typings/history';
 
 const logger = createLogger('library.history');
 

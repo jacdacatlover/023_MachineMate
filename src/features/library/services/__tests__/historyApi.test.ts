@@ -2,8 +2,8 @@
  * Tests for History API Service
  */
 
-import { getHistory, addToHistory, clearAllHistory } from '../historyApi';
 import * as apiClient from '../../../../services/api/apiClient';
+import { getHistory, addToHistory, clearAllHistory } from '../historyApi';
 
 // Mock the logger first to avoid errors
 jest.mock('../../../../shared/logger', () => ({

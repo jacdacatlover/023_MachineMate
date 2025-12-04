@@ -2,9 +2,10 @@
  * Tests for Machines API Service
  */
 
-import { getMachines } from '../machinesApi';
-import * as apiClient from '../../../../services/api/apiClient';
 import { MachineDefinition } from '@typings/machine';
+
+import * as apiClient from '../../../../services/api/apiClient';
+import { getMachines } from '../machinesApi';
 
 // Mock the logger first to avoid errors
 jest.mock('../../../../shared/logger', () => ({
@@ -68,6 +69,7 @@ describe('machinesApi', () => {
 
       expect(mockedApiGet).toHaveBeenCalledWith('/api/v1/machines', {
         requireAuth: false,
+        params: { page: 1, page_size: 50 },
       });
       expect(result).toEqual(mockMachines);
     });

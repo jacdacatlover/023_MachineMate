@@ -2,8 +2,8 @@
  * Tests for Favorites API Service
  */
 
-import { getFavorites, addFavorite, removeFavorite, clearAllFavorites } from '../favoritesApi';
 import * as apiClient from '../../../../services/api/apiClient';
+import { getFavorites, addFavorite, removeFavorite, clearAllFavorites } from '../favoritesApi';
 
 // Mock the logger first to avoid errors
 jest.mock('../../../../shared/logger', () => ({

@@ -1731,6 +1731,58 @@ All criteria met and verified:
   - TestFlight build approved, QA checklist signed off, App Store submission accepted, and monitoring dashboards watched during rollout.
   - Crash-free sessions meet the Phase 4 target during a 48-hour canary; privacy documentation aligned with App Store nutrition labels.
 
+### Phase 5.5 — VLM Production Configuration & CI Fixes (2025-12-04)
+
+**VLM Configuration - ✅ COMPLETED**
+- Added Fireworks AI VLM configuration to Terraform for Cloud Run
+- **Problem**: Machine identification returning "Unknown" with 0.0 confidence in production
+- **Root Cause**: VLM environment variables were defined in local `.env` but missing from Terraform Cloud Run configuration
+- **Solution**: Added to `terraform/main.tf`:
+  - `machinemate-vlm-api-key` secret in Secret Manager
+  - IAM binding for service account access to the secret
+  - Cloud Run environment variables:
+    - `MACHINEMATE_VLM_API_BASE_URL=https://api.fireworks.ai/inference/v1`
+    - `MACHINEMATE_VLM_MODEL=accounts/fireworks/models/qwen2p5-vl-32b-instruct`
+    - `MACHINEMATE_VLM_API_KEY` (from Secret Manager)
+    - `MACHINEMATE_ENABLE_MOCK_RESPONSES=false`
+- **Files Modified**:
+  - `terraform/main.tf` - Added VLM secret, IAM binding, and 4 new env vars
+  - `terraform/outputs.tf` - Added vlm_api_key to outputs
+- **Verification**: Health endpoint shows `vlm_configured: true`, `mocking_enabled: false`
+- **Production URL**: https://machinemate-api-buz66rae7q-uc.a.run.app/health
+
+**CI Fixes - ⏳ PARTIAL (2025-12-04)**
+
+**Frontend - ✅ FIXED**
+- ✅ **ESLint: 0 errors, 10 warnings** (all warnings are acceptable - unused vars, no-explicit-any)
+- ✅ **Jest Tests: 80/80 passing**
+- **Fixes Applied**:
+  - `jest.setup.js`: Fixed NetInfo.addEventListener mock to return unsubscribe function
+  - `eslint.config.mjs`: Added DOM globals (`Headers`, `HeadersInit`, `RequestInit`, `URLSearchParams`)
+  - `src/services/api/apiClient.ts`: Added `params` support to `ApiRequestOptions` and query string serialization
+  - `src/features/library/services/__tests__/machinesApi.test.ts`: Updated test expectations for params
+  - `src/features/auth/screens/LoginScreen.tsx`: Fixed unescaped apostrophe in JSX
+  - `src/features/library/hooks/__tests__/useFavorites.test.tsx`: Fixed import order after jest.mock()
+
+**Backend - ⏳ PENDING (3 test failures)**
+- **98 passed, 3 failed** (81% coverage - above 80% threshold)
+- Failing tests:
+  - `test_identify_mock_returns_unknown_with_zero_confidence`
+  - `test_identify_returns_mock_prediction`
+  - `test_trace_endpoint_returns_latest_entry`
+- **Fix Required**: Configure `MACHINEMATE_ENABLE_MOCK_RESPONSES=true` in test environment (pytest.ini or conftest.py)
+
+**Lessons Learned & Troubleshooting Notes**
+1. **Cloud Run State Drift**: Cloud Run deployments can drift from Terraform state (e.g., if deployed via gcloud CLI or console). Always verify with `terraform plan` before assuming configuration is correct.
+2. **Terraform Apply as Reconciliation**: Running `terraform apply` syncs the actual deployment back to the declared configuration state.
+3. **Test vs Production Config**: `pytest.ini` environment variables only affect test runs, not production. Safe to enable mock responses for tests while keeping them disabled in production.
+4. **VLM vs JWT Auth**: VLM configuration (for machine identification) is separate from JWT authentication configuration. Both are required for full app functionality:
+   - JWT auth: `SUPABASE_JWT_SECRET`, `SUPABASE_JWT_ISSUER`, `SUPABASE_JWT_JWKS_URL`
+   - VLM: `MACHINEMATE_VLM_API_KEY`, `MACHINEMATE_VLM_API_BASE_URL`, `MACHINEMATE_VLM_MODEL`
+5. **Health Endpoint as Diagnostic**: The `/health` endpoint provides quick visibility into configuration state (`vlm_configured`, `mocking_enabled`, `database.connected`).
+
+---
+
 ### Phase 6 — Scale & Optimization (Post-Launch)
 - **Objectives**
   - Prepare for growth and future features (video tutorials, personalized programs).

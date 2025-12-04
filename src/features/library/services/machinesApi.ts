@@ -4,10 +4,11 @@
  * Handles machine catalog API calls to the backend
  */
 
+import { MachineDefinition } from '@typings/machine';
+
 import { apiGet } from '../../../services/api/apiClient';
 import { createLogger } from '../../../shared/logger';
 
-import { MachineDefinition } from '@typings/machine';
 
 const logger = createLogger('library.machines');
 

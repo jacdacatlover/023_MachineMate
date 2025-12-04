@@ -3,6 +3,8 @@
  */
 
 import Constants from 'expo-constants';
+import * as Sentry from 'sentry-expo';
+
 import {
   initMonitoring,
   reportError,
@@ -14,7 +16,6 @@ import {
   isCrashReportingEnabled,
   resetMonitoringForTests,
 } from '../monitoring';
-import * as Sentry from 'sentry-expo';
 
 // Mock sentry-expo
 jest.mock('sentry-expo');

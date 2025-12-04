@@ -6,8 +6,9 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
+
 import { createLogger } from '../../shared/logger';
 
 const logger = createLogger('api.supabaseClient');

@@ -5,6 +5,7 @@ import { View, ScrollView, Alert } from 'react-native';
 import { Text, Divider, TextInput, HelperText } from 'react-native-paper';
 
 import { useRecognitionSettings } from '@app/providers/RecognitionSettingsProvider';
+
 import { useSession } from '@features/auth';
 import { useFavorites } from '@features/library/hooks/useFavorites';
 import { useRecentHistory } from '@features/library/hooks/useRecentHistory';

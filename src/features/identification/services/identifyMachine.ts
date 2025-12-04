@@ -4,7 +4,6 @@
 import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 
-import { supabase } from '../../../services/api/supabaseClient';
 import { createLogger } from '@shared/logger';
 import { recordRecognitionBreadcrumb } from '@shared/observability/monitoring';
 
@@ -18,6 +17,7 @@ import { BackendIdentifyResponseSchema } from '@typings/validation';
 
 
 import { RECOGNITION_CONFIG } from './config';
+import { supabase } from '../../../services/api/supabaseClient';
 
 const logger = createLogger('recognition.identifyMachine');
 

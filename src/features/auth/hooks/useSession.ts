@@ -5,8 +5,9 @@
  * throughout the application.
  */
 
-import { useState, useEffect, useCallback } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback } from 'react';
+
 import { supabase } from '../../../services/api';
 import { createLogger } from '../../../shared/logger';
 import { setMonitoringUser } from '../../../shared/observability/monitoring';

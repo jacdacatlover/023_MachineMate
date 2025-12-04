@@ -6,9 +6,10 @@ import React from 'react';
 import { MachinesProvider } from '@app/providers/MachinesProvider';
 import { RecognitionSettingsProvider } from '@app/providers/RecognitionSettingsProvider';
 
+import { DEFAULT_CONFIDENCE_THRESHOLD } from '@shared/constants/recognition';
+
 import { IdentificationResult } from '@typings/identification';
 import { MachineDefinition } from '@typings/machine';
-import { DEFAULT_CONFIDENCE_THRESHOLD } from '@shared/constants/recognition';
 
 import * as identifyMachineService from '../../services/identifyMachine';
 import { useIdentifyMachine } from '../useIdentifyMachine';

@@ -6,8 +6,6 @@ import { MachinesProvider } from '@app/providers/MachinesProvider';
 
 import { MachineDefinition } from '@typings/machine';
 
-import { useFavorites } from '../useFavorites';
-
 // Mock the favorites API
 jest.mock('../../services/favoritesApi', () => ({
   getFavorites: jest.fn(),
@@ -15,8 +13,8 @@ jest.mock('../../services/favoritesApi', () => ({
   removeFavorite: jest.fn(),
   clearAllFavorites: jest.fn(),
 }));
-
 import * as favoritesApi from '../../services/favoritesApi';
+import { useFavorites } from '../useFavorites';
 
 const mockedGetFavorites = favoritesApi.getFavorites as jest.MockedFunction<typeof favoritesApi.getFavorites>;
 const mockedAddFavorite = favoritesApi.addFavorite as jest.MockedFunction<typeof favoritesApi.addFavorite>;

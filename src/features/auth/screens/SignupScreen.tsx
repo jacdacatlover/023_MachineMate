@@ -4,11 +4,11 @@
  * User registration screen with email/password and validation
  */
 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Text, TextInput, HelperText, ActivityIndicator } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import PrimaryButton from '@shared/components/PrimaryButton';
 import { createLogger } from '@shared/logger';
